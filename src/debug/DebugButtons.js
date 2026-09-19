@@ -1,14 +1,7 @@
-import { allCardData } from '../data/stageData.js';
-
 export default class DebugButtons {
 
     constructor(scene, options = {}) {
         this.scene = scene;
-        this.saveManager = this.scene.registry.get('saveManager');
-        
-        this.stageProgress = this.scene.stageProgress;
-        this.objectivesManager = this.scene.objectivesManager;
-        this.objectiveFlow = this.scene.objectiveFlow;
 
         this.container = this.scene.add.container();
         // Place on top of everything
@@ -27,15 +20,13 @@ export default class DebugButtons {
     create() {
         this.addTitle('DEBUG BUTTONS:');
 
-/* BUTTONS
+/* 
+// BUTTONS
 this.addButton('Clear Save Data', () => {
     this.saveManager.clear();
 });
-////
-this.addButton('unlock the_void (gather)', () => {
-    this.stageProgress.unlock('the_void');
-});*/
-////
+
+// SELECTOR
 this.addSelectButton(
     'UNLOCK ITEMS',
     this.getUnlockIds(),
@@ -43,38 +34,15 @@ this.addSelectButton(
         this.stageProgress.unlock(id);
     }
 );
-////
-this.addSelectButton(
-    'UNLOCK OBJECTIVES',
-    this.getObjectiveUnlockIds(),
-    id => {
-        this.objectivesManager.unlockObjective(id);
-    }
-);
-////
-this.addButton('SHOW UNLOCKED', () => {
-    const unlocked = this.stageProgress.getAllUnlocked();
-    jp(unlocked);
-});
-////
-this.addButton('Show current savedData', () => {
-    this.saveManager.debug();
-});
-////
-this.addButton('UNLOCK FIRST OBJ', () => {
-    this.objectiveFlow.completeObjective('the_beginning');
-});
-////
-this.addButton('getObjectiveData', () => {
-    jp(this.stageProgress.getObjectiveData());
-});
-////
-this.addButton('gameTimer', () => {
-    const time = this.scene.gameTimer.getRaw();
-    jp(time);
-});
-////
+*/
 
+////
+this.addButton('DISABLE BUTTON', () => {
+    this.scene.debugButton.setDisabled(true);
+});
+this.addButton('ENABLE BUTTON', () => {
+    this.scene.debugButton.setDisabled(false);
+});
 ////
 
     }

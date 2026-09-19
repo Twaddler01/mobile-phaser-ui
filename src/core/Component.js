@@ -4,16 +4,26 @@ export default class Component {
 
         this.scene = scene;
 
-        this.x = config.x ?? 0;
-        this.y = config.y ?? 0;
-
         this.width = config.width ?? 0;
         this.height = config.height ?? 0;
+
+        this.container =
+            scene.add.container(
+                config.x ?? 0,
+                config.y ?? 0
+            );
+    }
+
+    get x() {
+        return this.container.x;
+    }
+
+    get y() {
+        return this.container.y;
     }
 
     setPosition(x, y) {
-        this.x = x;
-        this.y = y;
+        this.container.setPosition(x, y);
         return this;
     }
 
@@ -22,7 +32,21 @@ export default class Component {
         return this;
     }
 
+    setAlpha(alpha) {
+        this.container.setAlpha(alpha);
+        return this;
+    }
+
+    setScale(scale) {
+        this.container.setScale(scale);
+        return this;
+    }
+
     destroy() {
-        this.container?.destroy();
+        if (this.container) {
+            this.container.destroy();
+        }
+    
+        return this;
     }
 }
