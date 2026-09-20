@@ -60,7 +60,9 @@ export default class DemoScene extends Phaser.Scene {
             width: 300,
             height: 40,
             text: 'Hello',
-            fontSize: '28px'
+            fontSize: '28px',
+            originX: 0.5,
+            originY: 0.5,
         });
         
         this.button = new Button(this, {
@@ -73,22 +75,42 @@ export default class DemoScene extends Phaser.Scene {
 
 ////////
 // Column //
-/*
+
+// DEBUG BACKGROUND
+        this.shape = this.add.rectangle(
+            100,
+            100,
+            500,
+            600,
+            0x000055,
+        )
+        .setOrigin(0);
+
+
         this.debugColumn =
             new Column(this, {
                 x: 100,
                 y: 100,
-                spacing: 20
+            
+                width: 500,
+                height: 600,
+            
+                spacing: 20,
+            
+                padding: 30,
+            
+                align: 'center',
+                justify: 'top'
             });
         
         this.debugColumn
             .add(this.debugButton)
             .add(this.title)
-            .add(this.button);
-*/
+            .add(this.button)
+
 ////////
 // Row //
-
+/*
         this.debugRow = new Row(this, {
             x: 10,
             y: 300,
@@ -99,7 +121,7 @@ export default class DemoScene extends Phaser.Scene {
             .add(this.debugButton)
             .add(this.title)
             .add(this.button);
-
+*/
 ////////
 
 

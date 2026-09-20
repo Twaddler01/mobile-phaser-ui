@@ -14,12 +14,6 @@ export default class Button extends Component {
             radius:
                 config.style?.radius ?? 0,
 
-            originX:
-                config.style?.originX ?? 0,
-
-            originY:
-                config.style?.originY ?? 0,
-
             stroke:
                 config.style?.stroke,
 
@@ -73,8 +67,8 @@ export default class Button extends Component {
                 );
         
                 this.background.fillRoundedRect(
-                    -this.width * this.style.originX,
-                    -this.height * this.style.originY,
+                    -this.width * this.originX,
+                    -this.height * this.originY,
                     this.width,
                     this.height,
                     this.style.radius
@@ -94,8 +88,8 @@ export default class Button extends Component {
                     );
         
                     this.background.strokeRoundedRect(
-                        -this.width * this.style.originX,
-                        -this.height * this.style.originY,
+                        -this.width * this.originX,
+                        -this.height * this.originY,
                         this.width,
                         this.height,
                         this.style.radius
@@ -107,10 +101,10 @@ export default class Button extends Component {
                 this.text =
                     this.scene.add.text(
                         this.width *
-                            (0.5 - this.style.originX),
+                            (0.5 - this.originX),
         
                         this.height *
-                            (0.5 - this.style.originY),
+                            (0.5 - this.originY),
         
                         this.textConfig.value,
         
@@ -129,8 +123,8 @@ export default class Button extends Component {
             overlay: () => {
                 this.disabledOverlay =
                     this.scene.add.rectangle(
-                        -this.width * this.style.originX,
-                        -this.height * this.style.originY,
+                        -this.width * this.originX,
+                        -this.height * this.originY,
                         this.width,
                         this.height,
                         0x000000,
@@ -153,8 +147,8 @@ export default class Button extends Component {
         
                 this.hitArea =
                     new Phaser.Geom.Rectangle(
-                        -this.width * this.style.originX,
-                        -this.height * this.style.originY,
+                        -this.width * this.originX,
+                        -this.height * this.originY,
                         this.width,
                         this.height
                     );

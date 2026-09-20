@@ -7,6 +7,12 @@ export default class Component {
         this.width = config.width ?? 0;
         this.height = config.height ?? 0;
 
+        this.originX =
+            config.originX ?? 0;
+        
+        this.originY =
+            config.originY ?? 0;
+
         this.container =
             scene.add.container(
                 config.x ?? 0,
@@ -22,8 +28,19 @@ export default class Component {
         return this.container.y;
     }
 
+    // Direct/container positioning
     setPosition(x, y) {
         this.container.setPosition(x, y);
+        return this;
+    }
+
+    // Layout-aware positioning
+    setLayoutPosition(x, y) {
+        this.container.setPosition(
+            x + this.width * this.originX,
+            y + this.height * this.originY
+        );
+    
         return this;
     }
 
