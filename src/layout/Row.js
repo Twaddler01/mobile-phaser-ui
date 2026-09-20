@@ -6,9 +6,6 @@ export default class Row extends Component {
 
         super(scene, config);
 
-        this.spacing =
-            config.spacing ?? 0;
-
         this.padding =
             this.getPadding(config.padding);
 
@@ -21,10 +18,56 @@ export default class Row extends Component {
         this.children = [];
     }
 
+    updateSize() {
+        const previousWidth = this.width;
+        const previousHeight = this.height;
+    
+        // AUTO WIDTH
+        if (this.widthAuto) {
+            const contentWidth =
+                this.children.reduce(
+                    (total, child) =>
+                        total + child.width,
+                    0
+                );
+    
+            this.width =
+                this.padding.left +
+                contentWidth +
+                this.padding.right;
+        }
+    
+        // AUTO HEIGHT
+        if (this.heightAuto) {
+            const contentHeight =
+                this.children.reduce(
+                    (max, child) =>
+                        Math.max(max, child.height),
+                    0
+                );
+    
+            this.height =
+                this.padding.top +
+                contentHeight +
+                this.padding.bottom;
+        }
+    
+        this.updateDebugBounds();
+    
+        // Notify parent if our size changed.
+        if (
+            this.width !== previousWidth ||
+            this.height !== previousHeight
+        ) {
+            this.requestLayout();
+        }
+    
+        return this;
+    }
+
     getPadding(padding = 0) {
 
         if (typeof padding === 'number') {
-
             return {
                 top: padding,
                 right: padding,
@@ -41,28 +84,40 @@ export default class Row extends Component {
         };
     }
 
-    add(component) {
-        this.children.push(component);
+    add(child) {
 
-        super.add(component);
+        this.children.push(child);
+
+        child.layoutParent = this;
+
+        super.add(child);
+
         this.layout();
 
         return this;
     }
 
-    remove(component) {
+    remove(child) {
+
         this.children =
             this.children.filter(
-                child => child !== component
+                item => item !== child
             );
 
-        super.remove(component);
+        if (child.layoutParent === this) {
+            child.layoutParent = null;
+        }
+
+        super.remove(child);
+
         this.layout();
 
         return this;
     }
 
     layout() {
+
+        this.updateSize();
 
         const availableWidth =
             this.width -
@@ -74,79 +129,173 @@ export default class Row extends Component {
             this.padding.top -
             this.padding.bottom;
 
-        const contentWidth =
+        // Total width occupied by children.
+        const childrenWidth =
             this.children.reduce(
                 (total, child) =>
                     total + child.width,
                 0
-            ) +
+            );
+
+        const remainingWidth =
             Math.max(
                 0,
-                this.children.length - 1
-            ) *
-            this.spacing;
+                availableWidth - childrenWidth
+            );
 
+        // Determine horizontal starting position
+        // and spacing between children.
         let x;
+        let spacing = 0;
 
         switch (this.justify) {
+
             case 'center':
+
                 x =
                     this.padding.left +
-                    (availableWidth - contentWidth) / 2;
+                    remainingWidth / 2;
+
                 break;
+
             case 'end':
+
                 x =
-                    this.width -
-                    this.padding.right -
-                    contentWidth;
+                    this.padding.left +
+                    remainingWidth;
+
                 break;
-            default:
+
+            case 'space-between':
+
                 x =
                     this.padding.left;
+
+                if (this.children.length > 1) {
+                    spacing =
+                        remainingWidth /
+                        (this.children.length - 1);
+                }
+
+                break;
+
+            case 'space-around':
+
+                if (this.children.length > 0) {
+
+                    spacing =
+                        remainingWidth /
+                        this.children.length;
+
+                    x =
+                        this.padding.left +
+                        spacing / 2;
+
+                } else {
+
+                    x =
+                        this.padding.left;
+                }
+
+                break;
+
+            case 'space-evenly':
+
+                if (this.children.length > 0) {
+
+                    spacing =
+                        remainingWidth /
+                        (this.children.length + 1);
+
+                    x =
+                        this.padding.left +
+                        spacing;
+
+                } else {
+
+                    x =
+                        this.padding.left;
+                }
+
+                break;
+
+            case 'start':
+            default:
+
+                x =
+                    this.padding.left;
+
+                break;
         }
 
+        // Position children vertically.
         for (const child of this.children) {
 
             let y;
+
             switch (this.align) {
+
                 case 'center':
+
                     y =
                         this.padding.top +
                         (availableHeight - child.height) / 2;
+
                     break;
+
                 case 'end':
+
                     y =
                         this.height -
                         this.padding.bottom -
                         child.height;
+
                     break;
+
+                case 'start':
                 default:
+
                     y =
                         this.padding.top;
+
+                    break;
             }
+
+            console.log(
+                'ROW CHILD',
+                child.constructor.name,
+                {
+                    x,
+                    y,
+                    width: child.width,
+                    height: child.height,
+                    originX: child.originX,
+                    originY: child.originY
+                }
+            );
 
             child.setLayoutPosition(x, y);
 
-            x += child.width + this.spacing;
+            x += child.width + spacing;
         }
+
+        return this;
     }
 }
 
 /*
-const column = new Column(this, {
+const row = new Row(this, {
 
     x: 100,
     y: 100,
 
     width: 500,
-    height: 600,
-
-    spacing: 20,
+    height: 300,
 
     padding: 30,
 
     align: 'center',
-    justify: 'start'
+    justify: 'space-evenly'
 });
 
 ////////////////////////////////
@@ -160,5 +309,8 @@ justify:
     start
     center
     end
+    space-between
+    space-around
+    space-evenly
 
 */

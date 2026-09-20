@@ -51,41 +51,80 @@ export default class Text extends Component {
         this.container.add(
             this.text
         );
+        
+        this.updateSize();
+    }
+
+    updateSize() {
+        // Wordwrap exception
+        if (this.wordWrapWidth !== undefined) {
+            if (this.widthAuto) {
+                this.width =
+                    this.wordWrapWidth;
+            }
+        } else {
+            if (this.widthAuto) {
+                this.width =
+                    this.text.width;
+            }
+        }
+        if (this.heightAuto) {
+            this.height =
+                this.text.height;
+        }
+
+        return this;
     }
 
     setText(text) {
         this.textValue = text;
         this.text.setText(text);
+        this.updateSize();
+        this.requestLayout();
+    
         return this;
     }
 
     setColor(color) {
         this.color = color;
         this.text.setColor(color);
+        this.updateSize();
+
         return this;
     }
 
     setFontSize(fontSize) {
         this.fontSize = fontSize;
         this.text.setFontSize(fontSize);
+        this.updateSize();
+        this.requestLayout();
+
         return this;
     }
 
     setFontFamily(fontFamily) {
         this.fontFamily = fontFamily;
         this.text.setFontFamily(fontFamily);
+        this.updateSize();
+        this.requestLayout();
+
         return this;
     }
 
     setFontStyle(fontStyle) {
         this.fontStyle = fontStyle;
         this.text.setFontStyle(fontStyle);
+        this.updateSize();
+        this.requestLayout();
+
         return this;
     }
 
     setAlign(align) {
         this.align = align;
         this.text.setAlign(align);
+        this.updateSize();
+
         return this;
     }
 
@@ -93,12 +132,16 @@ export default class Text extends Component {
         this.originX = x;
         this.originY = y;
         this.text.setOrigin(x, y);
+
         return this;
     }
 
     setWordWrapWidth(width) {
         this.wordWrapWidth = width;
         this.text.setWordWrapWidth(width);
+        this.updateSize();
+        this.requestLayout();
+
         return this;
     }
 

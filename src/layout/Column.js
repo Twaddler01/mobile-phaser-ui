@@ -6,9 +6,6 @@ export default class Column extends Component {
 
         super(scene, config);
 
-        this.spacing =
-            config.spacing ?? 0;
-
         this.padding =
             this.getPadding(config.padding);
 
@@ -21,7 +18,55 @@ export default class Column extends Component {
         this.children = [];
     }
 
+    updateSize() {
+        const previousWidth = this.width;
+        const previousHeight = this.height;
+    
+        // AUTO WIDTH
+        if (this.widthAuto) {
+            const contentWidth =
+                this.children.reduce(
+                    (max, child) =>
+                        Math.max(max, child.width),
+                    0
+                );
+    
+            this.width =
+                this.padding.left +
+                contentWidth +
+                this.padding.right;
+        }
+    
+        // AUTO HEIGHT
+        if (this.heightAuto) {
+            const contentHeight =
+                this.children.reduce(
+                    (total, child) =>
+                        total + child.height,
+                    0
+                );
+    
+            this.height =
+                this.padding.top +
+                contentHeight +
+                this.padding.bottom;
+        }
+    
+        this.updateDebugBounds();
+    
+        // Notify parent if our size changed.
+        if (
+            this.width !== previousWidth ||
+            this.height !== previousHeight
+        ) {
+            this.requestLayout();
+        }
+    
+        return this;
+    }
+
     getPadding(padding = 0) {
+
         if (typeof padding === 'number') {
             return {
                 top: padding,
@@ -39,28 +84,41 @@ export default class Column extends Component {
         };
     }
 
-    add(component) {
-        this.children.push(component);
+    add(child) {
 
-        super.add(component);
+        this.children.push(child);
+
+        child.layoutParent = this;
+
+        super.add(child);
+
         this.layout();
 
         return this;
     }
 
-    remove(component) {
+    remove(child) {
+
         this.children =
             this.children.filter(
-                child => child !== component
+                item => item !== child
             );
 
-        super.remove(component);
+        if (child.layoutParent === this) {
+            child.layoutParent = null;
+        }
+
+        super.remove(child);
+
         this.layout();
 
         return this;
     }
 
     layout() {
+
+        this.updateSize();
+
         const availableWidth =
             this.width -
             this.padding.left -
@@ -71,65 +129,161 @@ export default class Column extends Component {
             this.padding.top -
             this.padding.bottom;
 
-        const contentHeight =
+        // Total height occupied by children.
+        const childrenHeight =
             this.children.reduce(
                 (total, child) =>
                     total + child.height,
                 0
-            ) +
+            );
+
+        const remainingHeight =
             Math.max(
                 0,
-                this.children.length - 1
-            ) *
-            this.spacing;
+                availableHeight - childrenHeight
+            );
 
+        // Determine vertical starting position
+        // and spacing between children.
         let y;
+        let spacing = 0;
 
         switch (this.justify) {
+
             case 'center':
+
                 y =
                     this.padding.top +
-                    (availableHeight - contentHeight) / 2;
+                    remainingHeight / 2;
+
                 break;
+
             case 'end':
+
                 y =
-                    this.height -
-                    this.padding.bottom -
-                    contentHeight;
+                    this.padding.top +
+                    remainingHeight;
+
                 break;
-            default:
+
+            case 'space-between':
+
                 y =
                     this.padding.top;
+
+                if (this.children.length > 1) {
+                    spacing =
+                        remainingHeight /
+                        (this.children.length - 1);
+                }
+
+                break;
+
+            case 'space-around':
+
+                if (this.children.length > 0) {
+
+                    spacing =
+                        remainingHeight /
+                        this.children.length;
+
+                    y =
+                        this.padding.top +
+                        spacing / 2;
+
+                } else {
+
+                    y =
+                        this.padding.top;
+                }
+
+                break;
+
+            case 'space-evenly':
+
+                if (this.children.length > 0) {
+
+                    spacing =
+                        remainingHeight /
+                        (this.children.length + 1);
+
+                    y =
+                        this.padding.top +
+                        spacing;
+
+                } else {
+
+                    y =
+                        this.padding.top;
+                }
+
+                break;
+
+            case 'start':
+            default:
+
+                y =
+                    this.padding.top;
+
+                break;
         }
 
+        // Position children horizontally.
         for (const child of this.children) {
+
             let x;
 
             switch (this.align) {
+
                 case 'center':
+
                     x =
                         this.padding.left +
                         (availableWidth - child.width) / 2;
+
                     break;
+
                 case 'end':
+
                     x =
                         this.width -
                         this.padding.right -
                         child.width;
+
                     break;
+
+                case 'start':
                 default:
+
                     x =
                         this.padding.left;
+
+                    break;
             }
+
+            console.log(
+                'COLUMN CHILD',
+                child.constructor.name,
+                {
+                    x,
+                    y,
+                    width: child.width,
+                    height: child.height,
+                    originX: child.originX,
+                    originY: child.originY
+                }
+            );
 
             child.setLayoutPosition(x, y);
 
-            y += child.height + this.spacing;
+            y += child.height + spacing;
         }
+
+        return this;
     }
 }
-/*
 
+/*
 const column = new Column(this, {
 
     x: 100,
@@ -138,12 +292,10 @@ const column = new Column(this, {
     width: 500,
     height: 600,
 
-    spacing: 20,
-
     padding: 30,
 
     align: 'center',
-    justify: 'start'
+    justify: 'space-evenly'
 });
 
 ////////////////////////////////
@@ -157,4 +309,8 @@ justify:
     start
     center
     end
+    space-between
+    space-around
+    space-evenly
+
 */
