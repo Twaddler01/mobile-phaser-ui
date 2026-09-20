@@ -37,8 +37,8 @@ this.addSelectButton(
 */
 
 ////
-this.addButton('DISABLE BUTTON', () => {
-    this.scene.debugButton.setDisabled(true);
+this.addButton('REMOVE text', () => {
+    this.scene.debugRow.remove(this.scene.title);
 });
 this.addButton('ENABLE BUTTON', () => {
     this.scene.debugButton.setDisabled(false);

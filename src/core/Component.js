@@ -48,6 +48,12 @@ export default class Component {
         return this;
     }
 
+    remove(component) {
+        this.container.remove(component.container);
+    
+        return this;
+    }
+
     destroy() {
         if (this.container) {
             this.container.destroy();

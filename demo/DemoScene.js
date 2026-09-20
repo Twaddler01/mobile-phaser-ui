@@ -1,6 +1,9 @@
 import DebugButtons from '../src/debug/DebugButtons.js';
 import Button from '../src/components/Button.js';
+import Text from '../src/components/Text.js';
 import Card from '../src/components/Card.js';
+import Column from '../src/layout/Column.js';
+import Row from '../src/layout/Row.js';
 
 export default class DemoScene extends Phaser.Scene {
 
@@ -35,7 +38,7 @@ export default class DemoScene extends Phaser.Scene {
                 }
             });
 
-        this.debugCard = 
+        /*this.debugCard = 
             new Card(this, {
                 x: 100,
                 y: 200,
@@ -51,10 +54,58 @@ export default class DemoScene extends Phaser.Scene {
                 }
             });
 
-        
-        this.debugCard.add(this.debugButton);
+        this.debugCard.add(this.debugButton);*/
 
-        //
+        this.title = new Text(this, {
+            width: 300,
+            height: 40,
+            text: 'Hello',
+            fontSize: '28px'
+        });
+        
+        this.button = new Button(this, {
+            width: 300,
+            height: 60,
+            text: {
+                value: 'START'
+            }
+        });
+
+////////
+// Column //
+/*
+        this.debugColumn =
+            new Column(this, {
+                x: 100,
+                y: 100,
+                spacing: 20
+            });
+        
+        this.debugColumn
+            .add(this.debugButton)
+            .add(this.title)
+            .add(this.button);
+*/
+////////
+// Row //
+
+        this.debugRow = new Row(this, {
+            x: 10,
+            y: 300,
+            spacing: 15
+        });
+
+        this.debugRow
+            .add(this.debugButton)
+            .add(this.title)
+            .add(this.button);
+
+////////
+
+
+
+        
+
         this.debug = new DebugButtons(this, { x: 20, y: 500 });
     }
 
