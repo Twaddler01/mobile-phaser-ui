@@ -42,6 +42,12 @@ export default class Component {
         return this;
     }
 
+    add(component) {
+        this.container.add(component.container);
+    
+        return this;
+    }
+
     destroy() {
         if (this.container) {
             this.container.destroy();
