@@ -32,8 +32,8 @@ this.container.add(
     }
 
     updateSize() {
-        const previousWidth = this.width;
-        const previousHeight = this.height;
+        //const previousWidth = this.width;
+        //const previousHeight = this.height;
     
         // AUTO WIDTH
         if (this.widthAuto) {
@@ -42,7 +42,11 @@ this.container.add(
                     (total, child) =>
                         total + child.width,
                     0
-                );
+                ) +
+                Math.max(
+                    0,
+                    this.children.length - 1
+                ) * this.gap;
     
             this.width =
                 this.padding.left +
@@ -319,7 +323,7 @@ this.container.add(
                 this.debugChildrenBounds.strokeRect(
                     x,
                     y,
-                    width + this.gap,
+                    width,
                     height
                 );
             }
@@ -327,7 +331,15 @@ this.container.add(
 
             child.setPosition(x, y);
 
-            x += child.width + spacing + this.gap;
+            x += 
+                child.width + 
+                spacing + 
+                (
+                    child !==
+                    this.children[this.children.length - 1]
+                        ? this.gap
+                        : 0
+                );
         }
 
         if (this.layoutParent) {

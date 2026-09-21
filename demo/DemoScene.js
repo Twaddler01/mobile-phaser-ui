@@ -134,7 +134,10 @@ const item8 = new Text(this, {
         this.debugObject.add(item3);
         this.debugObject.add(item4);
 
-        this.debugObject2 = new Row(this, {});
+        this.debugObject2 = new  Row(this, {
+            //padding: 10
+            gap: 20
+        });
 
         this.debugObject2.add(item5);
         this.debugObject2.add(item6);

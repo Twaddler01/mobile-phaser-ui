@@ -309,20 +309,28 @@ if (Debug.layout.enabled) {
         this.padding.left,
         y,
         availableWidth,
-        child.height + this.gap
+        child.height
     );
 
     this.debugChildrenBounds.strokeRect(
         this.padding.left,
         y,
         availableWidth,
-        child.height + this.gap
+        child.height
     );
 }
 
             child.setPosition(x, y);
 
-            y += child.height + spacing + this.gap;
+            y +=
+                child.height +
+                spacing +
+                (
+                    child !==
+                    this.children[this.children.length - 1]
+                        ? this.gap
+                        : 0
+                );
         }
 
         if (this.layoutParent) {
