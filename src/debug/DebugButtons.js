@@ -37,6 +37,19 @@ this.addSelectButton(
 */
 
 ////
+this.addButton('BOUNDS', () => {
+console.log(
+    'COLUMN BOUNDS',
+    this.debugObject.getContentBounds()
+);
+
+console.log(
+    'ROW BOUNDS',
+    this.debugObject2.getContentBounds()
+);
+});
+
+
 this.addButton('LOG Row height', () => {
     console.log('Row HEIGHT: ', this.scene.debugObject.height);
 });

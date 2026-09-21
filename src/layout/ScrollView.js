@@ -10,6 +10,9 @@ export default class ScrollView extends Component {
         // CONFIG
         ////////////////////////////////////////
 
+        this.direction =
+            config.direction ?? 'vertical';
+
         this.maskPadding =
             config.maskPadding ?? 0;
 
@@ -24,7 +27,7 @@ export default class ScrollView extends Component {
 
         this.depth =
             config.depth ?? 0;
-        
+
         this.container.setDepth(
             this.depth
         );
@@ -35,13 +38,17 @@ export default class ScrollView extends Component {
 
         this.content = null;
 
+        this.contentWidth = 0;
         this.contentHeight = 0;
 
         ////////////////////////////////////////
         // SCROLL
         ////////////////////////////////////////
 
+        this.scrollX = 0;
         this.scrollY = 0;
+
+        this.maxScrollX = 0;
         this.maxScrollY = 0;
 
         ////////////////////////////////////////
@@ -50,7 +57,10 @@ export default class ScrollView extends Component {
 
         this.dragPointerId = null;
 
+        this.dragStartX = 0;
         this.dragStartY = 0;
+
+        this.scrollStartX = 0;
         this.scrollStartY = 0;
 
         this.isDragging = false;
@@ -87,7 +97,7 @@ export default class ScrollView extends Component {
             content.container
         );
 
-        this.updateContentHeight();
+        this.updateContentSize();
 
         this.updateScrollLimits();
 
@@ -116,9 +126,13 @@ export default class ScrollView extends Component {
 
         this.content = null;
 
+        this.contentWidth = 0;
         this.contentHeight = 0;
 
+        this.scrollX = 0;
         this.scrollY = 0;
+
+        this.maxScrollX = 0;
         this.maxScrollY = 0;
 
         this.updateScroll();
@@ -158,6 +172,13 @@ export default class ScrollView extends Component {
         const padding =
             this.maskPadding;
 
+        const width =
+            Math.max(
+                0,
+                this.width -
+                padding * 2
+            );
+
         const height =
             Math.max(
                 0,
@@ -172,9 +193,9 @@ export default class ScrollView extends Component {
         );
 
         this.maskShape.fillRect(
-            this.x,
+            this.x + padding,
             this.y + padding,
-            this.width,
+            width,
             height
         );
 
@@ -186,6 +207,7 @@ export default class ScrollView extends Component {
     ////////////////////////////////////////
 
     createScrollZone() {
+
         this.scrollZone =
             this.scene.add.zone(
                 this.x,
@@ -195,11 +217,14 @@ export default class ScrollView extends Component {
             )
             .setOrigin(0)
             .setInteractive();
-    
+
+        // Keep the scroll zone behind
+        // the ScrollView contents so it
+        // does not block buttons.
         this.scrollZone.setDepth(
             this.depth - 1
         );
-    
+
         return this;
     }
 
@@ -310,9 +335,32 @@ export default class ScrollView extends Component {
         deltaY
     ) {
 
-        this.scrollBy(
-            deltaY
-        );
+        if (
+            this.direction === 'horizontal'
+        ) {
+
+            this.scrollBy(
+                deltaX,
+                0
+            );
+
+        } else if (
+            this.direction === 'both'
+        ) {
+
+            this.scrollBy(
+                deltaX,
+                deltaY
+            );
+
+        } else {
+
+            // Default vertical.
+            this.scrollBy(
+                0,
+                deltaY
+            );
+        }
 
         return this;
     }
@@ -335,8 +383,14 @@ export default class ScrollView extends Component {
         this.dragPointerId =
             pointer.id;
 
+        this.dragStartX =
+            pointer.x;
+
         this.dragStartY =
             pointer.y;
+
+        this.scrollStartX =
+            this.scrollX;
 
         this.scrollStartY =
             this.scrollY;
@@ -357,9 +411,47 @@ export default class ScrollView extends Component {
             return;
         }
 
+        const deltaX =
+            pointer.x -
+            this.dragStartX;
+
         const deltaY =
             pointer.y -
             this.dragStartY;
+
+        ////////////////////////////////////////
+        // DETERMINE ACTIVE AXIS
+        ////////////////////////////////////////
+
+        let dragDistance;
+
+        switch (this.direction) {
+
+            case 'horizontal':
+
+                dragDistance =
+                    Math.abs(deltaX);
+
+                break;
+
+            case 'both':
+
+                dragDistance =
+                    Math.max(
+                        Math.abs(deltaX),
+                        Math.abs(deltaY)
+                    );
+
+                break;
+
+            case 'vertical':
+            default:
+
+                dragDistance =
+                    Math.abs(deltaY);
+
+                break;
+        }
 
         ////////////////////////////////////////
         // WAIT FOR DRAG THRESHOLD
@@ -368,7 +460,7 @@ export default class ScrollView extends Component {
         if (!this.isDragging) {
 
             if (
-                Math.abs(deltaY) <
+                dragDistance <
                 this.dragThreshold
             ) {
                 return;
@@ -384,9 +476,44 @@ export default class ScrollView extends Component {
         // SCROLL
         ////////////////////////////////////////
 
-        this.setScrollY(
-            this.scrollStartY -
-            deltaY
+        let x =
+            this.scrollStartX;
+
+        let y =
+            this.scrollStartY;
+
+        if (
+            this.direction ===
+            'horizontal'
+        ) {
+
+            x =
+                this.scrollStartX -
+                deltaX;
+
+        } else if (
+            this.direction ===
+            'both'
+        ) {
+
+            x =
+                this.scrollStartX -
+                deltaX;
+
+            y =
+                this.scrollStartY -
+                deltaY;
+
+        } else {
+
+            y =
+                this.scrollStartY -
+                deltaY;
+        }
+
+        this.setScroll(
+            x,
+            y
         );
 
         return this;
@@ -447,20 +574,42 @@ export default class ScrollView extends Component {
     // CONTENT SIZE
     ////////////////////////////////////////
 
-    updateContentHeight() {
+    updateContentSize() {
 
         if (!this.content) {
 
+            this.contentWidth = 0;
             this.contentHeight = 0;
 
             return this;
         }
+
+        this.contentWidth =
+            this.content.width;
 
         this.contentHeight =
             this.content.height;
 
         return this;
     }
+
+    ////////////////////////////////////////
+    // CONTENT WIDTH
+    ////////////////////////////////////////
+
+    setContentWidth(width) {
+
+        this.contentWidth =
+            width;
+
+        this.updateScrollLimits();
+
+        return this;
+    }
+
+    ////////////////////////////////////////
+    // CONTENT HEIGHT
+    ////////////////////////////////////////
 
     setContentHeight(height) {
 
@@ -478,13 +627,27 @@ export default class ScrollView extends Component {
 
     updateScrollLimits() {
 
-        this.updateContentHeight();
+        this.updateContentSize();
+
+        this.maxScrollX =
+            Math.max(
+                0,
+                this.contentWidth -
+                this.width
+            );
 
         this.maxScrollY =
             Math.max(
                 0,
                 this.contentHeight -
                 this.height
+            );
+
+        this.scrollX =
+            Phaser.Math.Clamp(
+                this.scrollX,
+                0,
+                this.maxScrollX
             );
 
         this.scrollY =
@@ -503,14 +666,51 @@ export default class ScrollView extends Component {
     // SET SCROLL
     ////////////////////////////////////////
 
-    setScrollY(value) {
+    setScroll(
+        x,
+        y
+    ) {
 
-        this.scrollY =
-            Phaser.Math.Clamp(
-                value,
-                0,
-                this.maxScrollY
-            );
+        if (
+            this.direction ===
+            'horizontal'
+        ) {
+
+            this.scrollX =
+                Phaser.Math.Clamp(
+                    x,
+                    0,
+                    this.maxScrollX
+                );
+
+        } else if (
+            this.direction ===
+            'both'
+        ) {
+
+            this.scrollX =
+                Phaser.Math.Clamp(
+                    x,
+                    0,
+                    this.maxScrollX
+                );
+
+            this.scrollY =
+                Phaser.Math.Clamp(
+                    y,
+                    0,
+                    this.maxScrollY
+                );
+
+        } else {
+
+            this.scrollY =
+                Phaser.Math.Clamp(
+                    y,
+                    0,
+                    this.maxScrollY
+                );
+        }
 
         this.updateScroll();
 
@@ -518,13 +718,41 @@ export default class ScrollView extends Component {
     }
 
     ////////////////////////////////////////
+    // SET SCROLL X
+    ////////////////////////////////////////
+
+    setScrollX(value) {
+
+        return this.setScroll(
+            value,
+            this.scrollY
+        );
+    }
+
+    ////////////////////////////////////////
+    // SET SCROLL Y
+    ////////////////////////////////////////
+
+    setScrollY(value) {
+
+        return this.setScroll(
+            this.scrollX,
+            value
+        );
+    }
+
+    ////////////////////////////////////////
     // MOVE SCROLL
     ////////////////////////////////////////
 
-    scrollBy(amount) {
+    scrollBy(
+        x = 0,
+        y = 0
+    ) {
 
-        return this.setScrollY(
-            this.scrollY + amount
+        return this.setScroll(
+            this.scrollX + x,
+            this.scrollY + y
         );
     }
 
@@ -539,11 +767,35 @@ export default class ScrollView extends Component {
         }
 
         this.content.setPosition(
-            0,
+            -this.scrollX,
             -this.scrollY
         );
 
         return this;
+    }
+
+    ////////////////////////////////////////
+    // LEFT
+    ////////////////////////////////////////
+
+    scrollToLeft() {
+
+        return this.setScroll(
+            0,
+            this.scrollY
+        );
+    }
+
+    ////////////////////////////////////////
+    // RIGHT
+    ////////////////////////////////////////
+
+    scrollToRight() {
+
+        return this.setScroll(
+            this.maxScrollX,
+            this.scrollY
+        );
     }
 
     ////////////////////////////////////////
@@ -552,7 +804,10 @@ export default class ScrollView extends Component {
 
     scrollToTop() {
 
-        return this.setScrollY(0);
+        return this.setScroll(
+            this.scrollX,
+            0
+        );
     }
 
     ////////////////////////////////////////
@@ -561,7 +816,8 @@ export default class ScrollView extends Component {
 
     scrollToBottom() {
 
-        return this.setScrollY(
+        return this.setScroll(
+            this.scrollX,
             this.maxScrollY
         );
     }
@@ -569,11 +825,11 @@ export default class ScrollView extends Component {
     ////////////////////////////////////////
     // LAYOUT
     ////////////////////////////////////////
-    
+
     layout() {
-    
+
         this.updateScrollLimits();
-    
+
         return this;
     }
 
@@ -626,3 +882,33 @@ export default class ScrollView extends Component {
         return super.destroy();
     }
 }
+
+/*
+const column = new Column(scene, {
+    padding: 20
+});
+
+const scroll = new ScrollView(scene, {
+    width: 500,
+    height: 600,
+    direction: 'vertical'
+});
+
+scroll.add(column);
+
+////
+
+const scroll = new ScrollView(scene, {
+    width: 500,
+    height: 150,
+    direction: 'horizontal'
+});
+
+////
+const scroll = new ScrollView(scene, {
+    width: 500,
+    height: 500,
+    direction: 'both'
+});
+
+*/

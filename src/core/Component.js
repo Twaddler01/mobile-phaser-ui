@@ -15,7 +15,7 @@ export default class Component {
         this.heightAuto =
             config.height === undefined;
 
-         // LAYOUT
+        // LAYOUT
         this.layoutParent = null;
 
         this.container =
@@ -86,9 +86,75 @@ export default class Component {
         return this;
     }
 
-////////////////////////////////////////
-// DEBUG ONLY
-////////////////////////////////////////
+    ////////////////////////////////////////
+    // CONTENT BOUNDS
+    ////////////////////////////////////////
+
+    getContentBounds() {
+
+        let left = 0;
+        let top = 0;
+
+        let right = this.width;
+        let bottom = this.height;
+
+        for (const child of this.children ?? []) {
+
+            const bounds =
+                child.getContentBounds();
+
+            const childLeft =
+                child.x +
+                bounds.x;
+
+            const childTop =
+                child.y +
+                bounds.y;
+
+            const childRight =
+                childLeft +
+                bounds.width;
+
+            const childBottom =
+                childTop +
+                bounds.height;
+
+            left =
+                Math.min(
+                    left,
+                    childLeft
+                );
+
+            top =
+                Math.min(
+                    top,
+                    childTop
+                );
+
+            right =
+                Math.max(
+                    right,
+                    childRight
+                );
+
+            bottom =
+                Math.max(
+                    bottom,
+                    childBottom
+                );
+        }
+
+        return {
+            x: left,
+            y: top,
+            width: right - left,
+            height: bottom - top
+        };
+    }
+
+    ////////////////////////////////////////
+    // DEBUG ONLY
+    ////////////////////////////////////////
 
     createDebugBounds() {
 
@@ -192,6 +258,7 @@ export default class Component {
 Component
 ├── x/y = top-left
 ├── width/height
+├── content bounds
 └── no origin concept
 
 Row / Column

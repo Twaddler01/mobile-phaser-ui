@@ -147,11 +147,13 @@ const item8 = new Text(this, {
 // column = this.debugObject;
 // row = this.debugObject2;
 
+this.debugObject.width = 1200;
 const scrollView = new ScrollView(this, {
     x: 50,
     y: 100,
     width: 600,
-    height: 800
+    height: 800,
+    direction: 'horizontal'
 });
 scrollView.add(this.debugObject);
 
