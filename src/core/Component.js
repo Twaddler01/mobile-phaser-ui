@@ -18,16 +18,16 @@ export default class Component {
          // LAYOUT
         this.layoutParent = null;
 
-        // DEBUG ONLY
-        if (Debug.enabled) {
-            this.createDebugBounds();
-        }
-
         this.container =
             scene.add.container(
                 config.x ?? 0,
                 config.y ?? 0
             );
+
+        // DEBUG ONLY
+        if (Debug.enabled) {
+            this.createDebugBounds();
+        }
     }
 
     get x() {

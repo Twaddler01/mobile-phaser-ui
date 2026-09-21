@@ -6,6 +6,7 @@ import Card from '../src/components/Card.js';
 import Column from '../src/layout/Column.js';
 import Row from '../src/layout/Row.js';
 import Spacer from '../src/layout/Spacer.js';
+import ScrollView from '../src/layout/ScrollView.js';
 
 export default class DemoScene extends Phaser.Scene {
 
@@ -32,6 +33,11 @@ this.shape = this.add.rectangle(
 */
 ////////
 
+this.testText = new Text(this, {
+    text: 'TEST 123',
+    fontSize: '36px',
+});
+
 const item1 =
     new Button(this, {
         width: 200,
@@ -43,7 +49,7 @@ const item1 =
             strokeColor: 0xffffff
         },
         text: {
-            value: 'START',
+            value: 'START item1',
             fontSize: '24px',
             color: '#ffffff'
         },
@@ -58,7 +64,7 @@ const item2 = new Spacer(this, {
 });
 
 const item3 = new Text(this, {
-    text: 'HELLO',
+    text: 'HELLO item3',
     fontSize: '36px',
 });
 
@@ -71,7 +77,7 @@ const item5 = new Button(this, {
     width: 300,
     height: 60,
     text: {
-        value: 'START plain'
+        value: 'START plain item5'
     }
 });
 
@@ -96,13 +102,19 @@ const item8 = new Text(this, {
 ////////
 // Column
 
-        this.debugRow =
-            new Row(this, {
+
+
+////////
+// Row
+
+
+        this.debugObject =
+            new Column(this, {
                 x: 10,
                 y: 100,
             
-                //width: 300,
-                //height: 800,
+                width: 600,
+                //height: 1200,
             
                 padding: 10,
             
@@ -116,24 +128,36 @@ const item8 = new Text(this, {
                 }
             });
 
+        this.debugObject.add(item1);
+        this.debugObject.add(item2);
+        this.debugObject.add(item3);
+        this.debugObject.add(item4);
 
-        this.debugRow.add(item1);
-        this.debugRow.add(item2);
-        this.debugRow.add(item3);
-        this.debugRow.add(item4);
+        this.debugObject2 = new Row(this, {});
 
-////////
-// Row
-        this.debugColumn = new Column(this, {});
+        this.debugObject2.add(item5);
+        this.debugObject2.add(item6);
+        this.debugObject2.add(item7)
 
-        this.debugColumn.add(item5);
-        this.debugColumn.add(item6);
-        this.debugColumn.add(item7)
+        this.debugObject.add(this.debugObject2);
+        this.debugObject.add(item8)
 
-        this.debugRow.add(this.debugColumn);
-        this.debugRow.add(item8)
+        this.debugObject.createDebugBounds();
 
-this.debugRow.createDebugBounds();
+// column = this.debugObject;
+// row = this.debugObject2;
+
+const scrollView = new ScrollView(this, {
+    x: 50,
+    y: 100,
+    width: 600,
+    height: 800
+});
+scrollView.add(this.debugObject);
+
+// DEBUG
+
+
 
 ////////
 // Card
@@ -155,7 +179,7 @@ this.debugRow.createDebugBounds();
 
         this.debugCard.add(this.debugButton);
 */
-        if (!DEBUG) {
+        if (DEBUG) {
             this.debug = new DebugButtons(this, { x: 20, y: 500 });
         }
     }

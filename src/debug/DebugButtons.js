@@ -37,8 +37,14 @@ this.addSelectButton(
 */
 
 ////
-this.addButton('REMOVE title (col)', () => {
-    this.scene.debugColumn.remove(this.scene.title);
+this.addButton('LOG Row height', () => {
+    console.log('Row HEIGHT: ', this.scene.debugObject.height);
+});
+this.addButton('LOG Column height', () => {
+    console.log('Column HEIGHT: ', this.scene.debugObject2.height);
+});
+this.addButton('ADD object (row)', () => {
+    this.scene.debugObject.add(this.scene.testText);
 });
 this.addButton('ENABLE BUTTON', () => {
     this.scene.debugButton.setDisabled(false);

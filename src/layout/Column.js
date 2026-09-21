@@ -29,9 +29,6 @@ this.container.add(
     }
 
     updateSize() {
-        const previousWidth = this.width;
-        const previousHeight = this.height;
-    
         // AUTO WIDTH
         if (this.widthAuto) {
             const contentWidth =
@@ -65,12 +62,12 @@ this.container.add(
         this.updateDebugBounds();
     
         // Notify parent if our size changed.
-        if (
+        /*if (
             this.width !== previousWidth ||
             this.height !== previousHeight
         ) {
             this.requestLayout();
-        }
+        }*/
     
         return this;
     }
@@ -128,6 +125,23 @@ this.container.add(
     layout() {
 
         this.updateSize();
+
+// DEBUG
+if (Debug.layout.enabled) {
+
+    this.debugChildrenBounds.clear();
+
+    this.debugChildrenBounds.fillStyle(
+        Debug.layout.fillColor,
+        Debug.layout.fillAlpha
+    );
+
+    this.debugChildrenBounds.lineStyle(
+        Debug.layout.borderWidth,
+        Debug.layout.borderColor,
+        Debug.layout.borderAlpha
+    );
+}
 
         const availableWidth =
             this.width -
@@ -271,32 +285,30 @@ this.container.add(
                     break;
             }
 
-// DEBUG
- if (Debug.layout.enabled) {
+if (Debug.layout.enabled) {
 
-        this.debugChildrenBounds.lineStyle(
-            Debug.layout.borderWidth,
-            Debug.layout.borderColor,
-            Debug.layout.borderAlpha
-        );
+    this.debugChildrenBounds.fillRect(
+        this.padding.left,
+        y,
+        availableWidth,
+        child.height
+    );
 
-        // Fill
-        this.debugChildrenBounds.fillStyle(
-            Debug.layout.fillColor,
-            Debug.layout.fillAlpha
-        );
-
-        this.debugChildrenBounds.strokeRect(
-            this.padding.left,
-            y,
-            availableWidth,
-            child.height
-        );
-    }
+    this.debugChildrenBounds.strokeRect(
+        this.padding.left,
+        y,
+        availableWidth,
+        child.height
+    );
+}
 
             child.setPosition(x, y);
 
             y += child.height + spacing;
+        }
+
+        if (this.layoutParent) {
+            this.layoutParent.layout();
         }
 
         return this;
