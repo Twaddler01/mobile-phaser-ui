@@ -76,19 +76,19 @@ const item5 = new Button(this, {
 });
 
 const item6 = new Text(this, {
-    text: 'wrap this text up Hello there wrap this text up Hello there wrap this text up Hello there wrap',
+    text: 'ITEM6 wrap this text up Hello there wrap this text up Hello there wrap this text up Hello there wrap',
     fontSize: '28px',
     wordWrapWidth: 150
 });
 
 const item7 = new Text(this, {
-    text: 'Hello there wrap this text  up Hello there wrap this this text up Hello there wrap this text up Hello there wrap this text up ',
+    text: 'ITEM7 there wrap this text  up Hello there wrap this this text up Hello there wrap this text up Hello there wrap this text up ',
     fontSize: '28px',
     wordWrapWidth: 150
 });
 
 const item8 = new Text(this, {
-    text: 'Hello there wrap this text up Hello there wrap this text up Hello there wrap this text up Hello there wrap this text up Hello there wrap this text up Hello there wrap this text up ',
+    text: 'ITEM8 there wrap this text up Hello there wrap this text up Hello there wrap this text up Hello there wrap this text up Hello there wrap this text up Hello there wrap this text up ',
     fontSize: '28px',
     wordWrapWidth: 150
 });

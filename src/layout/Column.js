@@ -1,3 +1,5 @@
+import Debug from '../core/Debug.js';
+
 import Component from '../core/Component.js';
 
 export default class Column extends Component {
@@ -14,6 +16,13 @@ export default class Column extends Component {
 
         this.justify =
             config.justify ?? 'start';
+
+this.debugChildrenBounds =
+    this.scene.add.graphics();
+
+this.container.add(
+    this.debugChildrenBounds
+);
 
         this.children = [];
     }
@@ -261,18 +270,22 @@ export default class Column extends Component {
                     break;
             }
 
-            console.log(
-                'COLUMN CHILD',
-                child.constructor.name,
-                {
-                    x,
-                    y,
-                    width: child.width,
-                    height: child.height,
-                    originX: child.originX,
-                    originY: child.originY
-                }
-            );
+// DEBUG
+ if (Debug.layout.enabled) {
+
+        this.debugChildrenBounds.lineStyle(
+            Debug.layout.borderWidth,
+            Debug.layout.borderColor,
+            Debug.layout.borderAlpha
+        );
+
+        this.debugChildrenBounds.strokeRect(
+            this.padding.left,
+            y,
+            availableWidth,
+            child.height
+        );
+    }
 
             child.setPosition(x, y);
 

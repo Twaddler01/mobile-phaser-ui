@@ -1,3 +1,5 @@
+import Debug from './Debug.js';
+
 export default class Component {
 
     constructor(scene, config = {}) {
@@ -17,8 +19,9 @@ export default class Component {
         this.layoutParent = null;
 
         // DEBUG ONLY
-        this.debug =
-            config.debug ?? {};
+        if (Debug.enabled) {
+            this.createDebugBounds();
+        }
 
         this.container =
             scene.add.container(
@@ -83,45 +86,106 @@ export default class Component {
         return this;
     }
 
-    // DEBUG ONLY
+////////////////////////////////////////
+// DEBUG ONLY
+////////////////////////////////////////
+
     createDebugBounds() {
-    
+
         this.debugBounds =
             this.scene.add.graphics();
-    
+
         this.container.add(
             this.debugBounds
         );
-    
+
         this.updateDebugBounds();
-    
+
         return this;
     }
-    
-    // DEBUG ONLY
+
     updateDebugBounds() {
-    
+
         if (!this.debugBounds) {
             return this;
         }
-    
+
         this.debugBounds.clear();
+
+        if (Debug.bounds.fill) {
+
+            this.debugBounds.fillStyle(
+                Debug.bounds.fillColor,
+                Debug.bounds.fillAlpha
+            );
+
+            this.debugBounds.fillRect(
+                0,
+                0,
+                this.width,
+                this.height
+            );
+        }
+
+        if (Debug.bounds.border) {
+
+            this.debugBounds.lineStyle(
+                Debug.bounds.borderWidth,
+                Debug.bounds.borderColor,
+                Debug.bounds.borderAlpha
+            );
+
+            this.debugBounds.strokeRect(
+                0,
+                0,
+                this.width,
+                this.height
+            );
+        }
+
+        return this;
+    }
+
+    updateDebugLayoutBounds(
+        x,
+        y,
+        width,
+        height,
+        color
+    ) {
     
-        this.debugBounds.lineStyle(
-            this.debug.borderWidth ?? 1,
-            this.debug.borderColor ?? 0xff0000,
-            1
+        if (!Debug.enabled) {
+            return this;
+        }
+    
+        if (!this.debugLayoutBounds) {
+    
+            this.debugLayoutBounds =
+                this.scene.add.graphics();
+    
+            this.container.add(
+                this.debugLayoutBounds
+            );
+        }
+    
+        this.debugLayoutBounds.clear();
+    
+        this.debugLayoutBounds.lineStyle(
+            Debug.layout.borderWidth,
+            color ?? Debug.layout.borderColor,
+            Debug.layout.borderAlpha
         );
     
-        this.debugBounds.strokeRect(
-            0,
-            0,
-            this.width,
-            this.height
+        this.debugLayoutBounds.strokeRect(
+            x,
+            y,
+            width,
+            height
         );
     
         return this;
     }
+
 }
 
 /*
