@@ -18,10 +18,16 @@ const Debug = {
 
     layout: {
         enabled: true,
-
+        
         borderColor: 0x00ffff,
         borderAlpha: 0.7,
-        borderWidth: 1
+        borderWidth: 1,
+        fillColor: 0x00ffff,
+        fillAlpha: 0.3,
+
+        borderColor_ROW: 0x0000ff,
+        fillColor_ROW: 0x0000ff,
+
     }
 
 };

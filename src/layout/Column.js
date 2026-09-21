@@ -17,6 +17,7 @@ export default class Column extends Component {
         this.justify =
             config.justify ?? 'start';
 
+// DEBUG
 this.debugChildrenBounds =
     this.scene.add.graphics();
 
@@ -277,6 +278,12 @@ this.container.add(
             Debug.layout.borderWidth,
             Debug.layout.borderColor,
             Debug.layout.borderAlpha
+        );
+
+        // Fill
+        this.debugChildrenBounds.fillStyle(
+            Debug.layout.fillColor,
+            Debug.layout.fillAlpha
         );
 
         this.debugChildrenBounds.strokeRect(

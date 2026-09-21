@@ -1,3 +1,5 @@
+import Debug from '../core/Debug.js';
+
 import Component from '../core/Component.js';
 
 export default class Row extends Component {
@@ -14,6 +16,14 @@ export default class Row extends Component {
 
         this.justify =
             config.justify ?? 'start';
+
+// DEBUG
+this.debugChildrenBounds =
+    this.scene.add.graphics();
+
+this.container.add(
+    this.debugChildrenBounds
+);
 
         this.children = [];
     }
@@ -261,18 +271,40 @@ export default class Row extends Component {
                     break;
             }
 
-            console.log(
-                'ROW CHILD',
-                child.constructor.name,
-                {
-                    x,
-                    y,
-                    width: child.width,
-                    height: child.height,
-                    originX: child.originX,
-                    originY: child.originY
-                }
-            );
+// DEBUG
+if (Debug.layout.enabled) {
+
+    const y = this.padding.top;
+    const width = child.width;
+    const height = availableHeight;
+
+    // Fill
+    this.debugChildrenBounds.fillStyle(
+        Debug.layout.fillColor_ROW,
+        Debug.layout.fillAlpha
+    );
+
+    this.debugChildrenBounds.fillRect(
+        x,
+        y,
+        width,
+        height
+    );
+
+    // Border
+    this.debugChildrenBounds.lineStyle(
+        Debug.layout.borderWidth,
+        Debug.layout.borderColor_ROW,
+        Debug.layout.borderAlpha
+    );
+
+    this.debugChildrenBounds.strokeRect(
+        x,
+        y,
+        width,
+        height
+    );
+}
 
             child.setPosition(x, y);
 
