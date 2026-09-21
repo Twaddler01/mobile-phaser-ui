@@ -13,12 +13,6 @@ export default class Component {
         this.heightAuto =
             config.height === undefined;
 
-        this.originX =
-            config.originX ?? 0;
-        
-        this.originY =
-            config.originY ?? 0;
-
          // LAYOUT
         this.layoutParent = null;
 
@@ -41,19 +35,8 @@ export default class Component {
         return this.container.y;
     }
 
-    // Direct/container positioning
     setPosition(x, y) {
         this.container.setPosition(x, y);
-        return this;
-    }
-
-    // Layout-aware positioning
-    setLayoutPosition(x, y) {
-        this.container.setPosition(
-            x + this.width * this.originX,
-            y + this.height * this.originY
-        );
-    
         return this;
     }
 
@@ -131,8 +114,8 @@ export default class Component {
         );
     
         this.debugBounds.strokeRect(
-            -this.width * this.originX,
-            -this.height * this.originY,
+            0,
+            0,
             this.width,
             this.height
         );
@@ -140,3 +123,16 @@ export default class Component {
         return this;
     }
 }
+
+/*
+Component
+├── x/y = top-left
+├── width/height
+└── no origin concept
+
+Row / Column
+└── position children by bounding box
+
+Button
+└── internally centers its own text
+*/

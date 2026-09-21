@@ -274,7 +274,7 @@ export default class Column extends Component {
                 }
             );
 
-            child.setLayoutPosition(x, y);
+            child.setPosition(x, y);
 
             y += child.height + spacing;
         }

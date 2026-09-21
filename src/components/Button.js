@@ -67,8 +67,8 @@ export default class Button extends Component {
                 );
         
                 this.background.fillRoundedRect(
-                    -this.width * this.originX,
-                    -this.height * this.originY,
+                    0,
+                    0,
                     this.width,
                     this.height,
                     this.style.radius
@@ -88,8 +88,8 @@ export default class Button extends Component {
                     );
         
                     this.background.strokeRoundedRect(
-                        -this.width * this.originX,
-                        -this.height * this.originY,
+                        0,
+                        0,
                         this.width,
                         this.height,
                         this.style.radius
@@ -100,11 +100,9 @@ export default class Button extends Component {
             text: () => {
                 this.text =
                     this.scene.add.text(
-                        this.width *
-                            (0.5 - this.originX),
+                        this.width / 2,
         
-                        this.height *
-                            (0.5 - this.originY),
+                        this.height / 2,
         
                         this.textConfig.value,
         
@@ -123,8 +121,8 @@ export default class Button extends Component {
             overlay: () => {
                 this.disabledOverlay =
                     this.scene.add.rectangle(
-                        -this.width * this.originX,
-                        -this.height * this.originY,
+                        0,
+                        0,
                         this.width,
                         this.height,
                         0x000000,
@@ -147,8 +145,8 @@ export default class Button extends Component {
         
                 this.hitArea =
                     new Phaser.Geom.Rectangle(
-                        -this.width * this.originX,
-                        -this.height * this.originY,
+                        0,
+                        0,
                         this.width,
                         this.height
                     );
@@ -232,8 +230,6 @@ const button = new Button(this, {
     style: {
         backgroundColor: 0x222222,
         radius: 12,
-        originX: 0.5,
-        originY: 0.5,
         stroke: 2,
         strokeColor: 0xffffff
     },

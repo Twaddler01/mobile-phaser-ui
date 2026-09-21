@@ -43,10 +43,7 @@ export default class Text extends Component {
                 this.textValue,
                 style
             )
-            .setOrigin(
-                this.originX,
-                this.originY
-            );
+            .setOrigin(0);
 
         this.container.add(
             this.text

@@ -1,3 +1,4 @@
+import { DEBUG } from '../config.js';
 import DebugButtons from '../src/debug/DebugButtons.js';
 import Button from '../src/components/Button.js';
 import Text from '../src/components/Text.js';
@@ -31,17 +32,13 @@ this.shape = this.add.rectangle(
 */
 ////////
 
-this.debugButton =
+const item1 =
     new Button(this, {
-        x: 0,
-        y: 20,
         width: 200,
         height: 60,
         style: {
             backgroundColor: 0x222222,
             radius: 12,
-            originX: 0.5,
-            originY: 0.5,
             stroke: 2,
             strokeColor: 0xffffff
         },
@@ -55,63 +52,57 @@ this.debugButton =
         }
     });
 
-const spacer1 = new Spacer(this, {
-    width: 0,
-    height: 40
+const item2 = new Spacer(this, {
+    width: 20,
+    height: 20
 });
 
-this.title = new Text(this, {
-    //width: 200,
-    //height: 40,
-    text: 'Hello',
-    fontSize: '28px',
-    //originX: 0.5,
-    //originY: 0.5,
+const item3 = new Text(this, {
+    text: 'HELLO',
+    fontSize: '36px',
 });
 
-const spacer2 = new Spacer(this, {
-    width: 0,
-    height: 40
+const item4 = new Spacer(this, {
+    width: 20,
+    height: 20
 });
 
-this.button = new Button(this, {
+const item5 = new Button(this, {
     width: 300,
     height: 60,
-    originX: 0,
-    originY: 0,
     text: {
-        value: 'START'
+        value: 'START plain'
     }
 });
 
-const textLong1 = new Text(this, {
-    text: 'Hello there wrap this text up Hello there wrap this text up Hello there wrap this text up Hello there wrap this text up Hello there wrap this text up Hello there wrap this text up ',
+const item6 = new Text(this, {
+    text: 'wrap this text up Hello there wrap this text up Hello there wrap this text up Hello there wrap',
     fontSize: '28px',
     wordWrapWidth: 150
 });
 
-const textLong2 = new Text(this, {
-    text: 'Hello there wrap this text up Hello there wrap this text up Hello there wrap this text up Hello there wrap this text up Hello there wrap this text up Hello there wrap this text up ',
+const item7 = new Text(this, {
+    text: 'Hello there wrap this text  up Hello there wrap this this text up Hello there wrap this text up Hello there wrap this text up ',
     fontSize: '28px',
     wordWrapWidth: 150
 });
 
-const textLong3 = new Text(this, {
+const item8 = new Text(this, {
     text: 'Hello there wrap this text up Hello there wrap this text up Hello there wrap this text up Hello there wrap this text up Hello there wrap this text up Hello there wrap this text up ',
     fontSize: '28px',
     wordWrapWidth: 150
 });
 
 ////////
-// Row
+// Column
 
         this.debugRow =
             new Row(this, {
                 x: 10,
                 y: 100,
             
-                width: 900,
-                height: 800,
+                //width: 300,
+                //height: 800,
             
                 padding: 10,
             
@@ -125,40 +116,24 @@ const textLong3 = new Text(this, {
                 }
             });
 
-this.debugRow.createDebugBounds();
 
-        this.debugRow
-            .add(this.title)
-            .add(textLong1)
-            .add(textLong2)
-            .add(textLong3);
-            //.add(this.debugButton)
-            //.add(this.title);
-            //.add(spacer1)
-            //.add(spacer2)
-            //.add(this.button);
-
-let string = 'A much longer piece of text... ';
-for (let i = 0; i <= 2; i++) {
-    string += string;
-}
-console.log(string);
-
-textLong1.setText(string);
+        this.debugRow.add(item1);
+        this.debugRow.add(item2);
+        this.debugRow.add(item3);
+        this.debugRow.add(item4);
 
 ////////
-// Column
+// Row
+        this.debugColumn = new Column(this, {});
 
-        this.debugColumn = new Column(this, {
-            x: 10,
-            y: 10
-        });
+        this.debugColumn.add(item5);
+        this.debugColumn.add(item6);
+        this.debugColumn.add(item7)
 
-        this.debugColumn
-            .add(this.debugButton)
-            .add(this.debugRow)
-            .add(this.button);
+        this.debugRow.add(this.debugColumn);
+        this.debugRow.add(item8)
 
+this.debugRow.createDebugBounds();
 
 ////////
 // Card
@@ -180,8 +155,9 @@ textLong1.setText(string);
 
         this.debugCard.add(this.debugButton);
 */
-
-        this.debug = new DebugButtons(this, { x: 20, y: 500 });
+        if (!DEBUG) {
+            this.debug = new DebugButtons(this, { x: 20, y: 500 });
+        }
     }
 
 }

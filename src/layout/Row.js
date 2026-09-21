@@ -274,7 +274,7 @@ export default class Row extends Component {
                 }
             );
 
-            child.setLayoutPosition(x, y);
+            child.setPosition(x, y);
 
             x += child.width + spacing;
         }
