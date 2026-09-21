@@ -93,6 +93,13 @@ this.container.add(
 
     add(child) {
 
+        if (
+            child.layoutParent &&
+            child.layoutParent !== this
+        ) {
+            return this;
+        }
+
         this.children.push(child);
 
         child.layoutParent = this;

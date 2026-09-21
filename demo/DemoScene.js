@@ -33,9 +33,9 @@ this.shape = this.add.rectangle(
 */
 ////////
 
-this.testText = new Text(this, {
+this.createTestText = () => new Text(this, {
     text: 'TEST 123',
-    fontSize: '36px',
+    fontSize: '36px'
 });
 
 const item1 =
@@ -142,23 +142,22 @@ const item8 = new Text(this, {
         this.debugObject.add(this.debugObject2);
         this.debugObject.add(item8)
 
-        this.debugObject.createDebugBounds();
-
 // column = this.debugObject;
 // row = this.debugObject2;
 
-this.debugObject.width = 1200;
 const scrollView = new ScrollView(this, {
     x: 50,
     y: 100,
     width: 600,
     height: 800,
-    direction: 'horizontal'
+    direction: 'both'
 });
 scrollView.add(this.debugObject);
 
-// DEBUG
 
+// DEBUG
+this.debugObject.createDebugBounds();
+this.debugObject2.createDebugBounds();
 
 
 ////////

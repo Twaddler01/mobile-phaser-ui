@@ -40,12 +40,12 @@ this.addSelectButton(
 this.addButton('BOUNDS', () => {
 console.log(
     'COLUMN BOUNDS',
-    this.debugObject.getContentBounds()
+    this.scene.debugObject.getContentBounds()
 );
 
 console.log(
     'ROW BOUNDS',
-    this.debugObject2.getContentBounds()
+    this.scene.debugObject2.getContentBounds()
 );
 });
 
@@ -57,7 +57,12 @@ this.addButton('LOG Column height', () => {
     console.log('Column HEIGHT: ', this.scene.debugObject2.height);
 });
 this.addButton('ADD object (row)', () => {
-    this.scene.debugObject.add(this.scene.testText);
+    this.scene.debugObject.add(this.scene.createTestText());
+    this.scene.debugObject.updateDebugBounds();
+});
+this.addButton('ADD object (col)', () => {
+    this.scene.debugObject2.add(this.scene.createTestText());
+    this.scene.debugObject2.updateDebugBounds();
 });
 this.addButton('ENABLE BUTTON', () => {
     this.scene.debugButton.setDisabled(false);

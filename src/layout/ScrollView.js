@@ -575,21 +575,23 @@ export default class ScrollView extends Component {
     ////////////////////////////////////////
 
     updateContentSize() {
-
         if (!this.content) {
-
+    
             this.contentWidth = 0;
             this.contentHeight = 0;
-
+    
             return this;
         }
-
+    
+        const bounds =
+            this.content.getContentBounds();
+    
         this.contentWidth =
-            this.content.width;
-
+            bounds.width;
+    
         this.contentHeight =
-            this.content.height;
-
+            bounds.height;
+    
         return this;
     }
 
