@@ -11,6 +11,9 @@ export default class Column extends Component {
         this.padding =
             this.getPadding(config.padding);
 
+        this.gap =
+            config.gap ?? 0;
+
         this.align =
             config.align ?? 'start';
 
@@ -51,7 +54,11 @@ this.container.add(
                     (total, child) =>
                         total + child.height,
                     0
-                );
+                ) +
+                Math.max(
+                    0,
+                    this.children.length - 1
+                ) * this.gap;
     
             this.height =
                 this.padding.top +
@@ -166,7 +173,11 @@ if (Debug.layout.enabled) {
                 (total, child) =>
                     total + child.height,
                 0
-            );
+            ) +
+            Math.max(
+                0,
+                this.children.length - 1
+            ) * this.gap;
 
         const remainingHeight =
             Math.max(
@@ -298,20 +309,20 @@ if (Debug.layout.enabled) {
         this.padding.left,
         y,
         availableWidth,
-        child.height
+        child.height + this.gap
     );
 
     this.debugChildrenBounds.strokeRect(
         this.padding.left,
         y,
         availableWidth,
-        child.height
+        child.height + this.gap
     );
 }
 
             child.setPosition(x, y);
 
-            y += child.height + spacing;
+            y += child.height + spacing + this.gap;
         }
 
         if (this.layoutParent) {

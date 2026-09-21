@@ -11,6 +11,9 @@ export default class Row extends Component {
         this.padding =
             this.getPadding(config.padding);
 
+        this.gap =
+            config.gap ?? 0;
+
         this.align =
             config.align ?? 'start';
 
@@ -169,7 +172,11 @@ this.container.add(
                 (total, child) =>
                     total + child.width,
                 0
-            );
+            ) +
+            Math.max(
+                0,
+                this.children.length - 1
+            ) * this.gap;
 
         const remainingWidth =
             Math.max(
@@ -312,7 +319,7 @@ this.container.add(
                 this.debugChildrenBounds.strokeRect(
                     x,
                     y,
-                    width,
+                    width + this.gap,
                     height
                 );
             }
@@ -320,7 +327,7 @@ this.container.add(
 
             child.setPosition(x, y);
 
-            x += child.width + spacing;
+            x += child.width + spacing + this.gap;
         }
 
         if (this.layoutParent) {

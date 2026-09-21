@@ -117,9 +117,10 @@ const item8 = new Text(this, {
                 //height: 1200,
             
                 padding: 10,
+                gap: 20,
             
-                align: 'centwr',
-                justify: 'space-evenly',
+                align: 'start',
+                //justify: 'space-evenly',
                 
                 debug: {
                     border: true,
