@@ -40,6 +40,7 @@ this.items =
 // DEBUG
 this.column =
     new Column(this, {
+        x: 30,
         y: 200,
         id: 'parentColumn'
     });
@@ -48,8 +49,30 @@ this.column =
 this.card =
     new Card(this, {
         id: 'card',
+        padding: 50,
         //width: 500,
         //height: 150
+    });
+
+this.cardInside =
+    new Card(this, {
+        id: 'card2',
+        padding: 10,
+        width: 500,
+        height: 150,
+        style: {
+            backgroundColor: 0x555555
+        },
+    });
+
+this.cardInside2 =
+    new Card(this, {
+        id: 'card3',
+        style: {
+            backgroundColor: 0x0000ff
+        },
+        width: 200,
+        height: 50
     });
 
 const text =
@@ -64,13 +87,22 @@ this.anotherText =
     });
 
 
-this.card.add(text);
-
 this.column.add(this.card);
 
+this.card.add(this.cardInside);
+
+this.cardInside.add(text);
+
+this.cardInside.add(this.cardInside2, {
+    horizontalAlign: 'center'
+});
+
+this.cardInside2.add(this.anotherText, {
+    horizontalAlign: 'center'
+});
+
+// WIP integrate with scheduling
 this.column.requestLayout();
-
-
 
 /*
 
