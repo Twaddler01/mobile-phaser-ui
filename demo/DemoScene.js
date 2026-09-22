@@ -20,137 +20,58 @@ export default class DemoScene extends Phaser.Scene {
         this.width = this.scale.width;
         this.height = this.scale.height;
 
-// DEBUG BACKGROUND
-/*
-this.shape = this.add.rectangle(
-    100,
-    100,
-    500,
-    600,
-    0x000055,
-)
-.setOrigin(0);
-*/
-////////
+        // DEBUG
+        const setZoom = () => {
+            this.cameras.main.setZoom(0.7);
+            this.cameras.main.setOrigin(0, 0);
+            this.cameras.main.setScroll(0, 0);
+        }
+        //setZoom();
 
+
+
+
+
+// DEBUG
 this.items = 
     this.createDebugItems();
 
-/*
+this.parentColumn =
+    new Column(this, {
+        x: 10,
+        y: 100,
+    
+        width: 1500,
+        height: 1200,
+    
+        padding: 10,
+        gap: 10,
+    
+        align: 'start',
+        justify: 'space-evenly',
+        
+        debug: {
+            border: true,
+            borderColor: 0xff0000,
+            borderWidth: 1
+        }
+    });
 
-this.textCycle =
-    this.createRandomCycle(
-        this.items.texts
-    );
+this.debugRow1 =
+    new Row(this, {
+        padding: 10,
+        gap: 10,
+        align: 'start'
+    });
 
-this.buttonCycle =
-    this.createRandomCycle(
-        this.items.buttons
-    );
+this.debugRow2 =
+    new Row(this, {
+        padding: 10,
+        gap: 10,
+        align: 'start'
+    });
 
-this.cardCycle =
-    this.createRandomCycle(
-        this.items.cards
-    );
-
-
-
-this.mixedCycle =
-    this.createRandomCycle([
-        ...this.items.texts,
-        ...this.items.buttons,
-        ...this.items.cards
-    ]);
-
-this.addButton('ADD (mixed)', () => {
-    const item =
-        this.scene.mixedCycle();
-
-    if (!item) {
-        return;
-    }
-
-    this.scene.mainColumn.add(item);
-});
-
-
-
-*/
-
-
-////////
-// Column
-
-
-
-////////
-// Row
-
-
-        this.parentColumn =
-            new Column(this, {
-                x: 10,
-                y: 100,
-            
-                //width: 600,
-                height: 1200,
-            
-                padding: 10,
-                gap: 10,
-            
-                align: 'start',
-                //justify: 'space-evenly',
-                
-                debug: {
-                    border: true,
-                    borderColor: 0xff0000,
-                    borderWidth: 1
-                }
-            });
-
-        this.debugRow1 = new  Row(this, {
-            padding: 10,
-            gap: 10,
-            align: 'start'
-        });
-
-        this.debugRow2 = new  Row(this, {
-            padding: 10,
-            gap: 10,
-            align: 'start'
-        });
-
-
-const basicCard1 = new Card(this, {
-    width: 500,
-    height: 100
-});
-const basicCard2 = new Card(this, {
-    width: 500,
-    height: 100
-});
-const basicCard3 = new Card(this, {
-    width: 500,
-    height: 100
-});
-const basicCard4 = new Card(this, {
-    width: 500,
-    height: 100
-});
-
-this.debugRow1 = new  Row(this, {
-    //padding: 10,
-    gap: 10,
-    align: 'start'
-});
-this.debugRow1.add([basicCard2, basicCard3]);
-
-
-this.parentColumn.add(basicCard1);
-this.parentColumn.add(this.debugRow1);
-this.parentColumn.add(basicCard4);
-
-/*const scrollView = new ScrollView(this, {
+const scrollView = new ScrollView(this, {
     x: 50,
     y: 100,
     width: 600,
@@ -158,40 +79,87 @@ this.parentColumn.add(basicCard4);
     direction: 'both'
 });
 scrollView.add(this.parentColumn);
-*/
 
-// DEBUG
 this.parentColumn.createDebugBounds();
 this.debugRow1.createDebugBounds();
+this.debugRow2.createDebugBounds();
 
+if (DEBUG) {
+    this.debug = new DebugButtons(this, { x: 20, y: 500 });
+}
 
 ////////
-// Card
-        /*this.debugCard = 
-            new Card(this, {
-                x: 100,
-                y: 200,
-            
-                width: 500,
-                height: 300,
-            
-                style: {
-                    backgroundColor: 0x222222,
-                    radius: 16,
-                    stroke: 2,
-                    strokeColor: 0xffffff
-                }
-            });
-
-        this.debugCard.add(this.debugButton);
+// ScrollView
+/*
+const scrollView =
+    new ScrollView(this, {
+        x: 50,
+        y: 100,
+        width: 600,
+        height: 800,
+        direction: 'both'
+    });
+scrollView.add(this.parentColumn);
 */
-        if (DEBUG) {
-            this.debug = new DebugButtons(this, { x: 20, y: 500 });
+
+////////
+// Column
+/*
+this.parentColumn =
+    new Column(this, {
+        x: 10,
+        y: 100,
+    
+        width: 1500,
+        height: 1200,
+    
+        padding: 10,
+        gap: 10,
+    
+        align: 'start',
+        //justify: 'space-evenly',
+        
+        debug: {
+            border: true,
+            borderColor: 0xff0000,
+            borderWidth: 1
         }
+    });
+*/
+////////
+// Row
+/*
+this.parentRow = new  Row(this, {
+    padding: 10,
+    gap: 10,
+    align: 'start'
+    });
+*/
+////////
+// Card
+/*
+this.debugCard = 
+    new Card(this, {
+        x: 100,
+        y: 200,
+    
+        width: 500,
+        height: 300,
+    
+        style: {
+            backgroundColor: 0x222222,
+            radius: 16,
+            stroke: 2,
+            strokeColor: 0xffffff
+        }
+    });
+
+this.debugCard.add(item);
+*/
     }
 
     createDebugItems() {
-        this.debugItems = {
+        const debugItems = {
             texts: [],
             buttons: [],
             cards: []
@@ -199,56 +167,27 @@ this.debugRow1.createDebugBounds();
     
         for (let i = 1; i <= 5; i++) {
     
-            this.debugItems.texts.push(
+            debugItems.texts.push(
                 new Text(this, {
                     id: `testText${i}`,
                     text: `Text ${i}`
                 })
             );
     
-            this.debugItems.buttons.push(
+            debugItems.buttons.push(
                 new Button(this, {
                     id: `testButton${i}`,
                     text: `Button ${i}`
                 })
             );
     
-            this.debugItems.cards.push(
+            debugItems.cards.push(
                 new Card(this, {
                     id: `testCard${i}`
                 })
             );
         }
     
-        return this.debugItems;
+        return debugItems;
     }
-
-    createRandomCycle(items) {
-        const remaining =
-            items.map(
-                (_, index) => index
-            );
-    
-        return () => {
-    
-            if (!remaining.length) {
-                return null;
-            }
-    
-            const position =
-                Math.floor(
-                    Math.random() *
-                    remaining.length
-                );
-    
-            const index =
-                remaining.splice(
-                    position,
-                    1
-                )[0];
-    
-            return items[index];
-        };
-    }
-
 }

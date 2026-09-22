@@ -23,7 +23,30 @@ export default class DebugButtons {
     create() {
         this.addTitle('DEBUG BUTTONS:');
 
-/* 
+        this.addCycle =
+            this.createClickCycle([
+                () => this.scene.parentColumn.add(this.scene.items.buttons[0]),
+                () => this.scene.parentColumn.add(this.scene.items.texts[0]),
+                () => this.scene.parentColumn.add(this.scene.items.texts[1]),
+                () => this.scene.parentColumn.add(this.scene.items.texts[2]),
+                () => this.scene.parentColumn.add(this.scene.items.texts[3]),
+                () => this.scene.parentColumn.add(this.scene.items.texts[4]),
+                () => this.scene.parentColumn.add(this.scene.items.buttons[1]),
+                () => this.scene.parentColumn.add(this.scene.items.cards[0]),
+                () => this.scene.parentColumn.add(this.scene.items.cards[1]),
+                () => this.scene.parentColumn.add(this.scene.items.cards[2]),
+                () => this.scene.items.cards[2].add(this.scene.items.texts[3]),
+                () => this.scene.parentColumn.add(this.scene.items.cards[3]),
+                () => this.scene.parentColumn.add(this.scene.items.cards[4]),
+                () => this.scene.parentColumn.add(this.scene.items.buttons[2]),
+                () => this.scene.parentColumn.add(this.scene.items.buttons[3]),
+                () => this.scene.parentColumn.add(this.scene.items.buttons[4]),
+                
+                
+                
+            ]);
+
+/* v
 // BUTTONS
 this.addButton('Clear Save Data', () => {
     this.saveManager.clear();
@@ -51,9 +74,8 @@ console.log(
 );
 });
 
-this.addButton('ADD (text)', () => {
-    this.scene.parentColumn.add(this.scene.items.texts[0].id);
-    // next (each click until no more)
+this.addButton('ADD (cycle)', () => {
+    this.addCycle();
 });
 
 this.addButton('insertBefore (after item2)', () => {
@@ -305,5 +327,20 @@ this.addButton('ENABLE BUTTON', () => {
     closeSelect() {
         this.activeSelect?.destroy();
         this.activeSelect = null;
+    }
+    
+    createClickCycle(calls) {
+        let index = 0;
+    
+        return () => {
+    
+            if (index >= calls.length) {
+                return;
+            }
+    
+            calls[index]();
+    
+            index++;
+        };
     }
 }

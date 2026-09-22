@@ -1,5 +1,4 @@
 import Debug from './Debug.js';
-
 export default class Component {
 
     constructor(scene, config = {}) {
@@ -19,6 +18,8 @@ export default class Component {
 
         // LAYOUT
         this.layoutParent = null;
+
+        this.children = [];
 
         this.container =
             scene.add.container(
@@ -65,6 +66,25 @@ export default class Component {
         console.log(child.id);
     }
     */
+
+    markLayoutDirty() {
+        if (this.layoutDirty) {
+            return this;
+        }
+    
+        this.layoutDirty = true;
+    
+        if (this.layoutParent) {
+            this.layoutParent.markLayoutDirty();
+        }
+    
+        return this;
+    }
+
+    layout() {
+        this.layoutDirty = false;
+        return this;
+    }
 
     setPosition(x, y) {
         this.container.setPosition(x, y);
@@ -276,16 +296,6 @@ export default class Component {
             width,
             height
         );
-    
-        return this;
-    }
-
-    markLayoutDirty() {
-        this.layoutDirty = true;
-    
-        if (this.layoutParent) {
-            this.layoutParent.markLayoutDirty();
-        }
     
         return this;
     }

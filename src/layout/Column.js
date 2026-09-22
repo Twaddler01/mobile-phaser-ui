@@ -1,5 +1,4 @@
 import Debug from '../core/Debug.js';
-
 import Component from '../core/Component.js';
 
 export default class Column extends Component {
@@ -26,8 +25,6 @@ export default class Column extends Component {
         this.container.add(
             this.debugChildrenBounds
         );
-
-        this.children = [];
     }
 
     updateSize() {

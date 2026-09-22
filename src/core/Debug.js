@@ -2,7 +2,7 @@
 
 const Debug = {
 
-    enabled: false,
+    enabled: true,
 
     bounds: {
         fill: true,

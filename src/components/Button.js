@@ -6,13 +6,16 @@ export default class Button extends Component {
 
         super(scene, config);
 
+        this.width = this.widthAuto ? 240 : this.width;
+        this.height = this.heightAuto ? 80 : this.height;
+
         // STYLE
         this.style = {
             backgroundColor:
                 config.style?.backgroundColor ?? 0x222222,
 
             radius:
-                config.style?.radius ?? 0,
+                config.style?.radius ?? 30,
 
             stroke:
                 config.style?.stroke,
@@ -27,7 +30,7 @@ export default class Button extends Component {
                 config.text?.value ?? 'BUTTON',
 
             fontSize:
-                config.text?.fontSize ?? '12px',
+                config.text?.fontSize ?? '18px',
 
             color:
                 config.text?.color ?? '#ffffff'

@@ -6,7 +6,7 @@ export default class Text extends Component {
 
         super(scene, config);
 
-        this.textValue = config.text ?? '';
+        this.textValue = config.text ?? 'Text';
         this.fontSize = config.fontSize ?? '16px';
         this.fontFamily = config.fontFamily ?? 'Arial';
         this.color = config.color ?? '#ffffff';
