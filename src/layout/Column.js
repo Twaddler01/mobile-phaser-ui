@@ -90,50 +90,140 @@ export default class Column extends Component {
     }
 
     add(child) {
-
+        // Multiple children
+        if (Array.isArray(child)) {
+    
+            for (const item of child) {
+    
+                if (!item) {
+                    continue;
+                }
+    
+                if (this.children.includes(item)) {
+    
+                    if (Debug.enabled) {
+                        console.warn(
+                            'Cannot add child: component is already in this layout.'
+                        );
+                    }
+    
+                    continue;
+                }
+    
+                if (
+                    item.layoutParent &&
+                    item.layoutParent !== this
+                ) {
+    
+                    if (Debug.enabled) {
+                        console.warn(
+                            'Cannot add child: component already belongs to another layout.'
+                        );
+                    }
+    
+                    continue;
+                }
+    
+                this.children.push(item);
+    
+                item.layoutParent = this;
+    
+                super.add(item);
+            }
+    
+            this.layout();
+    
+            return this;
+        }
+    
+        // Single child
+        if (!child) {
+            return this;
+        }
+    
         if (this.children.includes(child)) {
+    
             if (Debug.enabled) {
                 console.warn(
                     'Cannot add child: component is already in this layout.'
                 );
             }
-        
+    
             return this;
         }
-
+    
         if (
             child.layoutParent &&
             child.layoutParent !== this
         ) {
+    
+            if (Debug.enabled) {
+                console.warn(
+                    'Cannot add child: component already belongs to another layout.'
+                );
+            }
+    
             return this;
         }
-
+    
         this.children.push(child);
-
+    
         child.layoutParent = this;
-
+    
         super.add(child);
-
+    
         this.layout();
-
+    
         return this;
     }
 
     insertBefore(child, beforeChild) {
     
+        if (!child) {
+            return this;
+        }
+    
+        if (this.children.includes(child)) {
+    
+            if (Debug.enabled) {
+                console.warn(
+                    'Cannot insert child: component is already in this layout.'
+                );
+            }
+    
+            return this;
+        }
+    
         if (
             child.layoutParent &&
             child.layoutParent !== this
         ) {
+    
+            if (Debug.enabled) {
+                console.warn(
+                    'Cannot insert child: component already belongs to another layout.'
+                );
+            }
+    
+            return this;
+        }
+    
+        const reference =
+            this.getChild(beforeChild);
+    
+        if (!reference) {
+    
+            if (Debug.enabled) {
+                console.warn(
+                    'Cannot insert child: reference component was not found.'
+                );
+            }
+    
             return this;
         }
     
         const index =
-            this.children.indexOf(beforeChild);
-    
-        if (index === -1) {
-            return this;
-        }
+            this.children.indexOf(reference);
     
         this.children.splice(
             index,
@@ -145,29 +235,67 @@ export default class Column extends Component {
     
         super.add(child);
     
+        // Keep Phaser's display order synchronized.
+        this.container.moveTo(
+            child.container,
+            index
+        );
+    
         this.layout();
     
         return this;
     }
-
+    
     insertAfter(child, afterChild) {
-
+    
+        if (!child) {
+            return this;
+        }
+    
+        if (this.children.includes(child)) {
+    
+            if (Debug.enabled) {
+                console.warn(
+                    'Cannot insert child: component is already in this layout.'
+                );
+            }
+    
+            return this;
+        }
+    
         if (
             child.layoutParent &&
             child.layoutParent !== this
         ) {
+    
+            if (Debug.enabled) {
+                console.warn(
+                    'Cannot insert child: component already belongs to another layout.'
+                );
+            }
+    
+            return this;
+        }
+    
+        const reference =
+            this.getChild(afterChild);
+    
+        if (!reference) {
+    
+            if (Debug.enabled) {
+                console.warn(
+                    'Cannot insert child: reference component was not found.'
+                );
+            }
+    
             return this;
         }
     
         const index =
-            this.children.indexOf(afterChild);
-    
-        if (index === -1) {
-            return this;
-        }
+            this.children.indexOf(reference) + 1;
     
         this.children.splice(
-            index + 1,
+            index,
             0,
             child
         );
@@ -176,13 +304,19 @@ export default class Column extends Component {
     
         super.add(child);
     
+        // Keep Phaser's display order synchronized.
+        this.container.moveTo(
+            child.container,
+            index
+        );
+    
         this.layout();
     
         return this;
     }
-
-    // WIP
+    
     move(childOrId, index) {
+    
         const child =
             this.getChild(childOrId);
     
@@ -197,11 +331,13 @@ export default class Column extends Component {
             return this;
         }
     
+        // Remove from our layout order.
         this.children.splice(
             currentIndex,
             1
         );
     
+        // Clamp destination.
         index =
             Math.max(
                 0,
@@ -211,10 +347,17 @@ export default class Column extends Component {
                 )
             );
     
+        // Insert into our layout order.
         this.children.splice(
             index,
             0,
             child
+        );
+    
+        // Keep Phaser's display order synchronized.
+        this.container.moveTo(
+            child.container,
+            index
         );
     
         this.layout();
@@ -223,38 +366,82 @@ export default class Column extends Component {
     }
 
     remove(child) {
-
-        this.children =
-            this.children.filter(
-                item => item !== child
-            );
-
-        if (child.layoutParent === this) {
-            child.layoutParent = null;
+        // Multiple children
+        if (Array.isArray(child)) {
+    
+            for (const item of child) {
+    
+                const target =
+                    this.getChild(item);
+    
+                if (!target) {
+                    continue;
+                }
+    
+                const index =
+                    this.children.indexOf(target);
+    
+                if (index === -1) {
+                    continue;
+                }
+    
+                this.children.splice(
+                    index,
+                    1
+                );
+    
+                if (
+                    target.layoutParent === this
+                ) {
+                    target.layoutParent = null;
+                }
+    
+                super.remove(target);
+            }
+    
+            this.layout();
+    
+            return this;
         }
-
-        super.remove(child);
-
+    
+        // Single child or ID
+        const target =
+            this.getChild(child);
+    
+        if (!target) {
+            return this;
+        }
+    
+        const index =
+            this.children.indexOf(target);
+    
+        if (index === -1) {
+            return this;
+        }
+    
+        this.children.splice(
+            index,
+            1
+        );
+    
+        if (
+            target.layoutParent === this
+        ) {
+            target.layoutParent = null;
+        }
+    
+        super.remove(target);
+    
         this.layout();
-
+    
         return this;
     }
 
     clear() {
-    
-        for (const child of this.children) {
-    
-            if (child.layoutParent === this) {
-                child.layoutParent = null;
-            }
-    
-            super.remove(child);
-        }
-    
-        this.children = [];
-    
-        this.layout();
-    
+        this.remove(
+            this.getChildren()
+        );
+
         return this;
     }
 

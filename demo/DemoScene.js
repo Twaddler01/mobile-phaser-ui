@@ -92,11 +92,11 @@ this.addButton('ADD (mixed)', () => {
                 x: 10,
                 y: 100,
             
-                width: 600,
-                //height: 1200,
+                //width: 600,
+                height: 1200,
             
                 padding: 10,
-                gap: 20,
+                gap: 10,
             
                 align: 'start',
                 //justify: 'space-evenly',
@@ -110,15 +110,45 @@ this.addButton('ADD (mixed)', () => {
 
         this.debugRow1 = new  Row(this, {
             padding: 10,
-            gap: 20,
-            align: 'start',
-            //justify: 'space-evenly',
+            gap: 10,
+            align: 'start'
+        });
+
+        this.debugRow2 = new  Row(this, {
+            padding: 10,
+            gap: 10,
+            align: 'start'
         });
 
 
+const basicCard1 = new Card(this, {
+    width: 500,
+    height: 100
+});
+const basicCard2 = new Card(this, {
+    width: 500,
+    height: 100
+});
+const basicCard3 = new Card(this, {
+    width: 500,
+    height: 100
+});
+const basicCard4 = new Card(this, {
+    width: 500,
+    height: 100
+});
 
-const basicCard = new Card(this);
-this.parentColumn.add(basicCard);
+this.debugRow1 = new  Row(this, {
+    //padding: 10,
+    gap: 10,
+    align: 'start'
+});
+this.debugRow1.add([basicCard2, basicCard3]);
+
+
+this.parentColumn.add(basicCard1);
+this.parentColumn.add(this.debugRow1);
+this.parentColumn.add(basicCard4);
 
 /*const scrollView = new ScrollView(this, {
     x: 50,

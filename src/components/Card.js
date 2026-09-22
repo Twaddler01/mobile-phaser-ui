@@ -14,12 +14,6 @@ export default class Card extends Component {
             radius:
                 config.style?.radius ?? 12,
 
-            originX:
-                config.style?.originX ?? 0,
-
-            originY:
-                config.style?.originY ?? 0,
-
             stroke:
                 config.style?.stroke,
 
@@ -53,8 +47,8 @@ export default class Card extends Component {
                 );
 
                 this.background.fillRoundedRect(
-                    -this.width * this.style.originX,
-                    -this.height * this.style.originY,
+                    0,
+                    0,
                     this.width,
                     this.height,
                     this.style.radius
@@ -73,8 +67,8 @@ export default class Card extends Component {
                     );
 
                     this.background.strokeRoundedRect(
-                        -this.width * this.style.originX,
-                        -this.height * this.style.originY,
+                        0,
+                        0,
                         this.width,
                         this.height,
                         this.style.radius
