@@ -7,14 +7,8 @@ export default class Card extends Component {
 
         super(scene, config);
 
-        this.width =
-            this.widthAuto ? 500 : this.width;
-
-        this.height =
-            this.heightAuto ? 100 : this.height;
-
         this.padding =
-            config.padding ?? 0;
+            this.getPadding(config.padding);
         
         this.childLayoutOptions =
             new Map();
@@ -35,6 +29,7 @@ export default class Card extends Component {
         };
 
         this.build();
+        this.updateBackground();
     }
 
     build() {
@@ -91,6 +86,45 @@ export default class Card extends Component {
         };
 
         this.create.all();
+    }
+
+    updateBackground() {
+        this.background.clear();
+    
+        this.background.fillStyle(
+            this.style.backgroundColor,
+            1
+        );
+    
+        this.background.fillRoundedRect(
+            0,
+            0,
+            this.width,
+            this.height,
+            this.style.radius
+        );
+    
+        if (
+            this.style.stroke !== undefined &&
+            this.style.strokeColor !== undefined
+        ) {
+    
+            this.background.lineStyle(
+                this.style.stroke,
+                this.style.strokeColor,
+                1
+            );
+    
+            this.background.strokeRoundedRect(
+                0,
+                0,
+                this.width,
+                this.height,
+                this.style.radius
+            );
+        }
+    
+        return this;
     }
 
     add(child, options = {}) {
@@ -153,10 +187,100 @@ export default class Card extends Component {
         return this;
     }
 
-    layout() {
+    updateSize() {
+        // AUTO WIDTH
+        if (this.widthAuto) {
     
+            let contentWidth = 0;
+    
+            for (const child of this.children) {
+    
+                const options =
+                    this.childLayoutOptions.get(child);
+    
+                if (!options) {
+                    continue;
+                }
+    
+                const { margin } = options;
+    
+                contentWidth =
+                    Math.max(
+                        contentWidth,
+                        margin.left +
+                        child.width +
+                        margin.right
+                    );
+            }
+    
+            this.width =
+                this.padding.left +
+                contentWidth +
+                this.padding.right;
+        }
+    
+        // AUTO HEIGHT
+        if (this.heightAuto) {
+    
+            let contentHeight = 0;
+    
+            for (const child of this.children) {
+    
+                const options =
+                    this.childLayoutOptions.get(child);
+    
+                if (!options) {
+                    continue;
+                }
+    
+                const { margin } = options;
+    
+                contentHeight =
+                    Math.max(
+                        contentHeight,
+                        margin.top +
+                        child.height +
+                        margin.bottom
+                    );
+            }
+    
+            this.height =
+                this.padding.top +
+                contentHeight +
+                this.padding.bottom;
+        }
+    
+        return this;
+    }
+
+    layout() {
+        // Resolve layouts
         for (const child of this.children) {
     
+            if (
+                child.layoutDirty &&
+                typeof child.layout === 'function'
+            ) {
+                child.layout();
+            }
+        }
+    
+        // Resolve Card dimensions.
+        this.updateSize();
+        this.updateBackground();
+        
+        for (const child of this.children) {
+        
+            if (
+                child.layoutDirty &&
+                typeof child.layout === 'function'
+            ) {
+                child.layout();
+            }
+        }
+
+        for (const child of this.children) {
+
             const options =
                 this.childLayoutOptions.get(child);
     
@@ -270,7 +394,7 @@ export default class Card extends Component {
     
             child.setPosition(x, y);
         }
-    
+
         this.updateDebugBounds();
     
         this.layoutDirty = false;
@@ -278,8 +402,25 @@ export default class Card extends Component {
         return this;
     }
 
-    getMargin(margin = 0) {
+    getPadding(padding = 0) {
+        if (typeof padding === 'number') {
+            return {
+                top: padding,
+                right: padding,
+                bottom: padding,
+                left: padding
+            };
+        }
     
+        return {
+            top: padding.top ?? 0,
+            right: padding.right ?? 0,
+            bottom: padding.bottom ?? 0,
+            left: padding.left ?? 0
+        };
+    }
+
+    getMargin(margin = 0) {
         if (typeof margin === 'number') {
     
             return {

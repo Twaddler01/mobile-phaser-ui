@@ -34,19 +34,22 @@ export default class DemoScene extends Phaser.Scene {
 
 
 
-
 this.items = 
     this.createDebugItems();
 
 // DEBUG
-const column =
+this.column =
     new Column(this, {
+        y: 200,
         id: 'parentColumn'
     });
+////
 
-const card =
+this.card =
     new Card(this, {
-        id: 'card'
+        id: 'card',
+        //width: 500,
+        //height: 150
     });
 
 const text =
@@ -54,31 +57,18 @@ const text =
         id: 'text',
         text: 'Hello'
     });
-
-card.add(text, {
-    margin: 10,
-    horizontalAlign: 'center',
-    verticalAlign: 'center'
-});
-
-column.add(card);
-
-
-const card3 =
-    new Card(this, {
-        id: 'card3',
-        width: 500,
-        height: 150
+this.anotherText = 
+    new Text(this, {
+        id: 'anotherText',
+        text: 'anotherText here'
     });
 
-const text4 =
-    this.items.texts[3];
 
-card3.add(text4);
+this.card.add(text);
 
-column.add(card3);
+this.column.add(this.card);
 
-column.requestLayout();
+this.column.requestLayout();
 
 
 

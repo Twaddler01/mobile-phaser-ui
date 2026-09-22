@@ -25,6 +25,16 @@ export default class DebugButtons {
 
         this.addCycle =
             this.createClickCycle([
+                () => {
+
+// later...
+this.scene.card.add(this.scene.anotherText);
+// later...
+this.scene.column.requestLayout();
+console.log('executed ()');
+
+                },
+                () => 
                 () => this.scene.parentColumn.add(this.scene.items.buttons[0]),
                 () => this.scene.parentColumn.add(this.scene.items.texts[0]),
                 () => this.scene.parentColumn.add(this.scene.items.texts[1]),

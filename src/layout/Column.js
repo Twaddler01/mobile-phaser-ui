@@ -443,15 +443,12 @@ export default class Column extends Component {
     }
 
     layout() {
-
-
-console.log(
-    'COLUMN LAYOUT',
-    this.id,
-    'dirty:',
-    this.layoutDirty
-);
-
+        // Resolve child layouts first.
+        for (const child of this.children) {
+            if (child.layoutDirty && typeof child.layout === 'function') {
+                child.layout();
+            }
+        }
 
         this.updateSize();
 
