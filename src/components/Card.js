@@ -15,6 +15,9 @@ export default class Card extends Component {
 
         this.padding =
             config.padding ?? 0;
+        
+        this.childLayoutOptions =
+            new Map();
 
         // STYLE
         this.style = {
@@ -132,111 +135,145 @@ export default class Card extends Component {
     
         this.children.push(child);
     
+        this.childLayoutOptions.set(
+            child,
+            {
+                margin,
+                horizontalAlign,
+                verticalAlign
+            }
+        );
+    
         child.layoutParent = this;
     
         super.add(child);
     
-        ////////////////////////////////////////
-        // AVAILABLE AREA
-        ////////////////////////////////////////
+        this.markLayoutDirty();
     
-        const availableWidth =
-            this.width -
-            this.padding.left -
-            this.padding.right -
-            margin.left -
-            margin.right;
+        return this;
+    }
+
+    layout() {
     
-        const availableHeight =
-            this.height -
-            this.padding.top -
-            this.padding.bottom -
-            margin.top -
-            margin.bottom;
+        for (const child of this.children) {
     
-        ////////////////////////////////////////
-        // HORIZONTAL POSITION
-        ////////////////////////////////////////
+            const options =
+                this.childLayoutOptions.get(child);
     
-        let x;
+            if (!options) {
+                continue;
+            }
     
-        switch (horizontalAlign) {
+            const {
+                margin,
+                horizontalAlign,
+                verticalAlign
+            } = options;
     
-            case 'center':
+            ////////////////////////////////////////
+            // AVAILABLE AREA
+            ////////////////////////////////////////
     
-                x =
-                    this.padding.left +
-                    margin.left +
-                    (
-                        availableWidth -
-                        child.width
-                    ) / 2;
+            const availableWidth =
+                this.width -
+                this.padding.left -
+                this.padding.right -
+                margin.left -
+                margin.right;
     
-                break;
+            const availableHeight =
+                this.height -
+                this.padding.top -
+                this.padding.bottom -
+                margin.top -
+                margin.bottom;
     
-            case 'end':
+            ////////////////////////////////////////
+            // HORIZONTAL POSITION
+            ////////////////////////////////////////
     
-                x =
-                    this.width -
-                    this.padding.right -
-                    margin.right -
-                    child.width;
+            let x;
     
-                break;
+            switch (horizontalAlign) {
     
-            case 'start':
-            default:
+                case 'center':
     
-                x =
-                    this.padding.left +
-                    margin.left;
+                    x =
+                        this.padding.left +
+                        margin.left +
+                        (
+                            availableWidth -
+                            child.width
+                        ) / 2;
     
-                break;
+                    break;
+    
+                case 'end':
+    
+                    x =
+                        this.width -
+                        this.padding.right -
+                        margin.right -
+                        child.width;
+    
+                    break;
+    
+                case 'start':
+                default:
+    
+                    x =
+                        this.padding.left +
+                        margin.left;
+    
+                    break;
+            }
+    
+            ////////////////////////////////////////
+            // VERTICAL POSITION
+            ////////////////////////////////////////
+    
+            let y;
+    
+            switch (verticalAlign) {
+    
+                case 'center':
+    
+                    y =
+                        this.padding.top +
+                        margin.top +
+                        (
+                            availableHeight -
+                            child.height
+                        ) / 2;
+    
+                    break;
+    
+                case 'end':
+    
+                    y =
+                        this.height -
+                        this.padding.bottom -
+                        margin.bottom -
+                        child.height;
+    
+                    break;
+    
+                case 'start':
+                default:
+    
+                    y =
+                        this.padding.top +
+                        margin.top;
+    
+                    break;
+            }
+    
+            child.setPosition(x, y);
         }
-    
-        ////////////////////////////////////////
-        // VERTICAL POSITION
-        ////////////////////////////////////////
-    
-        let y;
-    
-        switch (verticalAlign) {
-    
-            case 'center':
-    
-                y =
-                    this.padding.top +
-                    margin.top +
-                    (
-                        availableHeight -
-                        child.height
-                    ) / 2;
-    
-                break;
-    
-            case 'end':
-    
-                y =
-                    this.height -
-                    this.padding.bottom -
-                    margin.bottom -
-                    child.height;
-    
-                break;
-    
-            case 'start':
-            default:
-    
-                y =
-                    this.padding.top +
-                    margin.top;
-    
-                break;
-        }
-    
-        child.setPosition(x, y);
     
         this.updateDebugBounds();
+    
+        this.layoutDirty = false;
     
         return this;
     }

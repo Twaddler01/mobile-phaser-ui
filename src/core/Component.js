@@ -91,10 +91,22 @@ export default class Component {
         return this;
     }
 
-    requestLayout() {
+    /*requestLayout() {
         if (this.layoutParent) {
             this.layoutParent.layout();
         }
+    
+        return this;
+    }*/
+    requestLayout() {
+    
+        let root = this;
+    
+        while (root.layoutParent) {
+            root = root.layoutParent;
+        }
+    
+        root.layout();
     
         return this;
     }

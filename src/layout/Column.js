@@ -128,7 +128,7 @@ export default class Column extends Component {
                 super.add(item);
             }
     
-            this.layout();
+            this.markLayoutDirty();
     
             return this;
         }
@@ -169,7 +169,7 @@ export default class Column extends Component {
     
         super.add(child);
     
-        this.layout();
+        this.markLayoutDirty();
     
         return this;
     }
@@ -238,7 +238,7 @@ export default class Column extends Component {
             index
         );
     
-        this.layout();
+        this.markLayoutDirty();
     
         return this;
     }
@@ -307,7 +307,7 @@ export default class Column extends Component {
             index
         );
     
-        this.layout();
+        this.markLayoutDirty();
     
         return this;
     }
@@ -357,7 +357,7 @@ export default class Column extends Component {
             index
         );
     
-        this.layout();
+        this.markLayoutDirty();
     
         return this;
     }
@@ -396,7 +396,7 @@ export default class Column extends Component {
                 super.remove(target);
             }
     
-            this.layout();
+            this.markLayoutDirty();
     
             return this;
         }
@@ -429,7 +429,7 @@ export default class Column extends Component {
     
         super.remove(target);
     
-        this.layout();
+        this.markLayoutDirty();
     
         return this;
     }
@@ -443,6 +443,15 @@ export default class Column extends Component {
     }
 
     layout() {
+
+
+console.log(
+    'COLUMN LAYOUT',
+    this.id,
+    'dirty:',
+    this.layoutDirty
+);
+
 
         this.updateSize();
 
@@ -645,9 +654,8 @@ export default class Column extends Component {
                 );
         }
 
-        if (this.layoutParent) {
-            this.layoutParent.layout();
-        }
+// No parent.layout() here.
+this.layoutDirty = false;
 
         return this;
     }

@@ -32,9 +32,57 @@ export default class DemoScene extends Phaser.Scene {
 
 
 
-// DEBUG
+
+
+
 this.items = 
     this.createDebugItems();
+
+// DEBUG
+const column =
+    new Column(this, {
+        id: 'parentColumn'
+    });
+
+const card =
+    new Card(this, {
+        id: 'card'
+    });
+
+const text =
+    new Text(this, {
+        id: 'text',
+        text: 'Hello'
+    });
+
+card.add(text, {
+    margin: 10,
+    horizontalAlign: 'center',
+    verticalAlign: 'center'
+});
+
+column.add(card);
+
+
+const card3 =
+    new Card(this, {
+        id: 'card3',
+        width: 500,
+        height: 150
+    });
+
+const text4 =
+    this.items.texts[3];
+
+card3.add(text4);
+
+column.add(card3);
+
+column.requestLayout();
+
+
+
+/*
 
 this.parentColumn =
     new Column(this, {
@@ -83,7 +131,7 @@ scrollView.add(this.parentColumn);
 this.parentColumn.createDebugBounds();
 this.debugRow1.createDebugBounds();
 this.debugRow2.createDebugBounds();
-
+*/
 if (DEBUG) {
     this.debug = new DebugButtons(this, { x: 20, y: 500 });
 }
