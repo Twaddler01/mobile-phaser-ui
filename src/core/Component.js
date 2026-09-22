@@ -9,6 +9,8 @@ export default class Component {
         this.width = config.width ?? 0;
         this.height = config.height ?? 0;
 
+        this.id = config.id ?? null;
+
         this.widthAuto =
             config.width === undefined;
         
@@ -24,6 +26,9 @@ export default class Component {
                 config.y ?? 0
             );
 
+        // For eventual dirty updates
+        this.layoutDirty = true;
+
         // DEBUG ONLY
         if (Debug.enabled) {
             this.createDebugBounds();
@@ -37,6 +42,29 @@ export default class Component {
     get y() {
         return this.container.y;
     }
+
+    // Ref name or id
+    getChild(childOrId) {
+        if (typeof childOrId !== 'string') {
+            return childOrId;
+        }
+    
+        return this.children?.find(
+            child => child.id === childOrId
+        ) ?? null;
+    }
+
+    // Copy only
+    getChildren() {
+        return [
+            ...(this.children ?? [])
+        ];
+    }
+    /*
+    for (const child of row.getChildren()) {
+        console.log(child.id);
+    }
+    */
 
     setPosition(x, y) {
         this.container.setPosition(x, y);
@@ -252,6 +280,15 @@ export default class Component {
         return this;
     }
 
+    markLayoutDirty() {
+        this.layoutDirty = true;
+    
+        if (this.layoutParent) {
+            this.layoutParent.markLayoutDirty();
+        }
+    
+        return this;
+    }
 }
 
 /*

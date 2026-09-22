@@ -1,7 +1,10 @@
 export default class DebugButtons {
 
     constructor(scene, options = {}) {
+
         this.scene = scene;
+        this.debugRow1 = this.scene.debugRow1;
+        this.debugCol1 = this.scene.debugCol1;
 
         this.container = this.scene.add.container();
         // Place on top of everything
@@ -42,14 +45,20 @@ console.log(
     'COLUMN BOUNDS',
     this.scene.debugObject.getContentBounds()
 );
-
 console.log(
     'ROW BOUNDS',
     this.scene.debugObject2.getContentBounds()
 );
 });
 
+this.addButton('ADD (text)', () => {
+    this.scene.parentColumn.add(this.scene.items.texts[0].id);
+    // next (each click until no more)
+});
 
+this.addButton('insertBefore (after item2)', () => {
+    this.scene.debugObject.insertBefore(this.scene.createTestText(), this.scene.item);
+});
 this.addButton('LOG Row height', () => {
     console.log('Row HEIGHT: ', this.scene.debugObject.height);
 });
@@ -297,5 +306,4 @@ this.addButton('ENABLE BUTTON', () => {
         this.activeSelect?.destroy();
         this.activeSelect = null;
     }
-
 }

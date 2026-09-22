@@ -20,13 +20,12 @@ export default class Column extends Component {
         this.justify =
             config.justify ?? 'start';
 
-// DEBUG
-this.debugChildrenBounds =
-    this.scene.add.graphics();
-
-this.container.add(
-    this.debugChildrenBounds
-);
+        // DEBUG
+        this.debugChildrenBounds =
+            this.scene.add.graphics();
+        this.container.add(
+            this.debugChildrenBounds
+        );
 
         this.children = [];
     }
@@ -67,15 +66,7 @@ this.container.add(
         }
     
         this.updateDebugBounds();
-    
-        // Notify parent if our size changed.
-        /*if (
-            this.width !== previousWidth ||
-            this.height !== previousHeight
-        ) {
-            this.requestLayout();
-        }*/
-    
+
         return this;
     }
 
@@ -100,6 +91,16 @@ this.container.add(
 
     add(child) {
 
+        if (this.children.includes(child)) {
+            if (Debug.enabled) {
+                console.warn(
+                    'Cannot add child: component is already in this layout.'
+                );
+            }
+        
+            return this;
+        }
+
         if (
             child.layoutParent &&
             child.layoutParent !== this
@@ -115,6 +116,109 @@ this.container.add(
 
         this.layout();
 
+        return this;
+    }
+
+    insertBefore(child, beforeChild) {
+    
+        if (
+            child.layoutParent &&
+            child.layoutParent !== this
+        ) {
+            return this;
+        }
+    
+        const index =
+            this.children.indexOf(beforeChild);
+    
+        if (index === -1) {
+            return this;
+        }
+    
+        this.children.splice(
+            index,
+            0,
+            child
+        );
+    
+        child.layoutParent = this;
+    
+        super.add(child);
+    
+        this.layout();
+    
+        return this;
+    }
+
+    insertAfter(child, afterChild) {
+
+        if (
+            child.layoutParent &&
+            child.layoutParent !== this
+        ) {
+            return this;
+        }
+    
+        const index =
+            this.children.indexOf(afterChild);
+    
+        if (index === -1) {
+            return this;
+        }
+    
+        this.children.splice(
+            index + 1,
+            0,
+            child
+        );
+    
+        child.layoutParent = this;
+    
+        super.add(child);
+    
+        this.layout();
+    
+        return this;
+    }
+
+    // WIP
+    move(childOrId, index) {
+        const child =
+            this.getChild(childOrId);
+    
+        if (!child) {
+            return this;
+        }
+    
+        const currentIndex =
+            this.children.indexOf(child);
+    
+        if (currentIndex === -1) {
+            return this;
+        }
+    
+        this.children.splice(
+            currentIndex,
+            1
+        );
+    
+        index =
+            Math.max(
+                0,
+                Math.min(
+                    index,
+                    this.children.length
+                )
+            );
+    
+        this.children.splice(
+            index,
+            0,
+            child
+        );
+    
+        this.layout();
+    
         return this;
     }
 
@@ -136,26 +240,45 @@ this.container.add(
         return this;
     }
 
+    clear() {
+    
+        for (const child of this.children) {
+    
+            if (child.layoutParent === this) {
+                child.layoutParent = null;
+            }
+    
+            super.remove(child);
+        }
+    
+        this.children = [];
+    
+        this.layout();
+    
+        return this;
+    }
+
     layout() {
 
         this.updateSize();
 
-// DEBUG
-if (Debug.layout.enabled) {
-
-    this.debugChildrenBounds.clear();
-
-    this.debugChildrenBounds.fillStyle(
-        Debug.layout.fillColor,
-        Debug.layout.fillAlpha
-    );
-
-    this.debugChildrenBounds.lineStyle(
-        Debug.layout.borderWidth,
-        Debug.layout.borderColor,
-        Debug.layout.borderAlpha
-    );
-}
+        // DEBUG
+        if (Debug.layout.enabled) {
+        
+            this.debugChildrenBounds.clear();
+        
+            this.debugChildrenBounds.fillStyle(
+                Debug.layout.fillColor,
+                Debug.layout.fillAlpha
+            );
+        
+            this.debugChildrenBounds.lineStyle(
+                Debug.layout.borderWidth,
+                Debug.layout.borderColor,
+                Debug.layout.borderAlpha
+            );
+        }
+        //// DEBUG
 
         const availableWidth =
             this.width -
@@ -303,22 +426,27 @@ if (Debug.layout.enabled) {
                     break;
             }
 
-if (Debug.layout.enabled) {
-
-    this.debugChildrenBounds.fillRect(
-        this.padding.left,
-        y,
-        availableWidth,
-        child.height
-    );
-
-    this.debugChildrenBounds.strokeRect(
-        this.padding.left,
-        y,
-        availableWidth,
-        child.height
-    );
-}
+            // DEBUG
+            if (Debug.layout.enabled) {
+            
+                const width = availableWidth;
+                const height = child.height;
+            
+                this.debugChildrenBounds.fillRect(
+                    this.padding.left,
+                    y,
+                    width,
+                    height
+                );
+            
+                this.debugChildrenBounds.strokeRect(
+                    this.padding.left,
+                    y,
+                    width,
+                    height
+                );
+            }
+            //// DEBUG
 
             child.setPosition(x, y);
 

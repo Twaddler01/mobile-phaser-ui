@@ -33,71 +33,50 @@ this.shape = this.add.rectangle(
 */
 ////////
 
-this.createTestText = () => new Text(this, {
-    text: 'TEST 123',
-    fontSize: '36px'
-});
+this.items = 
+    this.createDebugItems();
 
-const item1 =
-    new Button(this, {
-        width: 200,
-        height: 60,
-        style: {
-            backgroundColor: 0x222222,
-            radius: 12,
-            stroke: 2,
-            strokeColor: 0xffffff
-        },
-        text: {
-            value: 'START item1',
-            fontSize: '24px',
-            color: '#ffffff'
-        },
-        onPress: () => {
-            console.log('Pressed!');
-        }
-    });
+/*
 
-const item2 = new Spacer(this, {
-    width: 20,
-    height: 20
-});
+this.textCycle =
+    this.createRandomCycle(
+        this.items.texts
+    );
 
-const item3 = new Text(this, {
-    text: 'HELLO item3',
-    fontSize: '36px',
-});
+this.buttonCycle =
+    this.createRandomCycle(
+        this.items.buttons
+    );
 
-const item4 = new Spacer(this, {
-    width: 20,
-    height: 20
-});
+this.cardCycle =
+    this.createRandomCycle(
+        this.items.cards
+    );
 
-const item5 = new Button(this, {
-    width: 300,
-    height: 60,
-    text: {
-        value: 'START plain item5'
+
+
+this.mixedCycle =
+    this.createRandomCycle([
+        ...this.items.texts,
+        ...this.items.buttons,
+        ...this.items.cards
+    ]);
+
+this.addButton('ADD (mixed)', () => {
+    const item =
+        this.scene.mixedCycle();
+
+    if (!item) {
+        return;
     }
+
+    this.scene.mainColumn.add(item);
 });
 
-const item6 = new Text(this, {
-    text: 'ITEM6 wrap this text up Hello there wrap this text up Hello there wrap this text up Hello there wrap',
-    fontSize: '28px',
-    wordWrapWidth: 150
-});
 
-const item7 = new Text(this, {
-    text: 'ITEM7 there wrap this text  up Hello there wrap this this text up Hello there wrap this text up Hello there wrap this text up ',
-    fontSize: '28px',
-    wordWrapWidth: 150
-});
 
-const item8 = new Text(this, {
-    text: 'ITEM8 there wrap this text up Hello there wrap this text up Hello there wrap this text up Hello there wrap this text up Hello there wrap this text up Hello there wrap this text up ',
-    fontSize: '28px',
-    wordWrapWidth: 150
-});
+*/
+
 
 ////////
 // Column
@@ -108,7 +87,7 @@ const item8 = new Text(this, {
 // Row
 
 
-        this.debugObject =
+        this.parentColumn =
             new Column(this, {
                 x: 10,
                 y: 100,
@@ -129,39 +108,31 @@ const item8 = new Text(this, {
                 }
             });
 
-        this.debugObject.add(item1);
-        this.debugObject.add(item2);
-        this.debugObject.add(item3);
-        this.debugObject.add(item4);
-
-        this.debugObject2 = new  Row(this, {
-            //padding: 10
-            gap: 20
+        this.debugRow1 = new  Row(this, {
+            padding: 10,
+            gap: 20,
+            align: 'start',
+            //justify: 'space-evenly',
         });
 
-        this.debugObject2.add(item5);
-        this.debugObject2.add(item6);
-        this.debugObject2.add(item7)
 
-        this.debugObject.add(this.debugObject2);
-        this.debugObject.add(item8)
 
-// column = this.debugObject;
-// row = this.debugObject2;
+const basicCard = new Card(this);
+this.parentColumn.add(basicCard);
 
-const scrollView = new ScrollView(this, {
+/*const scrollView = new ScrollView(this, {
     x: 50,
     y: 100,
     width: 600,
     height: 800,
     direction: 'both'
 });
-scrollView.add(this.debugObject);
-
+scrollView.add(this.parentColumn);
+*/
 
 // DEBUG
-this.debugObject.createDebugBounds();
-this.debugObject2.createDebugBounds();
+this.parentColumn.createDebugBounds();
+this.debugRow1.createDebugBounds();
 
 
 ////////
@@ -187,6 +158,67 @@ this.debugObject2.createDebugBounds();
         if (DEBUG) {
             this.debug = new DebugButtons(this, { x: 20, y: 500 });
         }
+    }
+
+    createDebugItems() {
+        this.debugItems = {
+            texts: [],
+            buttons: [],
+            cards: []
+        };
+    
+        for (let i = 1; i <= 5; i++) {
+    
+            this.debugItems.texts.push(
+                new Text(this, {
+                    id: `testText${i}`,
+                    text: `Text ${i}`
+                })
+            );
+    
+            this.debugItems.buttons.push(
+                new Button(this, {
+                    id: `testButton${i}`,
+                    text: `Button ${i}`
+                })
+            );
+    
+            this.debugItems.cards.push(
+                new Card(this, {
+                    id: `testCard${i}`
+                })
+            );
+        }
+    
+        return this.debugItems;
+    }
+
+    createRandomCycle(items) {
+        const remaining =
+            items.map(
+                (_, index) => index
+            );
+    
+        return () => {
+    
+            if (!remaining.length) {
+                return null;
+            }
+    
+            const position =
+                Math.floor(
+                    Math.random() *
+                    remaining.length
+                );
+    
+            const index =
+                remaining.splice(
+                    position,
+                    1
+                )[0];
+    
+            return items[index];
+        };
     }
 
 }
