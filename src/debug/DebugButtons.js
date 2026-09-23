@@ -26,10 +26,16 @@ export default class DebugButtons {
                 // Clicks hwre...
                 
                 // Row
-                () => this.scene.parentRow.add(this.scene.items.cards[0]),
-                () => this.scene.items.cards[0].add(this.scene.items.texts[0], { horizontalAlign: 'center' }),
+                () => this.scene.parentRow.add(this.scene.items.cards[0], { margin: 10 } ),
+                () => {
+                    this.scene.items.cards[0].add(this.scene.items.texts[0], { width: 200, height: 120 });
+                    console.log(this.scene.parentRow.getChildOptions(this.scene.items.cards[0]));
+                },
                 () => this.scene.parentRow.add(this.scene.items.buttons[0]),
-                () => this.scene.parentRow.remove(this.scene.items.cards[0]),
+                () => { 
+                    this.scene.parentRow.remove(this.scene.items.cards[0])
+                    console.log(this.scene.parentRow.getChildOptions(this.scene.items.cards[0]));
+                },
                 () => this.scene.parentRow.add(this.scene.items.texts[1]),
                 () => this.scene.parentRow.add(this.scene.items.texts[2]),
                 () => this.scene.parentRow.add(this.scene.items.texts[4]),
@@ -87,6 +93,7 @@ this.addSelectButton(
 */
 
 ////
+/*
 this.addButton('BOUNDS', () => {
 console.log(
     'COLUMN BOUNDS',
@@ -97,7 +104,7 @@ console.log(
     this.scene.debugObject2.getContentBounds()
 );
 });
-
+*/
 this.addButton('ADD (cycle)', () => {
     this.addCycle();
 });

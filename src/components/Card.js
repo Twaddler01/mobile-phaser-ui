@@ -121,6 +121,20 @@ export default class Card extends Component {
             return this;
         }
     
+        /*** OPTIONS
+        width: Override the child's allocated width inside this parent
+        height: Override the child's allocated height inside this parent
+        margin: Space around the child
+        horizontalAlign: Position child horizontally within available space
+        verticalAlign: Position child vertically within available space
+        ***/
+
+        const height =
+            options.height ?? null;
+        
+        const width =
+            options.width ?? null;
+    
         const margin =
             this.getMargin(options.margin);
     
@@ -131,10 +145,12 @@ export default class Card extends Component {
             options.verticalAlign ?? 'start';
     
         this.children.push(child);
-    
+
         this.childLayoutOptions.set(
             child,
             {
+                width,
+                height,
                 margin,
                 horizontalAlign,
                 verticalAlign
@@ -144,6 +160,94 @@ export default class Card extends Component {
         child.layoutParent = this;
     
         super.add(child);
+    
+        this.markLayoutDirty();
+    
+        return this;
+    }
+
+    clear() {
+        this.remove(
+            this.getChildren()
+        );
+    
+        return this;
+    }
+
+    remove(child) {
+        // Multiple children
+        if (Array.isArray(child)) {
+    
+            for (const item of child) {
+    
+                const target =
+                    this.getChild(item);
+    
+                if (!target) {
+                    continue;
+                }
+    
+                const index =
+                    this.children.indexOf(target);
+    
+                if (index === -1) {
+                    continue;
+                }
+    
+                this.children.splice(
+                    index,
+                    1
+                );
+    
+                this.childLayoutOptions.delete(
+                    target
+                );
+    
+                if (
+                    target.layoutParent === this
+                ) {
+                    target.layoutParent = null;
+                }
+    
+                super.remove(target);
+            }
+    
+            this.markLayoutDirty();
+    
+            return this;
+        }
+    
+        // Single child or ID
+        const target =
+            this.getChild(child);
+    
+        if (!target) {
+            return this;
+        }
+    
+        const index =
+            this.children.indexOf(target);
+    
+        if (index === -1) {
+            return this;
+        }
+    
+        this.children.splice(
+            index,
+            1
+        );
+    
+        this.childLayoutOptions.delete(
+            target
+        );
+    
+        if (
+            target.layoutParent === this
+        ) {
+            target.layoutParent = null;
+        }
+    
+        super.remove(target);
     
         this.markLayoutDirty();
     
@@ -164,14 +268,17 @@ export default class Card extends Component {
                 if (!options) {
                     continue;
                 }
-    
+                
+                const childWidth =
+                    options.width ?? child.width;
+
                 const { margin } = options;
     
                 contentWidth =
                     Math.max(
                         contentWidth,
                         margin.left +
-                        child.width +
+                        childWidth +
                         margin.right
                     );
             }
@@ -196,13 +303,16 @@ export default class Card extends Component {
                     continue;
                 }
     
+                const childHeight =
+                options.height ?? child.height;
+    
                 const { margin } = options;
     
                 contentHeight =
                     Math.max(
                         contentHeight,
                         margin.top +
-                        child.height +
+                        childHeight +
                         margin.bottom
                     );
             }
@@ -244,7 +354,13 @@ export default class Card extends Component {
             if (!options) {
                 continue;
             }
-    
+
+            const childWidth =
+                options.width ?? child.width;
+            
+            const childHeight =
+                options.height ?? child.height;
+
             const {
                 margin,
                 horizontalAlign,
@@ -284,7 +400,7 @@ export default class Card extends Component {
                         margin.left +
                         (
                             availableWidth -
-                            child.width
+                            childWidth
                         ) / 2;
     
                     break;
@@ -295,7 +411,7 @@ export default class Card extends Component {
                         this.width -
                         this.padding.right -
                         margin.right -
-                        child.width;
+                        childWidth;
     
                     break;
     
@@ -324,7 +440,7 @@ export default class Card extends Component {
                         margin.top +
                         (
                             availableHeight -
-                            child.height
+                            childHeight
                         ) / 2;
     
                     break;
@@ -335,7 +451,7 @@ export default class Card extends Component {
                         this.height -
                         this.padding.bottom -
                         margin.bottom -
-                        child.height;
+                        childHeight;
     
                     break;
     
@@ -413,6 +529,95 @@ export default class Card extends Component {
             right: margin.right ?? 0,
             bottom: margin.bottom ?? 0,
             left: margin.left ?? 0
+        };
+    }
+
+    setChildOptions(childOrId, options = {}) {
+    
+        const child =
+            this.getChild(childOrId);
+    
+        if (!child) {
+            if (Debug.enabled) {
+                console.warn(
+                    'Cannot update child options: component was not found.'
+                );
+            }
+    
+            return this;
+        }
+    
+        const current =
+            this.childLayoutOptions.get(child);
+    
+        if (!current) {
+            if (Debug.enabled) {
+                console.warn(
+                    'Cannot update child options: component has no layout options.'
+                );
+            }
+    
+            return this;
+        }
+
+        if (options.width !== undefined) {
+            current.width =
+                options.width;
+        }
+
+        if (options.height !== undefined) {
+            current.height =
+                options.height;
+        }
+
+        if (options.margin !== undefined) {
+            current.margin =
+                this.getMargin(options.margin);
+        }
+    
+        if (options.horizontalAlign !== undefined) {
+            current.horizontalAlign =
+                options.horizontalAlign;
+        }
+    
+        if (options.verticalAlign !== undefined) {
+            current.verticalAlign =
+                options.verticalAlign;
+        }
+    
+        this.markLayoutDirty();
+    
+        return this;
+    }
+
+    getChildOptions(childOrId) {
+        const child =
+            this.getChild(childOrId);
+    
+        if (!child) {
+            return null;
+        }
+    
+        const options =
+            this.childLayoutOptions.get(child);
+    
+        if (!options) {
+            return null;
+        }
+    
+        return {
+            width: options.width,
+
+            height: options.height,
+
+            margin: {
+                ...options.margin
+            },
+            horizontalAlign:
+                options.horizontalAlign,
+    
+            verticalAlign:
+                options.verticalAlign
         };
     }
 }

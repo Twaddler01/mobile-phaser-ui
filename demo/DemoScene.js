@@ -42,11 +42,84 @@ this.items =
     this.createDebugItems();
 
 // DEBUG
+
+
+const parentRow =
+    new Row(this, {
+        x: 10,
+        y: 200,
+        id: 'parentRow',
+        padding: 60,
+        width: 800,
+        justify: 'start'
+    });
+
+const card =
+    new Card(this, {
+        id: 'card',
+        padding: 50,
+        //width: 500,
+        //height: 150
+    });
+
+const text =
+    new Text(this, {
+        id: 'text',
+        text: 'Hello'
+    });
+
+const button  = 
+    new Button(this, {
+        id: 'button',
+        text: 'button'
+    });
+
+parentRow.add(text, {
+    width: 100,
+    margin: 20
+});
+
+parentRow.add(button, {
+    width: 250,
+    margin: {
+        left: 10,
+        right: 30
+    }
+});
+
+parentRow.add(card, {
+    width: 100,
+    margin: 5
+});
+
+const scrollView = new ScrollView(this, {
+    x: 10,
+    y: 200,
+    width: 800,
+    height: 800,
+    direction: 'both'
+});
+scrollView.add(parentRow);
+
+
+
+
+/*
+justify: 'start'
+justify: 'center'
+justify: 'end'
+justify: 'space-between'
+justify: 'space-around'
+justify: 'space-evenly'
+
+
+
 this.parentRow =
     new Row(this, {
         x: 10,
         y: 200,
-        id: 'parentRow'
+        id: 'parentRow',
+        margin: 10
     });
 ////
 
@@ -93,7 +166,9 @@ this.anotherText =
 
 this.parentRow.add(this.card);
 
-this.card.add(this.cardInside);
+this.card.add(this.cardInside, {
+    margin: 30
+});
 
 this.cardInside.add(text);
 
@@ -102,9 +177,9 @@ this.cardInside.add(this.cardInside2, {
 });
 
 this.cardInside2.add(this.anotherText, {
-    verticalAlign: 'center'
+    verticalAlign: 'center',
+    horizontalAlign: 'center'
 });
-
 
 const scrollView = new ScrollView(this, {
     x: 10,
@@ -114,6 +189,10 @@ const scrollView = new ScrollView(this, {
     direction: 'both'
 });
 scrollView.add(this.parentRow);
+*/
+
+
+
 
 
 
