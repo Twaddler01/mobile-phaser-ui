@@ -351,10 +351,30 @@ export default class Card extends Component {
     
             child.setPosition(x, y);
         }
-
-        this.updateDebugBounds();
     
         this.layoutDirty = false;
+    
+        return this;
+    }
+
+    setPadding(padding = 0) {
+    
+        this.padding =
+            this.getPadding(padding);
+    
+        this.markLayoutDirty();
+    
+        return this;
+    }
+    
+    setStyle(style = {}) {
+    
+        this.style = {
+            ...this.style,
+            ...style
+        };
+    
+        this.markLayoutDirty();
     
         return this;
     }
