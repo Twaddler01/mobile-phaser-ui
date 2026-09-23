@@ -1,7 +1,6 @@
 export default class LayoutManager {
 
     constructor(scene) {
-
         this.scene = scene;
         this.dirtyRoots = new Set();
     }

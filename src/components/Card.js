@@ -33,62 +33,25 @@ export default class Card extends Component {
     }
 
     build() {
+        this.background =
+            this.scene.add.graphics();
+    
+        this.container.add(
+            this.background
+        );
+    
+        return this;
+    }
 
-        this.create = {
-
-            all: () => {
-                this.create.background();
-
-                this.container.add(
-                    this.background
-                );
-            },
-
-            background: () => {
-
-                this.background =
-                    this.scene.add.graphics();
-
-                this.background.fillStyle(
-                    this.style.backgroundColor,
-                    1
-                );
-
-                this.background.fillRoundedRect(
-                    0,
-                    0,
-                    this.width,
-                    this.height,
-                    this.style.radius
-                );
-
-                // STROKE
-                if (
-                    this.style.stroke !== undefined &&
-                    this.style.strokeColor !== undefined
-                ) {
-
-                    this.background.lineStyle(
-                        this.style.stroke,
-                        this.style.strokeColor,
-                        1
-                    );
-
-                    this.background.strokeRoundedRect(
-                        0,
-                        0,
-                        this.width,
-                        this.height,
-                        this.style.radius
-                    );
-                }
-            }
-        };
-
-        this.create.all();
+    updateVisuals() {
+        this.updateBackground();
+        this.updateDebugBounds();
+    
+        return this;
     }
 
     updateBackground() {
+    
         this.background.clear();
     
         this.background.fillStyle(
@@ -254,7 +217,7 @@ export default class Card extends Component {
     }
 
     layout() {
-        // Resolve layouts
+        // Resolve child layouts first.
         for (const child of this.children) {
     
             if (
@@ -267,20 +230,14 @@ export default class Card extends Component {
     
         // Resolve Card dimensions.
         this.updateSize();
-        this.updateBackground();
-        
+    
+        // Update anything that depends on
+        // the final Card dimensions.
+        this.updateVisuals();
+    
+        // Position children.
         for (const child of this.children) {
-        
-            if (
-                child.layoutDirty &&
-                typeof child.layout === 'function'
-            ) {
-                child.layout();
-            }
-        }
-
-        for (const child of this.children) {
-
+    
             const options =
                 this.childLayoutOptions.get(child);
     

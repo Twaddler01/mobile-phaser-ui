@@ -129,7 +129,7 @@ export default class Row extends Component {
                 super.add(item);
             }
     
-            this.layout();
+            this.markLayoutDirty();
     
             return this;
         }
@@ -170,7 +170,7 @@ export default class Row extends Component {
     
         super.add(child);
     
-        this.layout();
+        this.markLayoutDirty();
     
         return this;
     }
@@ -239,7 +239,7 @@ export default class Row extends Component {
             index
         );
     
-        this.layout();
+        this.markLayoutDirty();
     
         return this;
     }
@@ -308,7 +308,7 @@ export default class Row extends Component {
             index
         );
     
-        this.layout();
+        this.markLayoutDirty();
     
         return this;
     }
@@ -358,7 +358,7 @@ export default class Row extends Component {
             index
         );
     
-        this.layout();
+        this.markLayoutDirty();
     
         return this;
     }
@@ -397,7 +397,7 @@ export default class Row extends Component {
                 super.remove(target);
             }
     
-            this.layout();
+            this.markLayoutDirty();
     
             return this;
         }
@@ -430,7 +430,7 @@ export default class Row extends Component {
     
         super.remove(target);
     
-        this.layout();
+        this.markLayoutDirty();
     
         return this;
     }
@@ -444,6 +444,17 @@ export default class Row extends Component {
     }
 
     layout() {
+
+        // Resolve child layouts first.
+        for (const child of this.children) {
+    
+            if (
+                child.layoutDirty &&
+                typeof child.layout === 'function'
+            ) {
+                child.layout();
+            }
+        }
 
         this.updateSize();
 
@@ -645,10 +656,8 @@ export default class Row extends Component {
                 );
         }
 
-        if (this.layoutParent) {
-            this.layoutParent.layout();
-        }
-
+        this.layoutDirty = false;
+        
         return this;
     }
 }

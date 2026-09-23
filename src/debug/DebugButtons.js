@@ -3,8 +3,6 @@ export default class DebugButtons {
     constructor(scene, options = {}) {
 
         this.scene = scene;
-        this.debugRow1 = this.scene.debugRow1;
-        this.debugCol1 = this.scene.debugCol1;
 
         this.container = this.scene.add.container();
         // Place on top of everything
@@ -26,6 +24,28 @@ export default class DebugButtons {
         this.addCycle =
             this.createClickCycle([
                 // Clicks hwre...
+                
+                // Row
+                () => this.scene.parentRow.add(this.scene.items.cards[0]),
+                () => this.scene.items.cards[0].add(this.scene.items.texts[0], { horizontalAlign: 'center' }),
+                () => this.scene.parentRow.add(this.scene.items.buttons[0]),
+                () => this.scene.parentRow.remove(this.scene.items.cards[0]),
+                () => this.scene.parentRow.add(this.scene.items.texts[1]),
+                () => this.scene.parentRow.add(this.scene.items.texts[2]),
+                () => this.scene.parentRow.add(this.scene.items.texts[4]),
+                () => this.scene.parentRow.add(this.scene.items.buttons[1]),
+                () => this.scene.parentRow.add(this.scene.items.cards[0]),
+                () => this.scene.parentRow.add(this.scene.items.cards[1]),
+                () => this.scene.parentRow.add(this.scene.items.cards[2]),
+                () => this.scene.items.cards[2].add(this.scene.items.texts[3]),
+                () => this.scene.parentRow.add(this.scene.items.cards[3]),
+                () => this.scene.parentRow.add(this.scene.items.cards[4]),
+                () => this.scene.parentRow.add(this.scene.items.buttons[2]),
+                () => this.scene.parentRow.add(this.scene.items.buttons[3]),
+                () => this.scene.parentRow.add(this.scene.items.buttons[4]),
+                
+                // Column
+                /*
                 () => this.scene.parentColumn.add(this.scene.items.cards[0]),
                 () => this.scene.items.cards[0].add(this.scene.items.texts[0], { horizontalAlign: 'center' }),
                 () => this.scene.parentColumn.add(this.scene.items.buttons[0]),
@@ -45,7 +65,7 @@ export default class DebugButtons {
                 () => this.scene.parentColumn.add(this.scene.items.buttons[2]),
                 () => this.scene.parentColumn.add(this.scene.items.buttons[3]),
                 () => this.scene.parentColumn.add(this.scene.items.buttons[4]),
-                
+                */
                 
                 
             ]);

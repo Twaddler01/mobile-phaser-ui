@@ -80,29 +80,25 @@ export default class ScrollView extends Component {
     ////////////////////////////////////////
 
     add(content) {
-
+    
         // Remove existing content.
         if (this.content) {
-
+    
             this.remove(
                 this.content
             );
         }
-
+    
         this.content = content;
-
+    
         content.layoutParent = this;
-
+    
         this.container.add(
             content.container
         );
-
-        this.updateContentSize();
-
-        this.updateScrollLimits();
-
-        this.updateScroll();
-
+    
+        this.markLayoutDirty();
+    
         return this;
     }
 
@@ -135,8 +131,8 @@ export default class ScrollView extends Component {
         this.maxScrollX = 0;
         this.maxScrollY = 0;
 
-        this.updateScroll();
-
+        this.markLayoutDirty();
+        
         return this;
     }
 
@@ -829,9 +825,20 @@ export default class ScrollView extends Component {
     ////////////////////////////////////////
 
     layout() {
-
+    
+        // Resolve content layout first.
+        if (
+            this.content &&
+            this.content.layoutDirty &&
+            typeof this.content.layout === 'function'
+        ) {
+            this.content.layout();
+        }
+    
         this.updateScrollLimits();
-
+    
+        this.layoutDirty = false;
+    
         return this;
     }
 

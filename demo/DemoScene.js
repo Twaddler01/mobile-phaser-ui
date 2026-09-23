@@ -30,7 +30,7 @@ export default class DemoScene extends Phaser.Scene {
             this.cameras.main.setOrigin(0, 0);
             this.cameras.main.setScroll(0, 0);
         }
-        //setZoom();
+        setZoom();
 
 
 
@@ -42,11 +42,11 @@ this.items =
     this.createDebugItems();
 
 // DEBUG
-this.parentColumn =
-    new Column(this, {
-        x: 30,
+this.parentRow =
+    new Row(this, {
+        x: 10,
         y: 200,
-        id: 'parentColumn'
+        id: 'parentRow'
     });
 ////
 
@@ -91,19 +91,31 @@ this.anotherText =
     });
 
 
-this.parentColumn.add(this.card);
+this.parentRow.add(this.card);
 
 this.card.add(this.cardInside);
 
 this.cardInside.add(text);
 
 this.cardInside.add(this.cardInside2, {
-    horizontalAlign: 'center'
+    verticalAlign: 'center'
 });
 
 this.cardInside2.add(this.anotherText, {
-    horizontalAlign: 'center'
+    verticalAlign: 'center'
 });
+
+
+const scrollView = new ScrollView(this, {
+    x: 10,
+    y: 200,
+    width: 800,
+    height: 800,
+    direction: 'both'
+});
+scrollView.add(this.parentRow);
+
+
 
 // WIP integrate with scheduling
 //this.column.requestLayout();
