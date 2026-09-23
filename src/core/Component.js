@@ -29,6 +29,7 @@ export default class Component {
 
         // For eventual dirty updates
         this.layoutDirty = true;
+        this.layoutScheduled = false;
 
         // DEBUG ONLY
         if (Debug.enabled) {
@@ -68,14 +69,19 @@ export default class Component {
     */
 
     markLayoutDirty() {
-        if (this.layoutDirty) {
-            return this;
+        if (!this.layoutDirty) {
+            this.layoutDirty = true;
         }
     
-        this.layoutDirty = true;
-    
         if (this.layoutParent) {
-            this.layoutParent.markLayoutDirty();
+    
+            if (!this.layoutParent.layoutDirty) {
+                this.layoutParent.markLayoutDirty();
+            }
+    
+        } else {
+            this.layoutScheduled = true;
+            this.scene.layoutManager.markDirty(this);
         }
     
         return this;
@@ -91,13 +97,6 @@ export default class Component {
         return this;
     }
 
-    /*requestLayout() {
-        if (this.layoutParent) {
-            this.layoutParent.layout();
-        }
-    
-        return this;
-    }*/
     requestLayout() {
     
         let root = this;

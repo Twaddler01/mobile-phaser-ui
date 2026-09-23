@@ -25,21 +25,15 @@ export default class DebugButtons {
 
         this.addCycle =
             this.createClickCycle([
-                () => {
-
-// later...
-this.scene.card.add(this.scene.anotherText);
-// later...
-this.scene.column.requestLayout();
-console.log('executed ()');
-
-                },
-                () => 
+                // Clicks hwre...
+                () => this.scene.parentColumn.add(this.scene.items.cards[0]),
+                () => this.scene.items.cards[0].add(this.scene.items.texts[0], { horizontalAlign: 'center' }),
                 () => this.scene.parentColumn.add(this.scene.items.buttons[0]),
-                () => this.scene.parentColumn.add(this.scene.items.texts[0]),
+                
+                () => this.scene.parentColumn.remove(this.scene.items.cards[0]),
+                
                 () => this.scene.parentColumn.add(this.scene.items.texts[1]),
                 () => this.scene.parentColumn.add(this.scene.items.texts[2]),
-                () => this.scene.parentColumn.add(this.scene.items.texts[3]),
                 () => this.scene.parentColumn.add(this.scene.items.texts[4]),
                 () => this.scene.parentColumn.add(this.scene.items.buttons[1]),
                 () => this.scene.parentColumn.add(this.scene.items.cards[0]),

@@ -7,6 +7,7 @@ import Column from '../src/layout/Column.js';
 import Row from '../src/layout/Row.js';
 import Spacer from '../src/layout/Spacer.js';
 import ScrollView from '../src/layout/ScrollView.js';
+import LayoutManager from '../src/core/LayoutManager.js';
 
 export default class DemoScene extends Phaser.Scene {
 
@@ -16,6 +17,9 @@ export default class DemoScene extends Phaser.Scene {
     }
 
     create() {
+
+        this.layoutManager =
+            new LayoutManager(this);
 
         this.width = this.scale.width;
         this.height = this.scale.height;
@@ -38,7 +42,7 @@ this.items =
     this.createDebugItems();
 
 // DEBUG
-this.column =
+this.parentColumn =
     new Column(this, {
         x: 30,
         y: 200,
@@ -87,7 +91,7 @@ this.anotherText =
     });
 
 
-this.column.add(this.card);
+this.parentColumn.add(this.card);
 
 this.card.add(this.cardInside);
 
@@ -102,7 +106,7 @@ this.cardInside2.add(this.anotherText, {
 });
 
 // WIP integrate with scheduling
-this.column.requestLayout();
+//this.column.requestLayout();
 
 /*
 
@@ -253,11 +257,17 @@ this.debugCard.add(item);
     
             debugItems.cards.push(
                 new Card(this, {
-                    id: `testCard${i}`
+                    id: `testCard${i}`,
+                    width: i === 1 ? 100 : null
                 })
             );
         }
     
         return debugItems;
+    }
+    
+    // Live updates to root layouts
+    update(time, delta) {
+        this.layoutManager.update();
     }
 }
