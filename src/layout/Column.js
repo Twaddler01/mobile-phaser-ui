@@ -19,49 +19,96 @@ export default class Column extends Component {
         this.justify =
             config.justify ?? 'start';
 
+        this.childLayoutOptions =
+            new Map();
+
         // DEBUG
         this.debugChildrenBounds =
             this.scene.add.graphics();
+
         this.container.add(
             this.debugChildrenBounds
         );
     }
 
     updateSize() {
+
         // AUTO WIDTH
         if (this.widthAuto) {
+
             const contentWidth =
                 this.children.reduce(
-                    (max, child) =>
-                        Math.max(max, child.width),
+                    (max, child) => {
+
+                        const options =
+                            this.childLayoutOptions.get(child);
+
+                        if (!options) {
+                            return max;
+                        }
+
+                        const childWidth =
+                            options.width ?? child.width;
+
+                        const { margin } =
+                            options;
+
+                        return Math.max(
+                            max,
+                            margin.left +
+                            childWidth +
+                            margin.right
+                        );
+                    },
                     0
                 );
-    
+
             this.width =
                 this.padding.left +
                 contentWidth +
                 this.padding.right;
         }
-    
+
         // AUTO HEIGHT
         if (this.heightAuto) {
+
             const contentHeight =
                 this.children.reduce(
-                    (total, child) =>
-                        total + child.height,
+                    (total, child) => {
+
+                        const options =
+                            this.childLayoutOptions.get(child);
+
+                        if (!options) {
+                            return total;
+                        }
+
+                        const childHeight =
+                            options.height ?? child.height;
+
+                        const { margin } =
+                            options;
+
+                        return (
+                            total +
+                            margin.top +
+                            childHeight +
+                            margin.bottom
+                        );
+                    },
                     0
                 ) +
                 Math.max(
                     0,
                     this.children.length - 1
                 ) * this.gap;
-    
+
             this.height =
                 this.padding.top +
                 contentHeight +
                 this.padding.bottom;
         }
-    
+
         this.updateDebugBounds();
 
         return this;
@@ -70,6 +117,7 @@ export default class Column extends Component {
     getPadding(padding = 0) {
 
         if (typeof padding === 'number') {
+
             return {
                 top: padding,
                 right: padding,
@@ -86,254 +134,476 @@ export default class Column extends Component {
         };
     }
 
-    add(child) {
+    getMargin(margin = 0) {
+
+        if (typeof margin === 'number') {
+
+            return {
+                top: margin,
+                right: margin,
+                bottom: margin,
+                left: margin
+            };
+        }
+
+        return {
+            top: margin.top ?? 0,
+            right: margin.right ?? 0,
+            bottom: margin.bottom ?? 0,
+            left: margin.left ?? 0
+        };
+    }
+
+    setChildOptions(childOrId, options = {}) {
+
+        const child =
+            this.getChild(childOrId);
+
+        if (!child) {
+
+            if (Debug.enabled) {
+                console.warn(
+                    'Cannot update child options: component was not found.'
+                );
+            }
+
+            return this;
+        }
+
+        const current =
+            this.childLayoutOptions.get(child);
+
+        if (!current) {
+
+            if (Debug.enabled) {
+                console.warn(
+                    'Cannot update child options: component has no layout options.'
+                );
+            }
+
+            return this;
+        }
+
+        if (options.width !== undefined) {
+            current.width =
+                options.width;
+        }
+
+        if (options.height !== undefined) {
+            current.height =
+                options.height;
+        }
+
+        if (options.margin !== undefined) {
+            current.margin =
+                this.getMargin(options.margin);
+        }
+
+        if (options.horizontalAlign !== undefined) {
+            current.horizontalAlign =
+                options.horizontalAlign;
+        }
+
+        if (options.verticalAlign !== undefined) {
+            current.verticalAlign =
+                options.verticalAlign;
+        }
+
+        this.markLayoutDirty();
+
+        return this;
+    }
+
+    getChildOptions(childOrId) {
+
+        const child =
+            this.getChild(childOrId);
+
+        if (!child) {
+            return null;
+        }
+
+        const options =
+            this.childLayoutOptions.get(child);
+
+        if (!options) {
+            return null;
+        }
+
+        return {
+            width: options.width,
+
+            height: options.height,
+
+            margin: {
+                ...options.margin
+            },
+
+            horizontalAlign:
+                options.horizontalAlign,
+
+            verticalAlign:
+                options.verticalAlign
+        };
+    }
+
+    add(child, options = {}) {
+
         // Multiple children
         if (Array.isArray(child)) {
-    
+
             for (const item of child) {
-    
+
                 if (!item) {
                     continue;
                 }
-    
+
                 if (this.children.includes(item)) {
-    
+
                     if (Debug.enabled) {
                         console.warn(
                             'Cannot add child: component is already in this layout.'
                         );
                     }
-    
+
                     continue;
                 }
-    
+
                 if (
                     item.layoutParent &&
                     item.layoutParent !== this
                 ) {
-    
+
                     if (Debug.enabled) {
                         console.warn(
                             'Cannot add child: component already belongs to another layout.'
                         );
                     }
-    
+
                     continue;
                 }
-    
+
+                const width =
+                    options.width ?? null;
+
+                const height =
+                    options.height ?? null;
+
+                const margin =
+                    this.getMargin(options.margin);
+
+                const horizontalAlign =
+                    options.horizontalAlign ?? 'start';
+
+                const verticalAlign =
+                    options.verticalAlign ?? 'start';
+
                 this.children.push(item);
-    
+
+                this.childLayoutOptions.set(
+                    item,
+                    {
+                        width,
+                        height,
+                        margin,
+                        horizontalAlign,
+                        verticalAlign
+                    }
+                );
+
                 item.layoutParent = this;
-    
+
                 super.add(item);
             }
-    
+
             this.markLayoutDirty();
-    
+
             return this;
         }
-    
+
         // Single child
         if (!child) {
             return this;
         }
-    
+
         if (this.children.includes(child)) {
-    
+
             if (Debug.enabled) {
                 console.warn(
                     'Cannot add child: component is already in this layout.'
                 );
             }
-    
+
             return this;
         }
-    
+
         if (
             child.layoutParent &&
             child.layoutParent !== this
         ) {
-    
+
             if (Debug.enabled) {
                 console.warn(
                     'Cannot add child: component already belongs to another layout.'
                 );
             }
-    
+
             return this;
         }
-    
+
+        const width =
+            options.width ?? null;
+
+        const height =
+            options.height ?? null;
+
+        const margin =
+            this.getMargin(options.margin);
+
+        const horizontalAlign =
+            options.horizontalAlign ?? 'start';
+
+        const verticalAlign =
+            options.verticalAlign ?? 'start';
+
         this.children.push(child);
-    
+
+        this.childLayoutOptions.set(
+            child,
+            {
+                width,
+                height,
+                margin,
+                horizontalAlign,
+                verticalAlign
+            }
+        );
+
         child.layoutParent = this;
-    
+
         super.add(child);
-    
+
         this.markLayoutDirty();
-    
+
         return this;
     }
 
     insertBefore(child, beforeChild) {
-    
+
         if (!child) {
             return this;
         }
-    
+
         if (this.children.includes(child)) {
-    
+
             if (Debug.enabled) {
                 console.warn(
                     'Cannot insert child: component is already in this layout.'
                 );
             }
-    
+
             return this;
         }
-    
+
         if (
             child.layoutParent &&
             child.layoutParent !== this
         ) {
-    
+
             if (Debug.enabled) {
                 console.warn(
                     'Cannot insert child: component already belongs to another layout.'
                 );
             }
-    
+
             return this;
         }
-    
+
         const reference =
             this.getChild(beforeChild);
-    
+
         if (!reference) {
-    
+
             if (Debug.enabled) {
                 console.warn(
                     'Cannot insert child: reference component was not found.'
                 );
             }
-    
+
             return this;
         }
-    
+
         const index =
             this.children.indexOf(reference);
-    
+
         this.children.splice(
             index,
             0,
             child
         );
-    
+
+        // Inserted children need default
+        // layout options just like add().
+        const width =
+            null;
+
+        const height =
+            null;
+
+        const margin =
+            this.getMargin();
+
+        const horizontalAlign =
+            'start';
+
+        const verticalAlign =
+            'start';
+
+        this.childLayoutOptions.set(
+            child,
+            {
+                width,
+                height,
+                margin,
+                horizontalAlign,
+                verticalAlign
+            }
+        );
+
         child.layoutParent = this;
-    
+
         super.add(child);
-    
+
         // Keep Phaser's display order synchronized.
         this.container.moveTo(
             child.container,
             index
         );
-    
+
         this.markLayoutDirty();
-    
+
         return this;
     }
-    
+
     insertAfter(child, afterChild) {
-    
+
         if (!child) {
             return this;
         }
-    
+
         if (this.children.includes(child)) {
-    
+
             if (Debug.enabled) {
                 console.warn(
                     'Cannot insert child: component is already in this layout.'
                 );
             }
-    
+
             return this;
         }
-    
+
         if (
             child.layoutParent &&
             child.layoutParent !== this
         ) {
-    
+
             if (Debug.enabled) {
                 console.warn(
                     'Cannot insert child: component already belongs to another layout.'
                 );
             }
-    
+
             return this;
         }
-    
+
         const reference =
             this.getChild(afterChild);
-    
+
         if (!reference) {
-    
+
             if (Debug.enabled) {
                 console.warn(
                     'Cannot insert child: reference component was not found.'
                 );
             }
-    
+
             return this;
         }
-    
+
         const index =
             this.children.indexOf(reference) + 1;
-    
+
         this.children.splice(
             index,
             0,
             child
         );
-    
+
+        // Inserted children need default
+        // layout options just like add().
+        const width =
+            null;
+
+        const height =
+            null;
+
+        const margin =
+            this.getMargin();
+
+        const horizontalAlign =
+            'start';
+
+        const verticalAlign =
+            'start';
+
+        this.childLayoutOptions.set(
+            child,
+            {
+                width,
+                height,
+                margin,
+                horizontalAlign,
+                verticalAlign
+            }
+        );
+
         child.layoutParent = this;
-    
+
         super.add(child);
-    
+
         // Keep Phaser's display order synchronized.
         this.container.moveTo(
             child.container,
             index
         );
-    
+
         this.markLayoutDirty();
-    
+
         return this;
     }
-    
+
     move(childOrId, index) {
-    
+
         const child =
             this.getChild(childOrId);
-    
+
         if (!child) {
             return this;
         }
-    
+
         const currentIndex =
             this.children.indexOf(child);
-    
+
         if (currentIndex === -1) {
             return this;
         }
-    
+
         // Remove from our layout order.
         this.children.splice(
             currentIndex,
             1
         );
-    
+
         // Clamp destination.
         index =
             Math.max(
@@ -343,98 +613,108 @@ export default class Column extends Component {
                     this.children.length
                 )
             );
-    
+
         // Insert into our layout order.
         this.children.splice(
             index,
             0,
             child
         );
-    
+
         // Keep Phaser's display order synchronized.
         this.container.moveTo(
             child.container,
             index
         );
-    
+
         this.markLayoutDirty();
-    
+
         return this;
     }
 
     remove(child) {
+
         // Multiple children
         if (Array.isArray(child)) {
-    
+
             for (const item of child) {
-    
+
                 const target =
                     this.getChild(item);
-    
+
                 if (!target) {
                     continue;
                 }
-    
+
                 const index =
                     this.children.indexOf(target);
-    
+
                 if (index === -1) {
                     continue;
                 }
-    
+
                 this.children.splice(
                     index,
                     1
                 );
-    
+
+                this.childLayoutOptions.delete(
+                    target
+                );
+
                 if (
                     target.layoutParent === this
                 ) {
                     target.layoutParent = null;
                 }
-    
+
                 super.remove(target);
             }
-    
+
             this.markLayoutDirty();
-    
+
             return this;
         }
-    
+
         // Single child or ID
         const target =
             this.getChild(child);
-    
+
         if (!target) {
             return this;
         }
-    
+
         const index =
             this.children.indexOf(target);
-    
+
         if (index === -1) {
             return this;
         }
-    
+
         this.children.splice(
             index,
             1
         );
-    
+
+        this.childLayoutOptions.delete(
+            target
+        );
+
         if (
             target.layoutParent === this
         ) {
             target.layoutParent = null;
         }
-    
+
         super.remove(target);
-    
+
         this.markLayoutDirty();
-    
+
         return this;
     }
 
     clear() {
+
         this.remove(
             this.getChildren()
         );
@@ -443,9 +723,14 @@ export default class Column extends Component {
     }
 
     layout() {
+
         // Resolve child layouts first.
         for (const child of this.children) {
-            if (child.layoutDirty && typeof child.layout === 'function') {
+
+            if (
+                child.layoutDirty &&
+                typeof child.layout === 'function'
+            ) {
                 child.layout();
             }
         }
@@ -454,21 +739,20 @@ export default class Column extends Component {
 
         // DEBUG
         if (Debug.layout.enabled) {
-        
+
             this.debugChildrenBounds.clear();
-        
+
             this.debugChildrenBounds.fillStyle(
-                Debug.layout.fillColor,
+                Debug.layout.fillColor_ROW,
                 Debug.layout.fillAlpha
             );
-        
+
             this.debugChildrenBounds.lineStyle(
                 Debug.layout.borderWidth,
-                Debug.layout.borderColor,
+                Debug.layout.borderColor_ROW,
                 Debug.layout.borderAlpha
             );
         }
-        //// DEBUG
 
         const availableWidth =
             this.width -
@@ -483,8 +767,28 @@ export default class Column extends Component {
         // Total height occupied by children.
         const childrenHeight =
             this.children.reduce(
-                (total, child) =>
-                    total + child.height,
+                (total, child) => {
+
+                    const options =
+                        this.childLayoutOptions.get(child);
+
+                    if (!options) {
+                        return total;
+                    }
+
+                    const childHeight =
+                        options.height ?? child.height;
+
+                    const { margin } =
+                        options;
+
+                    return (
+                        total +
+                        margin.top +
+                        childHeight +
+                        margin.bottom
+                    );
+                },
                 0
             ) +
             Math.max(
@@ -583,76 +887,120 @@ export default class Column extends Component {
                 break;
         }
 
-        // Position children horizontally.
+        // POSITION CHILDREN
         for (const child of this.children) {
 
-            let x;
+            const options =
+                this.childLayoutOptions.get(child);
+
+            if (!options) {
+                continue;
+            }
+
+            const childWidth =
+                options.width ?? child.width;
+
+            const childHeight =
+                options.height ?? child.height;
+
+            const {
+                margin
+            } = options;
+
+            // The actual child starts
+            // after its top margin.
+            const childY =
+                y +
+                margin.top;
+
+            let outerX;
+
+            const outerWidth =
+                margin.left +
+                childWidth +
+                margin.right;
 
             switch (this.align) {
 
                 case 'center':
 
-                    x =
+                    outerX =
                         this.padding.left +
-                        (availableWidth - child.width) / 2;
+                        (
+                            availableWidth -
+                            outerWidth
+                        ) / 2;
 
                     break;
 
                 case 'end':
 
-                    x =
+                    outerX =
                         this.width -
                         this.padding.right -
-                        child.width;
+                        outerWidth;
 
                     break;
 
                 case 'start':
                 default:
 
-                    x =
+                    outerX =
                         this.padding.left;
 
                     break;
             }
 
+            const childX =
+                outerX +
+                margin.left;
+
             // DEBUG
             if (Debug.layout.enabled) {
-            
-                const width = availableWidth;
-                const height = child.height;
-            
+
+                const outerHeight =
+                    margin.top +
+                    childHeight +
+                    margin.bottom;
+
                 this.debugChildrenBounds.fillRect(
-                    this.padding.left,
+                    outerX,
                     y,
-                    width,
-                    height
+                    outerWidth,
+                    outerHeight
                 );
-            
+
                 this.debugChildrenBounds.strokeRect(
-                    this.padding.left,
+                    outerX,
                     y,
-                    width,
-                    height
+                    outerWidth,
+                    outerHeight
                 );
             }
-            //// DEBUG
 
-            child.setPosition(x, y);
+            child.setPosition(
+                childX,
+                childY
+            );
 
+            // Advance to the next
+            // outer layout box.
             y +=
-                child.height +
+                margin.top +
+                childHeight +
+                margin.bottom +
                 spacing +
                 (
                     child !==
-                    this.children[this.children.length - 1]
+                    this.children[
+                        this.children.length - 1
+                    ]
                         ? this.gap
                         : 0
                 );
         }
 
-// No parent.layout() here.
-this.layoutDirty = false;
+        this.layoutDirty = false;
 
         return this;
     }

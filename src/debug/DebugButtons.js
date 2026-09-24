@@ -26,29 +26,29 @@ export default class DebugButtons {
                 // Clicks hwre...
                 
                 // Row
-                () => this.scene.parentRow.add(this.scene.items.cards[0], { margin: 10 } ),
+                () => this.scene.parent.add(this.scene.items.cards[0], { margin: 10 } ),
                 () => {
                     this.scene.items.cards[0].add(this.scene.items.texts[0], { width: 200, height: 120 });
-                    console.log(this.scene.parentRow.getChildOptions(this.scene.items.cards[0]));
+                    console.log(this.scene.parent.getChildOptions(this.scene.items.cards[0]));
                 },
-                () => this.scene.parentRow.add(this.scene.items.buttons[0]),
+                () => this.scene.parent.add(this.scene.items.buttons[0]),
                 () => { 
-                    this.scene.parentRow.remove(this.scene.items.cards[0])
-                    console.log(this.scene.parentRow.getChildOptions(this.scene.items.cards[0]));
+                    this.scene.parent.remove(this.scene.items.cards[0])
+                    console.log(this.scene.parent.getChildOptions(this.scene.items.cards[0]));
                 },
-                () => this.scene.parentRow.add(this.scene.items.texts[1]),
-                () => this.scene.parentRow.add(this.scene.items.texts[2]),
-                () => this.scene.parentRow.add(this.scene.items.texts[4]),
-                () => this.scene.parentRow.add(this.scene.items.buttons[1]),
-                () => this.scene.parentRow.add(this.scene.items.cards[0]),
-                () => this.scene.parentRow.add(this.scene.items.cards[1]),
-                () => this.scene.parentRow.add(this.scene.items.cards[2]),
+                () => this.scene.parent.add(this.scene.items.texts[1]),
+                () => this.scene.parent.add(this.scene.items.texts[2]),
+                () => this.scene.parent.add(this.scene.items.texts[4]),
+                () => this.scene.parent.add(this.scene.items.buttons[1]),
+                () => this.scene.parent.add(this.scene.items.cards[0]),
+                () => this.scene.parent.add(this.scene.items.cards[1]),
+                () => this.scene.parent.add(this.scene.items.cards[2]),
                 () => this.scene.items.cards[2].add(this.scene.items.texts[3]),
-                () => this.scene.parentRow.add(this.scene.items.cards[3]),
-                () => this.scene.parentRow.add(this.scene.items.cards[4]),
-                () => this.scene.parentRow.add(this.scene.items.buttons[2]),
-                () => this.scene.parentRow.add(this.scene.items.buttons[3]),
-                () => this.scene.parentRow.add(this.scene.items.buttons[4]),
+                () => this.scene.parent.add(this.scene.items.cards[3]),
+                () => this.scene.parent.add(this.scene.items.cards[4]),
+                () => this.scene.parent.add(this.scene.items.buttons[2]),
+                () => this.scene.parent.add(this.scene.items.buttons[3]),
+                () => this.scene.parent.add(this.scene.items.buttons[4]),
                 
                 // Column
                 /*

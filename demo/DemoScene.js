@@ -44,14 +44,16 @@ this.items =
 // DEBUG
 
 
-const parentRow =
-    new Row(this, {
+this.parent =
+    new Column(this, {
         x: 10,
         y: 200,
-        id: 'parentRow',
+        id: 'parent',
         padding: 60,
         width: 800,
-        justify: 'start'
+        justify: 'space-evenly',
+        height: 1200,
+        align: 'center'
     });
 
 const card =
@@ -74,12 +76,12 @@ const button  =
         text: 'button'
     });
 
-parentRow.add(text, {
+this.parent.add(text, {
     width: 100,
     margin: 20
 });
 
-parentRow.add(button, {
+this.parent.add(button, {
     width: 250,
     margin: {
         left: 10,
@@ -87,7 +89,7 @@ parentRow.add(button, {
     }
 });
 
-parentRow.add(card, {
+this.parent.add(card, {
     width: 100,
     margin: 5
 });
@@ -99,7 +101,7 @@ const scrollView = new ScrollView(this, {
     height: 800,
     direction: 'both'
 });
-scrollView.add(parentRow);
+scrollView.add(this.parent);
 
 
 

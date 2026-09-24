@@ -434,7 +434,20 @@ export default class Row extends Component {
             0,
             child
         );
-    
+
+        // Inserted children need default
+        // layout options just like add().
+        this.childLayoutOptions.set(
+            child,
+            {
+                width: null,
+                height: null,
+                margin: this.getMargin(),
+                horizontalAlign: 'start',
+                verticalAlign: 'start'
+            }
+        );
+
         child.layoutParent = this;
     
         super.add(child);
@@ -503,7 +516,20 @@ export default class Row extends Component {
             0,
             child
         );
-    
+
+        // Inserted children need default
+        // layout options just like add().
+        this.childLayoutOptions.set(
+            child,
+            {
+                width: null,
+                height: null,
+                margin: this.getMargin(),
+                horizontalAlign: 'start',
+                verticalAlign: 'start'
+            }
+        );
+
         child.layoutParent = this;
     
         super.add(child);
@@ -831,43 +857,47 @@ export default class Row extends Component {
                 x +
                 margin.left;
         
-            let y;
-        
+            let outerY;
+            
+            const outerHeight =
+                margin.top +
+                childHeight +
+                margin.bottom;
+            
             switch (this.align) {
-        
+            
                 case 'center':
-                    y =
+                    outerY =
                         this.padding.top +
-                        margin.top +
                         (
                             availableHeight -
-                            margin.top -
-                            margin.bottom -
-                            childHeight
+                            outerHeight
                         ) / 2;
                     break;
-        
+            
                 case 'end':
-                    y =
+                    outerY =
                         this.height -
                         this.padding.bottom -
-                        margin.bottom -
-                        childHeight;
+                        outerHeight;
                     break;
-        
+            
                 case 'start':
                 default:
-                    y =
-                        this.padding.top +
-                        margin.top;
+                    outerY =
+                        this.padding.top;
                     break;
             }
-        
+            
+            const childY =
+                outerY +
+                margin.top;
+
             child.setPosition(
                 childX,
-                y
+                childY
             );
-        
+
             // DEBUG
             if (Debug.layout.enabled) {
         
@@ -875,20 +905,22 @@ export default class Row extends Component {
                     margin.left +
                     childWidth +
                     margin.right;
-        
+                
                 const outerHeight =
-                    availableHeight;
-        
+                    margin.top +
+                    childHeight +
+                    margin.bottom;
+                
                 this.debugChildrenBounds.fillRect(
                     x,
-                    this.padding.top,
+                    outerY,
                     outerWidth,
                     outerHeight
                 );
-        
+                
                 this.debugChildrenBounds.strokeRect(
                     x,
-                    this.padding.top,
+                    outerY,
                     outerWidth,
                     outerHeight
                 );
