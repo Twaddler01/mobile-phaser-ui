@@ -1,33 +1,30 @@
 import Debug from '../core/Debug.js';
-import Component from '../core/Component.js';
+import Container from '../core/Container.js';
 
-export default class Card extends Component {
+export default class Card extends Container {
 
     constructor(scene, config = {}) {
-
+    
         super(scene, config);
-
+    
         this.padding =
             this.getPadding(config.padding);
-        
-        this.childLayoutOptions =
-            new Map();
-
+    
         // STYLE
         this.style = {
             backgroundColor:
                 config.style?.backgroundColor ?? 0x222222,
-
+    
             radius:
                 config.style?.radius ?? 12,
-
+    
             stroke:
                 config.style?.stroke,
-
+    
             strokeColor:
                 config.style?.strokeColor
         };
-
+    
         this.build();
         this.updateBackground();
     }
@@ -86,170 +83,6 @@ export default class Card extends Component {
                 this.style.radius
             );
         }
-    
-        return this;
-    }
-
-    add(child, options = {}) {
-    
-        if (!child) {
-            return this;
-        }
-    
-        if (this.children.includes(child)) {
-    
-            if (Debug.enabled) {
-                console.warn(
-                    'Cannot add child: component is already in this layout.'
-                );
-            }
-    
-            return this;
-        }
-    
-        if (
-            child.layoutParent &&
-            child.layoutParent !== this
-        ) {
-    
-            if (Debug.enabled) {
-                console.warn(
-                    'Cannot add child: component already belongs to another layout.'
-                );
-            }
-    
-            return this;
-        }
-    
-        /*** OPTIONS
-        width: Override the child's allocated width inside this parent
-        height: Override the child's allocated height inside this parent
-        margin: Space around the child
-        horizontalAlign: Position child horizontally within available space
-        verticalAlign: Position child vertically within available space
-        ***/
-
-        const height =
-            options.height ?? null;
-        
-        const width =
-            options.width ?? null;
-    
-        const margin =
-            this.getMargin(options.margin);
-    
-        const horizontalAlign =
-            options.horizontalAlign ?? 'start';
-    
-        const verticalAlign =
-            options.verticalAlign ?? 'start';
-    
-        this.children.push(child);
-
-        this.childLayoutOptions.set(
-            child,
-            {
-                width,
-                height,
-                margin,
-                horizontalAlign,
-                verticalAlign
-            }
-        );
-    
-        child.layoutParent = this;
-    
-        super.add(child);
-    
-        this.markLayoutDirty();
-    
-        return this;
-    }
-
-    clear() {
-        this.remove(
-            this.getChildren()
-        );
-    
-        return this;
-    }
-
-    remove(child) {
-        // Multiple children
-        if (Array.isArray(child)) {
-    
-            for (const item of child) {
-    
-                const target =
-                    this.getChild(item);
-    
-                if (!target) {
-                    continue;
-                }
-    
-                const index =
-                    this.children.indexOf(target);
-    
-                if (index === -1) {
-                    continue;
-                }
-    
-                this.children.splice(
-                    index,
-                    1
-                );
-    
-                this.childLayoutOptions.delete(
-                    target
-                );
-    
-                if (
-                    target.layoutParent === this
-                ) {
-                    target.layoutParent = null;
-                }
-    
-                super.remove(target);
-            }
-    
-            this.markLayoutDirty();
-    
-            return this;
-        }
-    
-        // Single child or ID
-        const target =
-            this.getChild(child);
-    
-        if (!target) {
-            return this;
-        }
-    
-        const index =
-            this.children.indexOf(target);
-    
-        if (index === -1) {
-            return this;
-        }
-    
-        this.children.splice(
-            index,
-            1
-        );
-    
-        this.childLayoutOptions.delete(
-            target
-        );
-    
-        if (
-            target.layoutParent === this
-        ) {
-            target.layoutParent = null;
-        }
-    
-        super.remove(target);
-    
-        this.markLayoutDirty();
     
         return this;
     }
@@ -510,114 +343,6 @@ export default class Card extends Component {
             right: padding.right ?? 0,
             bottom: padding.bottom ?? 0,
             left: padding.left ?? 0
-        };
-    }
-
-    getMargin(margin = 0) {
-        if (typeof margin === 'number') {
-    
-            return {
-                top: margin,
-                right: margin,
-                bottom: margin,
-                left: margin
-            };
-        }
-    
-        return {
-            top: margin.top ?? 0,
-            right: margin.right ?? 0,
-            bottom: margin.bottom ?? 0,
-            left: margin.left ?? 0
-        };
-    }
-
-    setChildOptions(childOrId, options = {}) {
-    
-        const child =
-            this.getChild(childOrId);
-    
-        if (!child) {
-            if (Debug.enabled) {
-                console.warn(
-                    'Cannot update child options: component was not found.'
-                );
-            }
-    
-            return this;
-        }
-    
-        const current =
-            this.childLayoutOptions.get(child);
-    
-        if (!current) {
-            if (Debug.enabled) {
-                console.warn(
-                    'Cannot update child options: component has no layout options.'
-                );
-            }
-    
-            return this;
-        }
-
-        if (options.width !== undefined) {
-            current.width =
-                options.width;
-        }
-
-        if (options.height !== undefined) {
-            current.height =
-                options.height;
-        }
-
-        if (options.margin !== undefined) {
-            current.margin =
-                this.getMargin(options.margin);
-        }
-    
-        if (options.horizontalAlign !== undefined) {
-            current.horizontalAlign =
-                options.horizontalAlign;
-        }
-    
-        if (options.verticalAlign !== undefined) {
-            current.verticalAlign =
-                options.verticalAlign;
-        }
-    
-        this.markLayoutDirty();
-    
-        return this;
-    }
-
-    getChildOptions(childOrId) {
-        const child =
-            this.getChild(childOrId);
-    
-        if (!child) {
-            return null;
-        }
-    
-        const options =
-            this.childLayoutOptions.get(child);
-    
-        if (!options) {
-            return null;
-        }
-    
-        return {
-            width: options.width,
-
-            height: options.height,
-
-            margin: {
-                ...options.margin
-            },
-            horizontalAlign:
-                options.horizontalAlign,
-    
-            verticalAlign:
-                options.verticalAlign
         };
     }
 }

@@ -28,7 +28,7 @@ export default class DebugButtons {
                 () => this.scene.parent.add(this.scene.items.cards[0], { margin: 10 } ),
                 () => {
                     this.scene.items.cards[0].add(this.scene.items.texts[0], { width: 200, height: 120 });
-                    console.log(this.scene.parent.getChildOptions(this.scene.items.cards[0]));
+                    //console.log(this.scene.parent.getChildOptions(this.scene.items.cards[0]));
                 },
                 () => this.scene.parent.add(this.scene.items.buttons[0]),
                 () => this.scene.parent.remove(this.scene.items.cards[0]),

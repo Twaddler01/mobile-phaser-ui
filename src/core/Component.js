@@ -126,33 +126,14 @@ export default class Component {
         return this;
     }
 
-add(component) {
-
-    console.log(
-        'COMPONENT ADD:',
-        {
-            constructor:
-                component?.constructor?.name,
-
-            id:
-                component?.id,
-
-            keys:
-                component
-                    ? Object.keys(component)
-                    : null,
-
-            hasContainer:
-                !!component?.container
-        }
-    );
-
-    this.container.add(
-        component.container
-    );
-
-    return this;
-}
+    add(component) {
+    
+        this.container.add(
+            component.container
+        );
+    
+        return this;
+    }
 
     remove(component) {
         this.container.remove(component.container);

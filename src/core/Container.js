@@ -107,7 +107,15 @@ export default class Container extends Component {
     //////////////////////////////////////////
     // CHILD OPTIONS DEFAULTS
     //////////////////////////////////////////
-    
+
+    // *** OPTIONS
+    // width: Override the child's allocated width inside this parent
+    // height: Override the child's allocated height inside this parent
+    // margin: Space around the child
+    // horizontalAlign: Position child horizontally within available space
+    // verticalAlign: Position child vertically within available space
+    // ***
+
     _createChildOptions(options = {}) {
     
         return {

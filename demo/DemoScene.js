@@ -129,13 +129,21 @@ const scrollView = new ScrollView(this, {
 });
 scrollView.add(this.parent);
 
-card1.add(new Text(this, {text: 'card1 text'}));
+card1.add(new Text(this, {
+    text: 'card1 text',
+    fill: true
+}));
 card2.add(new Text(this, {text: 'card2 text'}));
 card3.add(new Text(this, {text: 'card3 text'}));
 card4.add(new Text(this, {text: 'card4 text'}));
 card5.add(new Text(this, {text: 'card5 text'}));
 
 this.row.insertAfter(card5, card2);
+
+console.log(
+    'OPTIONS: ', this.row.getChildOptions(card1)
+);
+
 
 
 /*
