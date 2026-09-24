@@ -1,3 +1,7 @@
+import Card from '../components/Card.js';
+import Text from '../components/Text.js';
+import Button from '../components/Button.js';
+
 export default class DebugButtons {
 
     constructor(scene, options = {}) {
@@ -21,10 +25,175 @@ export default class DebugButtons {
     create() {
         this.addTitle('DEBUG BUTTONS:');
 
+
+
+const fillCard = new Card(this.scene, {
+    x: 300,
+    y: 150,
+    width: 500,
+    height: 300,
+
+    padding: 20,
+
+    style: {
+        backgroundColor: 0x222222,
+        radius: 16,
+        stroke: 2,
+        strokeColor: 0xffffff
+    }
+});
+
+const fillItem = new Card(this.scene, {
+    width: 120,
+    height: 60,
+
+    style: {
+        backgroundColor: 0x4444aa,
+        radius: 8,
+        stroke: 2,
+        strokeColor: 0xffffff
+    }
+});
+
+fillCard.add(fillItem);
+
+this.scene.parent.add(fillCard);
+
+
         this.addCycle =
             this.createClickCycle([
                 // Clicks hwre...
-                
+
+
+        // 1. Intrinsic
+        () => {
+            fillCard.setChildOptions(fillItem, {
+                width: null,
+                height: null,
+                fill: null,
+                margin: 0,
+                horizontalAlign: 'start',
+                verticalAlign: 'start'
+            });
+        },
+
+        // 2. Fill both dimensions
+        () => {
+            fillCard.setChildOptions(fillItem, {
+                width: null,
+                height: null,
+                fill: true,
+                margin: 0,
+                horizontalAlign: 'start',
+                verticalAlign: 'start'
+            });
+        },
+
+        // 3. Explicit width + fill
+        // Width should win.
+        () => {
+            fillCard.setChildOptions(fillItem, {
+                width: 200,
+                height: null,
+                fill: true,
+                margin: 0,
+                horizontalAlign: 'start',
+                verticalAlign: 'start'
+            });
+        },
+
+        // 4. Explicit height + fill
+        // Height should win.
+        () => {
+            fillCard.setChildOptions(fillItem, {
+                width: null,
+                height: 100,
+                fill: true,
+                margin: 0,
+                horizontalAlign: 'start',
+                verticalAlign: 'start'
+            });
+        },
+
+        // 5. Explicit width + height + fill
+        // Both explicit dimensions should win.
+        () => {
+            fillCard.setChildOptions(fillItem, {
+                width: 200,
+                height: 100,
+                fill: true,
+                margin: 0,
+                horizontalAlign: 'start',
+                verticalAlign: 'start'
+            });
+        },
+
+        // 6. Horizontal fill
+        () => {
+            fillCard.setChildOptions(fillItem, {
+                width: null,
+                height: null,
+                fill: 'horizontal',
+                margin: 0,
+                horizontalAlign: 'start',
+                verticalAlign: 'start'
+            });
+        },
+
+        // 7. Vertical fill
+        () => {
+            fillCard.setChildOptions(fillItem, {
+                width: null,
+                height: null,
+                fill: 'vertical',
+                margin: 0,
+                horizontalAlign: 'start',
+                verticalAlign: 'start'
+            });
+        },
+
+        // 8. Fill + margin
+        () => {
+            fillCard.setChildOptions(fillItem, {
+                width: null,
+                height: null,
+                fill: true,
+                margin: 20,
+                horizontalAlign: 'start',
+                verticalAlign: 'start'
+            });
+        },
+
+        // 9. Horizontal fill + vertical center
+        // This makes alignment visibly meaningful.
+        () => {
+            fillCard.setChildOptions(fillItem, {
+                width: null,
+                height: null,
+                fill: 'horizontal',
+                margin: 0,
+                horizontalAlign: 'start',
+                verticalAlign: 'center'
+            });
+        },
+
+        // 10. Vertical fill + horizontal center
+        () => {
+            fillCard.setChildOptions(fillItem, {
+                width: null,
+                height: null,
+                fill: 'vertical',
+                margin: 0,
+                horizontalAlign: 'center',
+                verticalAlign: 'start'
+            });
+        }
+
+    ]);
+
+this.addCycle();
+
+/*
                 () => this.scene.parent.add(this.scene.items.cards[0], { margin: 10 } ),
                 () => {
                     this.scene.items.cards[0].add(this.scene.items.texts[0], { width: 200, height: 120 });
@@ -51,31 +220,10 @@ export default class DebugButtons {
                 () => this.scene.parent.move(this.scene.items.buttons[3], this.scene.items.buttons[1]),
                 () => this.scene.parent.move(this.scene.items.buttons[4], 1),
                 
-                // Column
-                /*
-                () => this.scene.parentColumn.add(this.scene.items.cards[0]),
-                () => this.scene.items.cards[0].add(this.scene.items.texts[0], { horizontalAlign: 'center' }),
-                () => this.scene.parentColumn.add(this.scene.items.buttons[0]),
-                
-                () => this.scene.parentColumn.remove(this.scene.items.cards[0]),
-                
-                () => this.scene.parentColumn.add(this.scene.items.texts[1]),
-                () => this.scene.parentColumn.add(this.scene.items.texts[2]),
-                () => this.scene.parentColumn.add(this.scene.items.texts[4]),
-                () => this.scene.parentColumn.add(this.scene.items.buttons[1]),
-                () => this.scene.parentColumn.add(this.scene.items.cards[0]),
-                () => this.scene.parentColumn.add(this.scene.items.cards[1]),
-                () => this.scene.parentColumn.add(this.scene.items.cards[2]),
-                () => this.scene.items.cards[2].add(this.scene.items.texts[3]),
-                () => this.scene.parentColumn.add(this.scene.items.cards[3]),
-                () => this.scene.parentColumn.add(this.scene.items.cards[4]),
-                () => this.scene.parentColumn.add(this.scene.items.buttons[2]),
-                () => this.scene.parentColumn.add(this.scene.items.buttons[3]),
-                () => this.scene.parentColumn.add(this.scene.items.buttons[4]),
-                */
-                
+
                 
             ]);
+*/
 
 /* v
 // BUTTONS

@@ -8,6 +8,10 @@ export default class Component {
         this.width = config.width ?? 0;
         this.height = config.height ?? 0;
 
+        // No parent-assigned size; use normal width/height
+        this.layoutWidth = null;
+        this.layoutHeight = null;
+
         this.id = config.id ?? null;
 
         this.widthAuto =
@@ -95,6 +99,32 @@ export default class Component {
     setPosition(x, y) {
         this.container.setPosition(x, y);
         return this;
+    }
+
+    setLayoutSize(width = null, height = null) {
+    
+        const changed =
+            this.layoutWidth !== width ||
+            this.layoutHeight !== height;
+    
+        if (!changed) {
+            return false;
+        }
+    
+        this.layoutWidth = width;
+        this.layoutHeight = height;
+    
+        this.layoutDirty = true;
+    
+        return true;
+    }
+
+    getLayoutWidth() {
+        return this.layoutWidth ?? this.width;
+    }
+    
+    getLayoutHeight() {
+        return this.layoutHeight ?? this.height;
     }
 
     // Resolves immediately (pre-dirty system)

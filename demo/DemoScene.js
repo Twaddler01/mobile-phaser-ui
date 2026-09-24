@@ -43,18 +43,18 @@ this.items =
 
 // DEBUG
 
+// container alone
+//this.parent = this.add.container();
 
 this.parent =
     new Column(this, {
         x: 0,
         y: 0,
         id: 'parent',
-        width: this.width,
-        height: this.height,
-        align: 'start',
-        gap: 50
+
     });
 
+/*
 this.row =
     new Row(this, {
         id: 'row',
@@ -143,7 +143,7 @@ this.row.insertAfter(card5, card2);
 console.log(
     'OPTIONS: ', this.row.getChildOptions(card1)
 );
-
+*/
 
 
 /*

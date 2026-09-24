@@ -59,8 +59,8 @@ export default class Card extends Container {
         this.background.fillRoundedRect(
             0,
             0,
-            this.width,
-            this.height,
+            this.getLayoutWidth(),
+            this.getLayoutHeight(),
             this.style.radius
         );
     
@@ -78,8 +78,8 @@ export default class Card extends Container {
             this.background.strokeRoundedRect(
                 0,
                 0,
-                this.width,
-                this.height,
+                this.getLayoutWidth(),
+                this.getLayoutHeight(),
                 this.style.radius
             );
         }
@@ -188,40 +188,75 @@ export default class Card extends Container {
                 continue;
             }
 
-            const childWidth =
-                options.width ?? child.width;
-            
-            const childHeight =
-                options.height ?? child.height;
-
             const {
                 margin,
                 horizontalAlign,
-                verticalAlign
+                verticalAlign,
+                fill
             } = options;
-    
+            
             ////////////////////////////////////////
             // AVAILABLE AREA
             ////////////////////////////////////////
-    
+            
             const availableWidth =
                 this.width -
                 this.padding.left -
                 this.padding.right -
                 margin.left -
                 margin.right;
-    
+            
             const availableHeight =
                 this.height -
                 this.padding.top -
                 this.padding.bottom -
                 margin.top -
                 margin.bottom;
-    
+            
             ////////////////////////////////////////
-            // HORIZONTAL POSITION
+            // CHILD SIZE
             ////////////////////////////////////////
-    
+            
+            let childWidth =
+                options.width ?? child.width;
+            
+            let childHeight =
+                options.height ?? child.height;
+            
+            ////////////////////////////////////////
+            // FILL
+            ////////////////////////////////////////
+            
+            if (
+                options.width === null &&
+                (fill === true || fill === 'horizontal')
+            ) {
+                childWidth =
+                    Math.max(0, availableWidth);
+            }
+            
+            if (
+                options.height === null &&
+                (fill === true || fill === 'vertical')
+            ) {
+                childHeight =
+                    Math.max(0, availableHeight);
+            }
+
+            ////////////////////////////////////////
+            // APPLY LAYOUT SIZE
+            ////////////////////////////////////////
+            
+            const layoutSizeChanged =
+                child.setLayoutSize(
+                    childWidth,
+                    childHeight
+                );
+            
+            if (layoutSizeChanged) {
+                child.layout();
+            }
+
             let x;
     
             switch (horizontalAlign) {
