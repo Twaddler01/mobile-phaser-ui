@@ -1,7 +1,7 @@
 import Debug from '../core/Debug.js';
-import Component from '../core/Component.js';
+import Container from '../core/Container.js';
 
-export default class Column extends Component {
+export default class Column extends Container {
 
     constructor(scene, config = {}) {
 
@@ -18,9 +18,6 @@ export default class Column extends Component {
 
         this.justify =
             config.justify ?? 'start';
-
-        this.childLayoutOptions =
-            new Map();
 
         // DEBUG
         this.debugChildrenBounds =

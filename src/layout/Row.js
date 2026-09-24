@@ -1,7 +1,7 @@
 import Debug from '../core/Debug.js';
-import Component from '../core/Component.js';
+import Container from '../core/Container.js';
 
-export default class Row extends Component {
+export default class Row extends Container {
 
     constructor(scene, config = {}) {
 
@@ -18,9 +18,6 @@ export default class Row extends Component {
 
         this.justify =
             config.justify ?? 'start';
-
-        this.childLayoutOptions =
-            new Map();
 
         // DEBUG
         this.debugChildrenBounds =
@@ -131,6 +128,7 @@ export default class Row extends Component {
         };
     }
 
+/*
     getMargin(margin = 0) {
         if (typeof margin === 'number') {
     
@@ -149,7 +147,7 @@ export default class Row extends Component {
             left: margin.left ?? 0
         };
     }
-
+*/
     setChildOptions(childOrId, options = {}) {
     
         const child =
@@ -239,7 +237,7 @@ export default class Row extends Component {
                 options.verticalAlign
         };
     }
-
+/*
     add(child, options = {}) {
     
         // Multiple children
@@ -726,7 +724,7 @@ export default class Row extends Component {
 
         return this;
     }
-
+*/
     layout() {
 
         // Resolve child layouts first.
