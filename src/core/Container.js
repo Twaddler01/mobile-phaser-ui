@@ -1,3 +1,4 @@
+import Debug from './Debug.js';
 import Component from './Component.js';
 
 export default class Container extends Component {
@@ -59,6 +60,10 @@ export default class Container extends Component {
             current.height = options.height;
         }
 
+        if (options.fill !== undefined) {
+            current.fill = options.fill;
+        }
+
         if (options.margin !== undefined) {
             current.margin = this.getMargin(
                 options.margin
@@ -85,7 +90,6 @@ export default class Container extends Component {
         return this;
     }
 
-
     getChildOptions(childOrId) {
 
         const child =
@@ -98,6 +102,37 @@ export default class Container extends Component {
         return this.childLayoutOptions.get(
             child
         ) ?? {};
+    }
+
+    //////////////////////////////////////////
+    // CHILD OPTIONS DEFAULTS
+    //////////////////////////////////////////
+    
+    _createChildOptions(options = {}) {
+    
+        return {
+            width:
+                options.width ?? null,
+    
+            height:
+                options.height ?? null,
+    
+            fill:
+                options.fill ?? null,
+    
+            margin:
+                this.getMargin(
+                    options.margin
+                ),
+    
+            horizontalAlign:
+                options.horizontalAlign ??
+                'start',
+    
+            verticalAlign:
+                options.verticalAlign ??
+                'start'
+        };
     }
 
     //////////////////////////////////////////
@@ -146,26 +181,7 @@ export default class Container extends Component {
 
         this.childLayoutOptions.set(
             child,
-            {
-                width:
-                    options.width ?? null,
-
-                height:
-                    options.height ?? null,
-
-                margin:
-                    this.getMargin(
-                        options.margin
-                    ),
-
-                horizontalAlign:
-                    options.horizontalAlign ??
-                    'start',
-
-                verticalAlign:
-                    options.verticalAlign ??
-                    'start'
-            }
+            this._createChildOptions(options)
         );
 
         super.add(child);
@@ -239,13 +255,7 @@ export default class Container extends Component {
         // layout options just like add().
         this.childLayoutOptions.set(
             child,
-            {
-                width: null,
-                height: null,
-                margin: this.getMargin(),
-                horizontalAlign: 'start',
-                verticalAlign: 'start'
-            }
+            this._createChildOptions()
         );
 
         child.layoutParent = this;
@@ -322,13 +332,7 @@ export default class Container extends Component {
         // layout options just like add().
         this.childLayoutOptions.set(
             child,
-            {
-                width: null,
-                height: null,
-                margin: this.getMargin(),
-                horizontalAlign: 'start',
-                verticalAlign: 'start'
-            }
+            this._createChildOptions()
         );
 
         child.layoutParent = this;
