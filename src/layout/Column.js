@@ -130,7 +130,7 @@ export default class Column extends Container {
             left: padding.left ?? 0
         };
     }
-
+/*
     getMargin(margin = 0) {
 
         if (typeof margin === 'number') {
@@ -150,7 +150,7 @@ export default class Column extends Container {
             left: margin.left ?? 0
         };
     }
-
+*/
     setChildOptions(childOrId, options = {}) {
 
         const child =
@@ -243,7 +243,7 @@ export default class Column extends Container {
                 options.verticalAlign
         };
     }
-
+/*
     add(child, options = {}) {
 
         // Multiple children
@@ -766,7 +766,7 @@ export default class Column extends Container {
 
         return this;
     }
-
+*/
     layout() {
 
         // Resolve child layouts first.
