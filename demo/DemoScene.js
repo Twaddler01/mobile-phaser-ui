@@ -30,7 +30,7 @@ export default class DemoScene extends Phaser.Scene {
             this.cameras.main.setOrigin(0, 0);
             this.cameras.main.setScroll(0, 0);
         }
-        setZoom();
+        //setZoom();
 
 
 
@@ -46,59 +46,87 @@ this.items =
 
 this.parent =
     new Column(this, {
-        x: 10,
-        y: 200,
+        x: 0,
+        y: 0,
         id: 'parent',
-        padding: 60,
-        width: 800,
-        justify: 'space-evenly',
-        height: 1200,
-        align: 'center'
+        width: this.width,
+        height: this.height,
+        align: 'start'
     });
 
-const card =
+this.row =
+    new Row(this, {
+        id: 'row',
+        width: this.width - 40,
+        justify: 'space-around',
+    });
+
+this.row2 =
+    new Row(this, {
+        id: 'row2',
+        width: this.width,
+        height: 300,
+        padding: { top: 50 },
+        justify: 'center'
+    });
+
+this.parent.add(this.row);
+this.parent.add(this.row2);
+
+const card1 =
     new Card(this, {
-        id: 'card',
-        padding: 50,
-        //width: 500,
-        //height: 150
+        id: 'card1',
+        padding: 10,
+        width: this.width / 4,
+        height: 120
     });
 
-const text =
-    new Text(this, {
-        id: 'text',
-        text: 'Hello'
+const card2 =
+    new Card(this, {
+        id: 'card2',
+        padding: 10,
+        width: this.width / 4,
+        height: 120
     });
 
-const button  = 
-    new Button(this, {
-        id: 'button',
-        text: 'button'
+const card3 =
+    new Card(this, {
+        id: 'card3',
+        padding: 10,
+        width: this.width / 4,
+        height: 120
     });
 
-this.parent.add(text, {
-    width: 100,
-    margin: 20
-});
+const card4 =
+    new Card(this, {
+        id: 'card4',
+        padding: 10,
+        width: this.width / 4,
+        height: 120
+    });
 
-this.parent.add(button, {
-    width: 250,
-    margin: {
-        left: 10,
-        right: 30
-    }
-});
+this.row.add([
+    card1, 
+    card2, 
+    card3, 
+    card4
+]);
 
-this.parent.add(card, {
-    width: 100,
-    margin: 5
-});
+const card5 =
+    new Card(this, {
+        id: 'card5',
+        padding: 10,
+        width: this.width / 4,
+        height: 120
+    });
+
+this.row2.add(card5);
 
 const scrollView = new ScrollView(this, {
-    x: 10,
-    y: 200,
-    width: 800,
-    height: 800,
+    x: 0,
+    y: 0,
+    width: this.width,
+    height: this.height,
     direction: 'both'
 });
 scrollView.add(this.parent);

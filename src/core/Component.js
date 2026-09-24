@@ -99,7 +99,7 @@ export default class Component {
 
     // Resolves immediately (pre-dirty system)
     requestLayout() {
-    9
+    
         let root = this;
     
         while (root.layoutParent) {
