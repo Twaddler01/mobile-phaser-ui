@@ -23,7 +23,7 @@ const Debug = {
         borderAlpha: 0.7,
         borderWidth: 1,
         fillColor: 0x0000ff,
-        fillAlpha: 0.3,
+        fillAlpha: 0.1,
 
         borderColor_ROW: 0x00ff00,
         fillColor_ROW: 0x00ff00,

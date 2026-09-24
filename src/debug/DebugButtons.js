@@ -25,22 +25,18 @@ export default class DebugButtons {
             this.createClickCycle([
                 // Clicks hwre...
                 
-                // Row
                 () => this.scene.parent.add(this.scene.items.cards[0], { margin: 10 } ),
                 () => {
                     this.scene.items.cards[0].add(this.scene.items.texts[0], { width: 200, height: 120 });
                     console.log(this.scene.parent.getChildOptions(this.scene.items.cards[0]));
                 },
                 () => this.scene.parent.add(this.scene.items.buttons[0]),
-                () => { 
-                    this.scene.parent.remove(this.scene.items.cards[0])
-                    console.log(this.scene.parent.getChildOptions(this.scene.items.cards[0]));
-                },
+                () => this.scene.parent.remove(this.scene.items.cards[0]),
                 () => this.scene.parent.add(this.scene.items.texts[1]),
                 () => this.scene.parent.add(this.scene.items.texts[2]),
                 () => this.scene.parent.add(this.scene.items.texts[4]),
                 () => this.scene.parent.add(this.scene.items.buttons[1]),
-                () => this.scene.parent.add(this.scene.items.cards[0]),
+                () => this.scene.parent.insertBefore(this.scene.items.cards[0], this.scene.items.texts[2]),
                 () => this.scene.parent.add(this.scene.items.cards[1]),
                 () => this.scene.parent.add(this.scene.items.cards[2]),
                 () => this.scene.items.cards[2].add(this.scene.items.texts[3]),
@@ -49,6 +45,11 @@ export default class DebugButtons {
                 () => this.scene.parent.add(this.scene.items.buttons[2]),
                 () => this.scene.parent.add(this.scene.items.buttons[3]),
                 () => this.scene.parent.add(this.scene.items.buttons[4]),
+                () => this.scene.items.buttons[0].destroy(),
+                () => this.scene.items.cards[0].destroy(),
+                () => this.scene.parent.move(this.scene.items.buttons[2], this.scene.items.buttons[1]),
+                () => this.scene.parent.move(this.scene.items.buttons[3], this.scene.items.buttons[1]),
+                () => this.scene.parent.move(this.scene.items.buttons[4], 1),
                 
                 // Column
                 /*

@@ -51,22 +51,22 @@ this.parent =
         id: 'parent',
         width: this.width,
         height: this.height,
-        align: 'start'
+        align: 'start',
+        gap: 50
     });
 
 this.row =
     new Row(this, {
         id: 'row',
-        width: this.width - 40,
+        width: this.width,
         justify: 'space-around',
+        //gap: 40
     });
 
 this.row2 =
     new Row(this, {
         id: 'row2',
         width: this.width,
-        height: 300,
-        padding: { top: 50 },
         justify: 'center'
     });
 
@@ -77,7 +77,7 @@ const card1 =
     new Card(this, {
         id: 'card1',
         padding: 10,
-        width: this.width / 4,
+        width: this.width / 4 - 40,
         height: 120
     });
 
@@ -85,7 +85,7 @@ const card2 =
     new Card(this, {
         id: 'card2',
         padding: 10,
-        width: this.width / 4,
+        width: this.width / 4 - 40,
         height: 120
     });
 
@@ -93,7 +93,7 @@ const card3 =
     new Card(this, {
         id: 'card3',
         padding: 10,
-        width: this.width / 4,
+        width: this.width / 4 - 40,
         height: 120
     });
 
@@ -101,14 +101,14 @@ const card4 =
     new Card(this, {
         id: 'card4',
         padding: 10,
-        width: this.width / 4,
+        width: this.width / 4 - 40,
         height: 120
     });
 
 this.row.add([
     card1, 
     card2, 
-    card3, 
+    //card3, 
     card4
 ]);
 
@@ -116,11 +116,9 @@ const card5 =
     new Card(this, {
         id: 'card5',
         padding: 10,
-        width: this.width / 4,
+        width: this.width / 4 - 40,
         height: 120
     });
-
-this.row2.add(card5);
 
 const scrollView = new ScrollView(this, {
     x: 0,
@@ -131,7 +129,13 @@ const scrollView = new ScrollView(this, {
 });
 scrollView.add(this.parent);
 
+card1.add(new Text(this, {text: 'card1 text'}));
+card2.add(new Text(this, {text: 'card2 text'}));
+card3.add(new Text(this, {text: 'card3 text'}));
+card4.add(new Text(this, {text: 'card4 text'}));
+card5.add(new Text(this, {text: 'card5 text'}));
 
+this.row.insertAfter(card5, card2);
 
 
 /*
@@ -379,7 +383,8 @@ this.debugCard.add(item);
             debugItems.cards.push(
                 new Card(this, {
                     id: `testCard${i}`,
-                    width: i === 1 ? 100 : null
+                    width: i === 1 ? 100 : 20,
+                    height: 20
                 })
             );
         }

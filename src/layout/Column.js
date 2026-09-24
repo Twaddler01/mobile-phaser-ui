@@ -582,28 +582,59 @@ export default class Column extends Component {
         return this;
     }
 
-    move(childOrId, index) {
-
+    // Either index or insert BEFORE
+    move(childOrId, destination) {
+    
         const child =
             this.getChild(childOrId);
-
+    
         if (!child) {
             return this;
         }
-
+    
         const currentIndex =
             this.children.indexOf(child);
-
+    
         if (currentIndex === -1) {
             return this;
         }
-
-        // Remove from our layout order.
+    
+        // Remove from current position.
         this.children.splice(
             currentIndex,
             1
         );
-
+    
+        let index;
+    
+        if (typeof destination === 'number') {
+    
+            index = destination;
+    
+        } else {
+    
+            const destinationChild =
+                this.getChild(destination);
+            
+            const destinationIndex =
+                this.children.indexOf(
+                    destinationChild
+                );
+            
+            if (destinationIndex === -1) {
+            
+                this.children.splice(
+                    currentIndex,
+                    0,
+                    child
+                );
+            
+                return this;
+            }
+            
+            index = destinationIndex;
+        }
+    
         // Clamp destination.
         index =
             Math.max(
@@ -613,22 +644,39 @@ export default class Column extends Component {
                     this.children.length
                 )
             );
-
-        // Insert into our layout order.
+    
+        // Insert into layout order.
         this.children.splice(
             index,
             0,
             child
         );
-
-        // Keep Phaser's display order synchronized.
-        this.container.moveTo(
-            child.container,
-            index
-        );
-
+    
+        // Keep Phaser display order synchronized.
+        this.syncDisplayOrder();
+    
         this.markLayoutDirty();
+    
+        return this;
+    }
 
+    // Match Phaser's ordering (keeping debugChildrenBounds as an overlay only)
+    syncDisplayOrder() {
+    
+        for (let i = 0; i < this.children.length; i++) {
+    
+            this.container.moveTo(
+                this.children[i].container,
+                i
+            );
+        }
+    
+        if (this.debugChildrenBounds) {
+            this.container.bringToTop(
+                this.debugChildrenBounds
+            );
+        }
+    
         return this;
     }
 

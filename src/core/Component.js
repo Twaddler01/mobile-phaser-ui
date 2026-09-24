@@ -138,14 +138,6 @@ export default class Component {
         return this;
     }
 
-    destroy() {
-        if (this.container) {
-            this.container.destroy();
-        }
-    
-        return this;
-    }
-
     ////////////////////////////////////////
     // CONTENT BOUNDS
     ////////////////////////////////////////
@@ -212,6 +204,33 @@ export default class Component {
         };
     }
 
+    destroy() {
+        if (this.destroyed) {
+            return this;
+        }
+    
+        this.destroyed = true;
+    
+        if (this.layoutParent) {
+            this.layoutParent.remove(this);
+        }
+    
+        for (const child of [...this.children]) {
+            child.destroy();
+        }
+    
+        this.children = [];
+    
+        if (this.container) {
+            this.container.destroy();
+            this.container = null;
+        }
+    
+        this.layoutParent = null;
+    
+        return this;
+    }
+
     ////////////////////////////////////////
     // DEBUG ONLY
     ////////////////////////////////////////
@@ -231,8 +250,7 @@ export default class Component {
     }
 
     updateDebugBounds() {
-
-        if (!this.debugBounds) {
+        if (!Debug.enabled || !this.debugBounds) {
             return this;
         }
 
@@ -268,6 +286,10 @@ export default class Component {
                 this.height
             );
         }
+
+        this.container?.bringToTop(
+            this.debugChildrenBounds
+        );
 
         return this;
     }
