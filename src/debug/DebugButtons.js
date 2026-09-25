@@ -1,4 +1,5 @@
 import Row from '../layout/Row.js';
+import Column from '../layout/Column.js';
 import Card from '../components/Card.js';
 import Text from '../components/Text.js';
 import Button from '../components/Button.js';
@@ -26,24 +27,15 @@ export default class DebugButtons {
     create() {
         this.addTitle('DEBUG BUTTONS:');
 
-
-
-const fillRow = new Row(this.scene, {
-    x: 300,
-    y: 150,
-    width: 500,
-    height: 300,
-    align: 'center',
-    gap: 10,
-
+const fillColumn = new Column(this.scene, {
+    //x: 300,
+    //y: 150,
+    width: 400,
+    height: 500,
     padding: 20,
-
-    style: {
-        backgroundColor: 0x222222,
-        radius: 16,
-        stroke: 2,
-        strokeColor: 0xffffff
-    }
+    gap: 10,
+    align: 'center',
+    justify: 'start'
 });
 
 const fillItem = new Card(this.scene, {
@@ -70,9 +62,15 @@ const fillItem2 = new Card(this.scene, {
     }
 });
 
-fillRow.add([fillItem, fillItem2]);
+fillColumn.add(fillItem, {
+    fill: 'vertical'
+});
 
-this.scene.parent.add(fillRow);
+fillColumn.add(fillItem2, {
+    fill: 'vertical'
+});
+
+this.scene.parent.add(fillColumn);
 
 
         this.addCycle =
@@ -82,7 +80,7 @@ this.scene.parent.add(fillRow);
 
         // 1. Intrinsic
         () => {
-            fillRow.setChildOptions(fillItem, {
+            fillColumn.setChildOptions(fillItem, {
                 width: null,
                 height: null,
                 fill: null,
@@ -94,7 +92,7 @@ this.scene.parent.add(fillRow);
 
         // 2. Fill both dimensions
         () => {
-            fillRow.setChildOptions(fillItem, {
+            fillColumn.setChildOptions(fillItem, {
                 width: null,
                 height: null,
                 fill: true,
@@ -107,7 +105,7 @@ this.scene.parent.add(fillRow);
         // 3. Explicit width + fill
         // Width should win.
         () => {
-            fillRow.setChildOptions(fillItem, {
+            fillColumn.setChildOptions(fillItem, {
                 width: 200,
                 height: null,
                 fill: true,
@@ -120,7 +118,7 @@ this.scene.parent.add(fillRow);
         // 4. Explicit height + fill
         // Height should win.
         () => {
-            fillRow.setChildOptions(fillItem, {
+            fillColumn.setChildOptions(fillItem, {
                 width: null,
                 height: 100,
                 fill: true,
@@ -133,7 +131,7 @@ this.scene.parent.add(fillRow);
         // 5. Explicit width + height + fill
         // Both explicit dimensions should win.
         () => {
-            fillRow.setChildOptions(fillItem, {
+            fillColumn.setChildOptions(fillItem, {
                 width: 200,
                 height: 100,
                 fill: true,
@@ -145,7 +143,7 @@ this.scene.parent.add(fillRow);
 
         // 6. Horizontal fill
         () => {
-            fillRow.setChildOptions(fillItem, {
+            fillColumn.setChildOptions(fillItem, {
                 width: null,
                 height: null,
                 fill: 'horizontal',
@@ -157,7 +155,7 @@ this.scene.parent.add(fillRow);
 
         // 7. Vertical fill
         () => {
-            fillRow.setChildOptions(fillItem, {
+            fillColumn.setChildOptions(fillItem, {
                 width: null,
                 height: null,
                 fill: 'vertical',
@@ -169,7 +167,7 @@ this.scene.parent.add(fillRow);
 
         // 8. Fill + margin
         () => {
-            fillRow.setChildOptions(fillItem, {
+            fillColumn.setChildOptions(fillItem, {
                 width: null,
                 height: null,
                 fill: true,
@@ -183,7 +181,7 @@ this.scene.parent.add(fillRow);
         // This makes alignment visibly meaningful.
         () => {
             console.log('9: horizontal test');
-            fillRow.setChildOptions(fillItem, {
+            fillColumn.setChildOptions(fillItem, {
                 width: null,
                 height: null,
                 fill: 'horizontal',
@@ -194,7 +192,7 @@ this.scene.parent.add(fillRow);
         },
         () => {
             console.log('9: horizontal test2');
-            fillRow.setChildOptions(fillItem2, {
+            fillColumn.setChildOptions(fillItem2, {
                 width: null,
                 height: null,
                 fill: 'horizontal',
@@ -208,7 +206,7 @@ this.scene.parent.add(fillRow);
         // 10. Vertical fill + horizontal center
         () => {
             console.log('10: Vertical test');
-            fillRow.setChildOptions(fillItem, {
+            fillColumn.setChildOptions(fillItem, {
                 width: null,
                 height: null,
                 fill: 'vertical',

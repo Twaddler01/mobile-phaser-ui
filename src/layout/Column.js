@@ -131,104 +131,11 @@ export default class Column extends Container {
         };
     }
 
-    setChildOptions(childOrId, options = {}) {
-
-        const child =
-            this.getChild(childOrId);
-
-        if (!child) {
-
-            if (Debug.enabled) {
-                console.warn(
-                    'Cannot update child options: component was not found.'
-                );
-            }
-
-            return this;
-        }
-
-        const current =
-            this.childLayoutOptions.get(child);
-
-        if (!current) {
-
-            if (Debug.enabled) {
-                console.warn(
-                    'Cannot update child options: component has no layout options.'
-                );
-            }
-
-            return this;
-        }
-
-        if (options.width !== undefined) {
-            current.width =
-                options.width;
-        }
-
-        if (options.height !== undefined) {
-            current.height =
-                options.height;
-        }
-
-        if (options.margin !== undefined) {
-            current.margin =
-                this.getMargin(options.margin);
-        }
-
-        if (options.horizontalAlign !== undefined) {
-            current.horizontalAlign =
-                options.horizontalAlign;
-        }
-
-        if (options.verticalAlign !== undefined) {
-            current.verticalAlign =
-                options.verticalAlign;
-        }
-
-        this.markLayoutDirty();
-
-        return this;
-    }
-
-    getChildOptions(childOrId) {
-
-        const child =
-            this.getChild(childOrId);
-
-        if (!child) {
-            return null;
-        }
-
-        const options =
-            this.childLayoutOptions.get(child);
-
-        if (!options) {
-            return null;
-        }
-
-        return {
-            width: options.width,
-
-            height: options.height,
-
-            margin: {
-                ...options.margin
-            },
-
-            horizontalAlign:
-                options.horizontalAlign,
-
-            verticalAlign:
-                options.verticalAlign
-        };
-    }
-
     layout() {
-
+    
         // Resolve child layouts first.
         for (const child of this.children) {
-
+    
             if (
                 child.layoutDirty &&
                 typeof child.layout === 'function'
@@ -236,54 +143,144 @@ export default class Column extends Container {
                 child.layout();
             }
         }
-
+    
         this.updateSize();
-
+    
         // DEBUG
         if (Debug.layout.enabled) {
-
+    
             this.debugChildrenBounds.clear();
-
+    
             this.debugChildrenBounds.fillStyle(
                 Debug.layout.fillColor_ROW,
                 Debug.layout.fillAlpha
             );
-
+    
             this.debugChildrenBounds.lineStyle(
                 Debug.layout.borderWidth,
                 Debug.layout.borderColor_ROW,
                 Debug.layout.borderAlpha
             );
         }
-
+    
         const availableWidth =
             this.width -
             this.padding.left -
             this.padding.right;
-
+    
         const availableHeight =
             this.height -
             this.padding.top -
             this.padding.bottom;
+    
+        ////////////////////////////////////////
+        // VERTICAL ALLOCATION
+        //
+        // Vertical fill children share the
+        // remaining main-axis space equally.
+        ////////////////////////////////////////
+    
+        let fixedHeight = 0;
+        let fillCount = 0;
+        let fillMargins = 0;
+    
+        for (const child of this.children) {
+    
+            const options =
+                this.childLayoutOptions.get(child);
+    
+            if (!options) {
+                continue;
+            }
+    
+            const {
+                margin,
+                fill
+            } = options;
+    
+            const childHeight =
+                options.height ?? child.height;
 
-        // Total height occupied by children.
+            const verticalFill =
+                options.height === null &&
+                (
+                    fill === true ||
+                    fill === 'vertical'
+                );
+    
+            if (verticalFill) {
+    
+                fillCount++;
+    
+                fillMargins +=
+                    margin.top +
+                    margin.bottom;
+    
+            } else {
+    
+                fixedHeight +=
+                    margin.top +
+                    childHeight +
+                    margin.bottom;
+            }
+        }
+    
+        const totalGaps =
+            Math.max(
+                0,
+                this.children.length - 1
+            ) * this.gap;
+    
+        const fillSpace =
+            Math.max(
+                0,
+                availableHeight -
+                fixedHeight -
+                fillMargins -
+                totalGaps
+            );
+    
+        const fillHeight =
+            fillCount > 0
+                ? fillSpace / fillCount
+                : 0;
+    
+        ////////////////////////////////////////
+        // RESOLVED CHILDREN HEIGHT
+        //
+        // Needed for justify calculations.
+        ////////////////////////////////////////
+    
         const childrenHeight =
             this.children.reduce(
                 (total, child) => {
-
+    
                     const options =
                         this.childLayoutOptions.get(child);
-
+    
                     if (!options) {
                         return total;
                     }
-
-                    const childHeight =
+    
+                    const {
+                        margin,
+                        fill
+                    } = options;
+    
+                    let childHeight =
                         options.height ?? child.height;
-
-                    const { margin } =
-                        options;
-
+    
+                    if (
+                        options.height === null &&
+                        (
+                            fill === true ||
+                            fill === 'vertical'
+                        )
+                    ) {
+                        childHeight =
+                            fillHeight;
+                    }
+    
                     return (
                         total +
                         margin.top +
@@ -297,181 +294,256 @@ export default class Column extends Container {
                 0,
                 this.children.length - 1
             ) * this.gap;
-
+    
         const remainingHeight =
             Math.max(
                 0,
-                availableHeight - childrenHeight
+                availableHeight -
+                childrenHeight
             );
-
-        // Determine vertical starting position
-        // and spacing between children.
+    
+        ////////////////////////////////////////
+        // DETERMINE VERTICAL STARTING POSITION
+        // AND SPACING BETWEEN CHILDREN.
+        ////////////////////////////////////////
+    
         let y;
         let spacing = 0;
-
+    
         switch (this.justify) {
-
+    
             case 'center':
-
+    
                 y =
                     this.padding.top +
                     remainingHeight / 2;
-
+    
                 break;
-
+    
             case 'end':
-
+    
                 y =
                     this.padding.top +
                     remainingHeight;
-
+    
                 break;
-
+    
             case 'space-between':
-
+    
                 y =
                     this.padding.top;
-
+    
                 if (this.children.length > 1) {
+    
                     spacing =
                         remainingHeight /
                         (this.children.length - 1);
                 }
-
+    
                 break;
-
+    
             case 'space-around':
-
+    
                 if (this.children.length > 0) {
-
+    
                     spacing =
                         remainingHeight /
                         this.children.length;
-
+    
                     y =
                         this.padding.top +
                         spacing / 2;
-
+    
                 } else {
-
+    
                     y =
                         this.padding.top;
                 }
-
+    
                 break;
-
+    
             case 'space-evenly':
-
+    
                 if (this.children.length > 0) {
-
+    
                     spacing =
                         remainingHeight /
                         (this.children.length + 1);
-
+    
                     y =
                         this.padding.top +
                         spacing;
-
+    
                 } else {
-
+    
                     y =
                         this.padding.top;
                 }
-
+    
                 break;
-
+    
             case 'start':
             default:
-
+    
                 y =
                     this.padding.top;
-
+    
                 break;
         }
-
+    
+        ////////////////////////////////////////
         // POSITION CHILDREN
+        ////////////////////////////////////////
+    
         for (const child of this.children) {
-
+    
             const options =
                 this.childLayoutOptions.get(child);
-
+    
             if (!options) {
                 continue;
             }
-
-            const childWidth =
-                options.width ?? child.width;
-
-            const childHeight =
-                options.height ?? child.height;
-
+    
             const {
-                margin
+                margin,
+                fill
             } = options;
-
-            // The actual child starts
-            // after its top margin.
+    
+            let childWidth =
+                options.width ?? child.width;
+    
+            let childHeight =
+                options.height ?? child.height;
+    
+            ////////////////////////////////////////
+            // HORIZONTAL FILL
+            //
+            // Cross-axis fill uses the entire
+            // available width after margins.
+            ////////////////////////////////////////
+    
+            if (
+                options.width === null &&
+                (
+                    fill === true ||
+                    fill === 'horizontal'
+                )
+            ) {
+    
+                childWidth =
+                    Math.max(
+                        0,
+                        availableWidth -
+                        margin.left -
+                        margin.right
+                    );
+            }
+    
+            ////////////////////////////////////////
+            // VERTICAL FILL
+            //
+            // Main-axis fill uses the resolved
+            // shared fill height.
+            ////////////////////////////////////////
+    
+            if (
+                options.height === null &&
+                (
+                    fill === true ||
+                    fill === 'vertical'
+                )
+            ) {
+    
+                childHeight =
+                    fillHeight;
+            }
+    
+            ////////////////////////////////////////
+            // APPLY LAYOUT SIZE
+            ////////////////////////////////////////
+    
+            const layoutSizeChanged =
+                child.setLayoutSize(
+                    childWidth,
+                    childHeight
+                );
+    
+            if (layoutSizeChanged) {
+                child.layout();
+            }
+    
+            ////////////////////////////////////////
+            // VERTICAL POSITION
+            ////////////////////////////////////////
+    
             const childY =
                 y +
                 margin.top;
-
-            let outerX;
-
+    
+            ////////////////////////////////////////
+            // HORIZONTAL ALIGNMENT
+            ////////////////////////////////////////
+    
             const outerWidth =
                 margin.left +
                 childWidth +
                 margin.right;
-
+    
+            let outerX;
+    
             switch (this.align) {
-
+    
                 case 'center':
-
+    
                     outerX =
                         this.padding.left +
                         (
                             availableWidth -
                             outerWidth
                         ) / 2;
-
+    
                     break;
-
+    
                 case 'end':
-
+    
                     outerX =
                         this.width -
                         this.padding.right -
                         outerWidth;
-
+    
                     break;
-
+    
                 case 'start':
                 default:
-
+    
                     outerX =
                         this.padding.left;
-
+    
                     break;
             }
-
+    
             const childX =
                 outerX +
                 margin.left;
-
+    
+            ////////////////////////////////////////
             // DEBUG
+            ////////////////////////////////////////
+    
             if (Debug.layout.enabled) {
-
+    
                 const outerHeight =
                     margin.top +
                     childHeight +
                     margin.bottom;
-
+    
                 this.debugChildrenBounds.fillRect(
                     outerX,
                     y,
                     outerWidth,
                     outerHeight
                 );
-
+    
                 this.debugChildrenBounds.strokeRect(
                     outerX,
                     y,
@@ -479,14 +551,16 @@ export default class Column extends Container {
                     outerHeight
                 );
             }
-
+    
             child.setPosition(
                 childX,
                 childY
             );
-
-            // Advance to the next
-            // outer layout box.
+    
+            ////////////////////////////////////////
+            // ADVANCE TO NEXT CHILD
+            ////////////////////////////////////////
+    
             y +=
                 margin.top +
                 childHeight +
@@ -501,9 +575,9 @@ export default class Column extends Container {
                         : 0
                 );
         }
-
+    
         this.layoutDirty = false;
-
+    
         return this;
     }
 }
