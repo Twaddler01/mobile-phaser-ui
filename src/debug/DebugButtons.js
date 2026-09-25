@@ -28,7 +28,7 @@ export default class DebugButtons {
     create() {
         this.addTitle('DEBUG BUTTONS:');
 
-const stackTest =
+/*const stackTest =
     new Stack(this.scene, {
 
         width: 500,
@@ -100,7 +100,7 @@ stackTest.add(childC, {
 });
 
 this.scene.parent.add(stackTest);
-
+*/
 
         this.addCycle =
             this.createClickCycle([
@@ -285,7 +285,7 @@ this.scene.parent.add(stackTest);
         
             ]);
 
-this.addCycle();
+//this.addCycle();
 
 /*
                 () => this.scene.parent.add(this.scene.items.cards[0], { margin: 10 } ),

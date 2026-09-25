@@ -38,8 +38,7 @@ export default class DemoScene extends Phaser.Scene {
 
 
 
-this.items = 
-    this.createDebugItems();
+//this.items = this.createDebugItems();
 
 // DEBUG
 
@@ -47,104 +46,64 @@ this.items =
 //this.parent = this.add.container();
 
 this.parent =
-    new Row(this, {
-        width: 900,
-        height: 650,
+    new Column(this, {
+        width: this.width,
+        height: this.height * 3,
         id: 'parent',
-        align: 'center',
-        justify: 'center'
+        justify: 'start',
+        padding: 20,
+        gap: 20
     });
 
-/*
-this.row =
-    new Row(this, {
-        id: 'row',
-        width: this.width,
-        justify: 'space-around',
-        //gap: 40
-    });
-
-this.row2 =
-    new Row(this, {
-        id: 'row2',
-        width: this.width,
-        justify: 'center'
-    });
-
-this.parent.add(this.row);
-this.parent.add(this.row2);
-
-const card1 =
+const headerSection =
     new Card(this, {
-        id: 'card1',
-        padding: 10,
-        width: this.width / 4 - 40,
-        height: 120
+        width: this.width - 40,
+        height: this.height / 4,
+        style: {
+            backgroundColor: 0x90D5FF,
+            radius: 8,
+            stroke: 2,
+            strokeColor: 0xffffff
+        }
     });
 
-const card2 =
+this.parent.add(headerSection);
+
+const headerTitle =
+    new Text(this, {
+        text: 'HEADER',
+        fontSize: '40px',
+        color: '#000000'
+    });
+
+headerSection.add(headerTitle, {
+    horizontalAlign: 'center',
+    verticalAlign: 'center',
+});
+
+const middleSection =
     new Card(this, {
-        id: 'card2',
-        padding: 10,
-        width: this.width / 4 - 40,
-        height: 120
+        width: this.width - 40,
+        height: this.height / 2,
+        padding: 20,
+        style: {
+            backgroundColor: 0x000000,
+            radius: 8,
+            stroke: 2,
+            strokeColor: 0xffffff
+        }
     });
 
-const card3 =
-    new Card(this, {
-        id: 'card3',
-        padding: 10,
-        width: this.width / 4 - 40,
-        height: 120
-    });
-
-const card4 =
-    new Card(this, {
-        id: 'card4',
-        padding: 10,
-        width: this.width / 4 - 40,
-        height: 120
-    });
-
-this.row.add([
-    card1, 
-    card2, 
-    //card3, 
-    card4
-]);
-
-const card5 =
-    new Card(this, {
-        id: 'card5',
-        padding: 10,
-        width: this.width / 4 - 40,
-        height: 120
-    });
+this.parent.add(middleSection);
 
 const scrollView = new ScrollView(this, {
-    x: 0,
-    y: 0,
-    width: this.width,
-    height: this.height,
-    direction: 'both'
+    width: this.width - 40,
+    height: this.height / 2,
+    padding: 20,
+    direction: 'vertical'
 });
 scrollView.add(this.parent);
 
-card1.add(new Text(this, {
-    text: 'card1 text',
-    fill: true
-}));
-card2.add(new Text(this, {text: 'card2 text'}));
-card3.add(new Text(this, {text: 'card3 text'}));
-card4.add(new Text(this, {text: 'card4 text'}));
-card5.add(new Text(this, {text: 'card5 text'}));
-
-this.row.insertAfter(card5, card2);
-
-console.log(
-    'OPTIONS: ', this.row.getChildOptions(card1)
-);
-*/
 
 
 /*
