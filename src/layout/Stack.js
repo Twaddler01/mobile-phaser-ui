@@ -181,40 +181,19 @@ export default class Stack extends Container {
             // AVAILABLE AREA
             ////////////////////////////////////////
 
-            const childAvailableWidth =
-                Math.max(
-                    0,
-                    availableWidth -
-                    margin.left -
-                    margin.right
-                );
+const childWidth =
+    this.resolveChildWidth(
+        child,
+        options,
+        availableWidth
+    );
 
-            const childAvailableHeight =
-                Math.max(
-                    0,
-                    availableHeight -
-                    margin.top -
-                    margin.bottom
-                );
-
-            ////////////////////////////////////////
-            // CHILD SIZE
-            ////////////////////////////////////////
-
-            const childWidth =
-                this.resolveChildWidth(
-                    child,
-                    options,
-                    childAvailableWidth
-                );
-
-            const childHeight =
-                this.resolveChildHeight(
-                    child,
-                    options,
-                    childAvailableHeight
-                );
-
+const childHeight =
+    this.resolveChildHeight(
+        child,
+        options,
+        availableHeight
+    );
             ////////////////////////////////////////
             // APPLY LAYOUT SIZE
             ////////////////////////////////////////

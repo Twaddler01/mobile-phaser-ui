@@ -1,3 +1,4 @@
+import Stack from '../layout/Stack.js';
 import Row from '../layout/Row.js';
 import Column from '../layout/Column.js';
 import Card from '../components/Card.js';
@@ -27,57 +28,51 @@ export default class DebugButtons {
     create() {
         this.addTitle('DEBUG BUTTONS:');
 
-const settingsColumn =
-    new Column(this.scene, {
+const stackTest =
+    new Stack(this.scene, {
 
-        width: 400,
-        height: 550,
+        width: 500,
+        height: 400,
 
-        padding: 20,
-        gap: 20,
-
-        align: 'center',
-        justify: 'start'
+        padding: 30
     });
 
-const header =
+const childA =
     new Card(this.scene, {
 
-        width: 120,
-        height: 60,
-
-        style: {
-            backgroundColor: 0x4444aa,
-            radius: 8,
-            stroke: 2,
-            strokeColor: 0xffffff
-        }
-    });
-
-
-const content =
-    new Card(this.scene, {
-
-        width: 120,
-        height: 60,
-
-        style: {
-            backgroundColor: 0x44aa66,
-            radius: 8,
-            stroke: 2,
-            strokeColor: 0xffffff
-        }
-    });
-
-
-const footer =
-    new Card(this.scene, {
-
-        width: 200,
+        width: 100,
         height: 50,
+        
+        style: {
+            backgroundColor: 0xff0000,
+            radius: 8,
+            stroke: 2,
+            strokeColor: 0xffffff
+        }
+    });
+
+const childB =
+    new Card(this.scene, {
+
+        width: 50,
+        height: 100,
 
         style: {
-            backgroundColor: 0xaa6644,
+            backgroundColor: 0x00ff00,
+            radius: 8,
+            stroke: 2,
+            strokeColor: 0xffffff
+        }
+    });
+
+const childC =
+    new Card(this.scene, {
+
+        width: 100,
+        height: 100,
+
+        style: {
+            backgroundColor: 0x0000ff,
             radius: 8,
             stroke: 2,
             strokeColor: 0xffffff
@@ -85,15 +80,26 @@ const footer =
     });
     
 
-settingsColumn.add(header);
-
-settingsColumn.add(content, {
-    fill: true
+stackTest.add(childA, {
+    fill: true,
+    horizontalAlign: 'start',
+    verticalAlign: 'start'
 });
 
-settingsColumn.add(footer);
+stackTest.add(childB, {
+    fill: true,
+    margin: 20,
+    horizontalAlign: 'center',
+    verticalAlign: 'center'
+});
 
-this.scene.parent.add(settingsColumn);
+stackTest.add(childC, {
+    margin: 15,
+    horizontalAlign: 'end',
+    verticalAlign: 'end'
+});
+
+this.scene.parent.add(stackTest);
 
 
         this.addCycle =
@@ -106,7 +112,7 @@ this.scene.parent.add(settingsColumn);
                 // Content fills the remaining area.
                 () => {
         
-                    settingsColumn.setChildOptions(content, {
+                    stackTest.setChildOptions(childA, {
                         width: null,
                         height: null,
                         fill: true,
@@ -124,7 +130,7 @@ this.scene.parent.add(settingsColumn);
                 // but returns to intrinsic height.
                 () => {
         
-                    settingsColumn.setChildOptions(content, {
+                    stackTest.setChildOptions(childA, {
                         width: null,
                         height: null,
                         fill: 'horizontal',
@@ -136,13 +142,13 @@ this.scene.parent.add(settingsColumn);
                 },
         
         
-                // 3. CONTENT: vertical fill only
+                // 3. childA: vertical fill only
                 //
-                // Content gets the remaining height,
+                // childA gets the remaining height,
                 // but keeps intrinsic width.
                 () => {
         
-                    settingsColumn.setChildOptions(content, {
+                    stackTest.setChildOptions(childA, {
                         width: null,
                         height: null,
                         fill: 'vertical',
@@ -154,13 +160,13 @@ this.scene.parent.add(settingsColumn);
                 },
         
         
-                // 4. CONTENT: explicit width + fill
+                // 4. childA: explicit width + fill
                 //
                 // Width should win.
                 // Height should still fill.
                 () => {
         
-                    settingsColumn.setChildOptions(content, {
+                    stackTest.setChildOptions(childA, {
                         width: 250,
                         height: null,
                         fill: true,
@@ -172,13 +178,13 @@ this.scene.parent.add(settingsColumn);
                 },
         
         
-                // 5. CONTENT: explicit height + fill
+                // 5. childA: explicit height + fill
                 //
                 // Height should win.
                 // Width should still fill.
                 () => {
         
-                    settingsColumn.setChildOptions(content, {
+                    stackTest.setChildOptions(childA, {
                         width: null,
                         height: 100,
                         fill: true,
@@ -190,12 +196,12 @@ this.scene.parent.add(settingsColumn);
                 },
         
         
-                // 6. CONTENT: explicit width + height
+                // 6. childA: explicit width + height
                 //
                 // Fill has nothing left to do.
                 () => {
         
-                    settingsColumn.setChildOptions(content, {
+                    stackTest.setChildOptions(childA, {
                         width: 250,
                         height: 100,
                         fill: true,
@@ -207,13 +213,13 @@ this.scene.parent.add(settingsColumn);
                 },
         
         
-                // 7. CONTENT: fill + margin
+                // 7. childA: fill + margin
                 //
                 // Margin should reduce the usable
                 // cross-axis and main-axis area.
                 () => {
         
-                    settingsColumn.setChildOptions(content, {
+                    stackTest.setChildOptions(childA, {
                         width: null,
                         height: null,
                         fill: true,
@@ -225,14 +231,14 @@ this.scene.parent.add(settingsColumn);
                 },
         
         
-                // 8. CONTENT: fill + horizontal center
+                // 8. childA: fill + horizontal center
                 //
                 // Because fill is active horizontally,
                 // there should be no visible horizontal
                 // movement unless margins constrain it.
                 () => {
         
-                    settingsColumn.setChildOptions(content, {
+                    stackTest.setChildOptions(childA, {
                         width: null,
                         height: null,
                         fill: true,
@@ -244,12 +250,12 @@ this.scene.parent.add(settingsColumn);
                 },
         
         
-                // 9. CONTENT: remove fill
+                // 9. childA: remove fill
                 //
                 // Return to intrinsic size and center it.
                 () => {
         
-                    settingsColumn.setChildOptions(content, {
+                    stackTest.setChildOptions(childA, {
                         width: null,
                         height: null,
                         fill: null,
@@ -261,12 +267,12 @@ this.scene.parent.add(settingsColumn);
                 },
         
         
-                // 10. CONTENT: fill again
+                // 10. childA: fill again
                 //
                 // Final expected flexible-panel state.
                 () => {
         
-                    settingsColumn.setChildOptions(content, {
+                    stackTest.setChildOptions(childA, {
                         width: null,
                         height: null,
                         fill: true,
