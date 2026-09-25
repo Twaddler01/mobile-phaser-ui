@@ -105,6 +105,260 @@ export default class Container extends Component {
     }
 
     //////////////////////////////////////////
+    // LAYOUT HELPERS
+    //////////////////////////////////////////
+
+    isFillWidth(options) {
+
+        return (
+            options.width === null &&
+            (
+                options.fill === true ||
+                options.fill === 'horizontal'
+            )
+        );
+    }
+
+
+    isFillHeight(options) {
+
+        return (
+            options.height === null &&
+            (
+                options.fill === true ||
+                options.fill === 'vertical'
+            )
+        );
+    }
+
+
+    getChildWidth(child, options) {
+
+        return (
+            options.width ??
+            child.width
+        );
+    }
+
+
+    getChildHeight(child, options) {
+
+        return (
+            options.height ??
+            child.height
+        );
+    }
+
+    resolveChildWidth(
+        child,
+        options,
+        availableWidth = null,
+        fillWidth = null
+    ) {
+
+        if (this.isFillWidth(options)) {
+
+            if (fillWidth !== null) {
+                return fillWidth;
+            }
+
+            if (availableWidth !== null) {
+
+                return Math.max(
+                    0,
+                    availableWidth -
+                    options.margin.left -
+                    options.margin.right
+                );
+            }
+        }
+
+        return this.getChildWidth(
+            child,
+            options
+        );
+    }
+
+    resolveChildHeight(
+        child,
+        options,
+        availableHeight = null,
+        fillHeight = null
+    ) {
+
+        if (this.isFillHeight(options)) {
+
+            if (fillHeight !== null) {
+                return fillHeight;
+            }
+
+            if (availableHeight !== null) {
+
+                return Math.max(
+                    0,
+                    availableHeight -
+                    options.margin.top -
+                    options.margin.bottom
+                );
+            }
+        }
+
+        return this.getChildHeight(
+            child,
+            options
+        );
+    }
+
+    getHorizontalFillAllocation(
+        availableWidth
+    ) {
+
+        let fixedWidth = 0;
+        let fillCount = 0;
+        let fillMargins = 0;
+
+        for (const child of this.children) {
+
+            const options =
+                this.childLayoutOptions.get(child);
+
+            if (!options) {
+                continue;
+            }
+
+            const {
+                margin
+            } = options;
+
+            const childWidth =
+                this.getChildWidth(
+                    child,
+                    options
+                );
+
+            if (this.isFillWidth(options)) {
+
+                fillCount++;
+
+                fillMargins +=
+                    margin.left +
+                    margin.right;
+
+            } else {
+
+                fixedWidth +=
+                    margin.left +
+                    childWidth +
+                    margin.right;
+            }
+        }
+
+        const totalGaps =
+            Math.max(
+                0,
+                this.children.length - 1
+            ) * this.gap;
+
+        const fillSpace =
+            Math.max(
+                0,
+                availableWidth -
+                fixedWidth -
+                fillMargins -
+                totalGaps
+            );
+
+        const fillWidth =
+            fillCount > 0
+                ? fillSpace / fillCount
+                : 0;
+
+        return {
+            fixedWidth,
+            fillCount,
+            fillMargins,
+            totalGaps,
+            fillSpace,
+            fillWidth
+        };
+    }
+
+
+    getVerticalFillAllocation(
+        availableHeight
+    ) {
+
+        let fixedHeight = 0;
+        let fillCount = 0;
+        let fillMargins = 0;
+
+        for (const child of this.children) {
+
+            const options =
+                this.childLayoutOptions.get(child);
+
+            if (!options) {
+                continue;
+            }
+
+            const {
+                margin
+            } = options;
+
+            const childHeight =
+                this.getChildHeight(
+                    child,
+                    options
+                );
+
+            if (this.isFillHeight(options)) {
+
+                fillCount++;
+
+                fillMargins +=
+                    margin.top +
+                    margin.bottom;
+
+            } else {
+
+                fixedHeight +=
+                    margin.top +
+                    childHeight +
+                    margin.bottom;
+            }
+        }
+
+        const totalGaps =
+            Math.max(
+                0,
+                this.children.length - 1
+            ) * this.gap;
+
+        const fillSpace =
+            Math.max(
+                0,
+                availableHeight -
+                fixedHeight -
+                fillMargins -
+                totalGaps
+            );
+
+        const fillHeight =
+            fillCount > 0
+                ? fillSpace / fillCount
+                : 0;
+
+        return {
+            fixedHeight,
+            fillCount,
+            fillMargins,
+            totalGaps,
+            fillSpace,
+            fillHeight
+        };
+    }
+
+    //////////////////////////////////////////
     // CHILD OPTIONS DEFAULTS
     //////////////////////////////////////////
 

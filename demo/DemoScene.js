@@ -48,10 +48,11 @@ this.items =
 
 this.parent =
     new Row(this, {
-        x: 0,
-        y: 0,
+        width: 900,
+        height: 650,
         id: 'parent',
-
+        align: 'center',
+        justify: 'center'
     });
 
 /*

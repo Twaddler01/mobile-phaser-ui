@@ -171,72 +171,13 @@ export default class Row extends Container {
         // main-axis space equally.
         ////////////////////////////////////////
         
-        // Children that explicitly consume width.
-        let fixedWidth = 0;
-        
-        // Number of children requesting
-        // horizontal fill.
-        let fillCount = 0;
-        
-        for (const child of this.children) {
-        
-            const options =
-                this.childLayoutOptions.get(child);
-        
-            if (!options) {
-                continue;
-            }
-        
-            const {
-                margin,
-                fill
-            } = options;
-        
-            const childWidth =
-                options.width ?? child.width;
-        
-            const horizontalFill =
-                options.width === null &&
-                (
-                    fill === true ||
-                    fill === 'horizontal'
-                );
-        
-            if (horizontalFill) {
-        
-                fillCount++;
-        
-            } else {
-        
-                fixedWidth +=
-                    margin.left +
-                    childWidth +
-                    margin.right;
-            }
-        }
-        
-        // Gaps are always fixed.
-        const totalGaps =
-            Math.max(
-                0,
-                this.children.length - 1
-            ) * this.gap;
-        
-        // Space available for fill children.
-        const fillSpace =
-            Math.max(
-                0,
-                availableWidth -
-                fixedWidth -
-                totalGaps
-            );
-        
-        // Each fill child receives an equal share.
-        const fillWidth =
-            fillCount > 0
-                ? fillSpace / fillCount
-                : 0;
-        
+        // Resolve the shared width for fill children.
+        const {
+            fillWidth
+        } = this.getHorizontalFillAllocation(
+            availableWidth
+        );
+
         ////////////////////////////////////////
         // RESOLVED CHILDREN WIDTH
         ////////////////////////////////////////
@@ -253,23 +194,16 @@ export default class Row extends Container {
                     }
         
                     const {
-                        margin,
-                        fill
+                        margin
                     } = options;
         
-                    let childWidth =
-                        options.width ?? child.width;
-        
-                    if (
-                        options.width === null &&
-                        (
-                            fill === true ||
-                            fill === 'horizontal'
-                        )
-                    ) {
-                        childWidth =
-                            fillWidth;
-                    }
+                    const childWidth =
+                        this.resolveChildWidth(
+                            child,
+                            options,
+                            availableWidth,
+                            fillWidth
+                        );
         
                     return (
                         total +
@@ -284,7 +218,7 @@ export default class Row extends Container {
                 0,
                 this.children.length - 1
             ) * this.gap;
-        
+
         const remainingWidth =
             Math.max(
                 0,
@@ -369,8 +303,7 @@ export default class Row extends Container {
             }
 
             const {
-                margin,
-                fill
+                margin
             } = options;
         
             ////////////////////////////////////////
@@ -387,49 +320,24 @@ export default class Row extends Container {
             ////////////////////////////////////////
             // CHILD SIZE
             ////////////////////////////////////////
-            
-            let childWidth =
-                options.width ?? child.width;
-            
-            let childHeight =
-                options.height ?? child.height;
-            
             // fill consumes available main-axis
             // space first; justify distributes 
             // whatever remains.
 
-            ////////////////////////////////////////
-            // HORIZONTAL FILL
-            ////////////////////////////////////////
+            let childWidth =
+                this.resolveChildWidth(
+                    child,
+                    options,
+                    availableWidth,
+                    fillWidth
+                );
             
-            if (
-                options.width === null &&
-                (
-                    fill === true ||
-                    fill === 'horizontal'
-                )
-            ) {
-                childWidth =
-                    fillWidth;
-            }
-            
-            ////////////////////////////////////////
-            // VERTICAL FILL
-            ////////////////////////////////////////
-            
-            if (
-                options.height === null &&
-                (
-                    fill === true ||
-                    fill === 'vertical'
-                )
-            ) {
-                childHeight =
-                    Math.max(
-                        0,
-                        availableHeight
-                    );
-            }
+            let childHeight =
+                this.resolveChildHeight(
+                    child,
+                    options,
+                    availableHeight
+                );
 
             ////////////////////////////////////////
             // APPLY LAYOUT SIZE

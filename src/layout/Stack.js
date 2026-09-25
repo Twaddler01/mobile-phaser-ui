@@ -1,7 +1,7 @@
 import Debug from '../core/Debug.js';
 import Container from '../core/Container.js';
 
-export default class Column extends Container {
+export default class Stack extends Container {
 
     constructor(scene, config = {}) {
 
@@ -9,15 +9,6 @@ export default class Column extends Container {
 
         this.padding =
             this.getPadding(config.padding);
-
-        this.gap =
-            config.gap ?? 0;
-
-        this.align =
-            config.align ?? 'start';
-
-        this.justify =
-            config.justify ?? 'start';
 
         // DEBUG
         this.debugChildrenBounds =
@@ -71,13 +62,13 @@ export default class Column extends Container {
 
             const contentHeight =
                 this.children.reduce(
-                    (total, child) => {
+                    (max, child) => {
 
                         const options =
                             this.childLayoutOptions.get(child);
 
                         if (!options) {
-                            return total;
+                            return max;
                         }
 
                         const childHeight =
@@ -86,19 +77,15 @@ export default class Column extends Container {
                         const { margin } =
                             options;
 
-                        return (
-                            total +
+                        return Math.max(
+                            max,
                             margin.top +
                             childHeight +
                             margin.bottom
                         );
                     },
                     0
-                ) +
-                Math.max(
-                    0,
-                    this.children.length - 1
-                ) * this.gap;
+                );
 
             this.height =
                 this.padding.top +
@@ -132,10 +119,10 @@ export default class Column extends Container {
     }
 
     layout() {
-    
+
         // Resolve child layouts first.
         for (const child of this.children) {
-    
+
             if (
                 child.layoutDirty &&
                 typeof child.layout === 'function'
@@ -143,373 +130,235 @@ export default class Column extends Container {
                 child.layout();
             }
         }
-    
+
         this.updateSize();
-    
+
         // DEBUG
         if (Debug.layout.enabled) {
-    
+
             this.debugChildrenBounds.clear();
-    
+
             this.debugChildrenBounds.fillStyle(
                 Debug.layout.fillColor_ROW,
                 Debug.layout.fillAlpha
             );
-    
+
             this.debugChildrenBounds.lineStyle(
                 Debug.layout.borderWidth,
                 Debug.layout.borderColor_ROW,
                 Debug.layout.borderAlpha
             );
         }
-    
+
         const availableWidth =
             this.width -
             this.padding.left -
             this.padding.right;
-    
+
         const availableHeight =
             this.height -
             this.padding.top -
             this.padding.bottom;
-    
-        ////////////////////////////////////////
-        // VERTICAL ALLOCATION
-        //
-        // Vertical fill children share the
-        // remaining main-axis space equally.
-        ////////////////////////////////////////
-    
-        // Resolve the shared height for fill children.
-        const {
-            fillHeight
-        } = this.getVerticalFillAllocation(
-            availableHeight
-        );
 
-        ////////////////////////////////////////
-        // RESOLVED CHILDREN HEIGHT
-        //
-        // Needed for justify calculations.
-        ////////////////////////////////////////
-    
-        const childrenHeight =
-            this.children.reduce(
-                (total, child) => {
-    
-                    const options =
-                        this.childLayoutOptions.get(child);
-    
-                    if (!options) {
-                        return total;
-                    }
-    
-                    const {
-                        margin
-                    } = options;
-                    
-                    const childHeight =
-                        this.resolveChildHeight(
-                            child,
-                            options,
-                            availableHeight,
-                            fillHeight
-                        );
-    
-                    return (
-                        total +
-                        margin.top +
-                        childHeight +
-                        margin.bottom
-                    );
-                },
-                0
-            ) +
-            Math.max(
-                0,
-                this.children.length - 1
-            ) * this.gap;
-    
-        const remainingHeight =
-            Math.max(
-                0,
-                availableHeight -
-                childrenHeight
-            );
-    
-        ////////////////////////////////////////
-        // DETERMINE VERTICAL STARTING POSITION
-        // AND SPACING BETWEEN CHILDREN.
-        ////////////////////////////////////////
-    
-        let y;
-        let spacing = 0;
-    
-        switch (this.justify) {
-    
-            case 'center':
-    
-                y =
-                    this.padding.top +
-                    remainingHeight / 2;
-    
-                break;
-    
-            case 'end':
-    
-                y =
-                    this.padding.top +
-                    remainingHeight;
-    
-                break;
-    
-            case 'space-between':
-    
-                y =
-                    this.padding.top;
-    
-                if (this.children.length > 1) {
-    
-                    spacing =
-                        remainingHeight /
-                        (this.children.length - 1);
-                }
-    
-                break;
-    
-            case 'space-around':
-    
-                if (this.children.length > 0) {
-    
-                    spacing =
-                        remainingHeight /
-                        this.children.length;
-    
-                    y =
-                        this.padding.top +
-                        spacing / 2;
-    
-                } else {
-    
-                    y =
-                        this.padding.top;
-                }
-    
-                break;
-    
-            case 'space-evenly':
-    
-                if (this.children.length > 0) {
-    
-                    spacing =
-                        remainingHeight /
-                        (this.children.length + 1);
-    
-                    y =
-                        this.padding.top +
-                        spacing;
-    
-                } else {
-    
-                    y =
-                        this.padding.top;
-                }
-    
-                break;
-    
-            case 'start':
-            default:
-    
-                y =
-                    this.padding.top;
-    
-                break;
-        }
-    
         ////////////////////////////////////////
         // POSITION CHILDREN
         ////////////////////////////////////////
-    
+
         for (const child of this.children) {
-    
+
             const options =
                 this.childLayoutOptions.get(child);
-    
+
             if (!options) {
                 continue;
             }
-    
+
             const {
                 margin
             } = options;
-    
-            let childWidth =
+
+            ////////////////////////////////////////
+            // AVAILABLE AREA
+            ////////////////////////////////////////
+
+            const childAvailableWidth =
+                Math.max(
+                    0,
+                    availableWidth -
+                    margin.left -
+                    margin.right
+                );
+
+            const childAvailableHeight =
+                Math.max(
+                    0,
+                    availableHeight -
+                    margin.top -
+                    margin.bottom
+                );
+
+            ////////////////////////////////////////
+            // CHILD SIZE
+            ////////////////////////////////////////
+
+            const childWidth =
                 this.resolveChildWidth(
                     child,
                     options,
-                    availableWidth
+                    childAvailableWidth
                 );
-            
-            let childHeight =
+
+            const childHeight =
                 this.resolveChildHeight(
                     child,
                     options,
-                    availableHeight,
-                    fillHeight
+                    childAvailableHeight
                 );
 
             ////////////////////////////////////////
             // APPLY LAYOUT SIZE
             ////////////////////////////////////////
-    
+
             const layoutSizeChanged =
                 child.setLayoutSize(
                     childWidth,
                     childHeight
                 );
-    
+
             if (layoutSizeChanged) {
                 child.layout();
             }
-    
-            ////////////////////////////////////////
-            // VERTICAL POSITION
-            ////////////////////////////////////////
-    
-            const childY =
-                y +
-                margin.top;
-    
+
             ////////////////////////////////////////
             // HORIZONTAL ALIGNMENT
             ////////////////////////////////////////
-    
+
             const outerWidth =
                 margin.left +
                 childWidth +
                 margin.right;
-    
+
             let outerX;
-    
-            switch (this.align) {
-    
+
+            switch (options.horizontalAlign) {
+
                 case 'center':
-    
+
                     outerX =
                         this.padding.left +
                         (
                             availableWidth -
                             outerWidth
                         ) / 2;
-    
+
                     break;
-    
+
                 case 'end':
-    
+
                     outerX =
                         this.width -
                         this.padding.right -
                         outerWidth;
-    
+
                     break;
-    
+
                 case 'start':
                 default:
-    
+
                     outerX =
                         this.padding.left;
-    
+
                     break;
             }
-    
-            const childX =
-                outerX +
-                margin.left;
-    
+
+            ////////////////////////////////////////
+            // VERTICAL ALIGNMENT
+            ////////////////////////////////////////
+
+            const outerHeight =
+                margin.top +
+                childHeight +
+                margin.bottom;
+
+            let outerY;
+
+            switch (options.verticalAlign) {
+
+                case 'center':
+
+                    outerY =
+                        this.padding.top +
+                        (
+                            availableHeight -
+                            outerHeight
+                        ) / 2;
+
+                    break;
+
+                case 'end':
+
+                    outerY =
+                        this.height -
+                        this.padding.bottom -
+                        outerHeight;
+
+                    break;
+
+                case 'start':
+                default:
+
+                    outerY =
+                        this.padding.top;
+
+                    break;
+            }
+
+            ////////////////////////////////////////
+            // CHILD POSITION
+            ////////////////////////////////////////
+
+            child.setPosition(
+                outerX + margin.left,
+                outerY + margin.top
+            );
+
             ////////////////////////////////////////
             // DEBUG
             ////////////////////////////////////////
-    
+
             if (Debug.layout.enabled) {
-    
-                const outerHeight =
-                    margin.top +
-                    childHeight +
-                    margin.bottom;
-    
+
                 this.debugChildrenBounds.fillRect(
                     outerX,
-                    y,
+                    outerY,
                     outerWidth,
                     outerHeight
                 );
-    
+
                 this.debugChildrenBounds.strokeRect(
                     outerX,
-                    y,
+                    outerY,
                     outerWidth,
                     outerHeight
                 );
             }
-    
-            child.setPosition(
-                childX,
-                childY
-            );
-    
-            ////////////////////////////////////////
-            // ADVANCE TO NEXT CHILD
-            ////////////////////////////////////////
-    
-            y +=
-                margin.top +
-                childHeight +
-                margin.bottom +
-                spacing +
-                (
-                    child !==
-                    this.children[
-                        this.children.length - 1
-                    ]
-                        ? this.gap
-                        : 0
-                );
         }
-    
+
         this.layoutDirty = false;
-    
+
         return this;
     }
 }
 
 /*
-const column = new Column(this, {
+const stack = new Stack(this, {
 
     x: 100,
     y: 100,
 
     width: 500,
-    height: 600,
+    height: 400,
 
-    padding: 30,
-
-    align: 'center',
-    justify: 'space-evenly'
+    padding: 30
 });
-
-////////////////////////////////
-
-align:
-    start
-    center
-    end
-
-justify:
-    start
-    center
-    end
-    space-between
-    space-around
-    space-evenly
-
 */

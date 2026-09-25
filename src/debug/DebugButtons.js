@@ -27,196 +27,257 @@ export default class DebugButtons {
     create() {
         this.addTitle('DEBUG BUTTONS:');
 
-const fillColumn = new Column(this.scene, {
-    //x: 300,
-    //y: 150,
-    width: 400,
-    height: 500,
-    padding: 20,
-    gap: 10,
-    align: 'center',
-    justify: 'start'
+const settingsColumn =
+    new Column(this.scene, {
+
+        width: 400,
+        height: 550,
+
+        padding: 20,
+        gap: 20,
+
+        align: 'center',
+        justify: 'start'
+    });
+
+const header =
+    new Card(this.scene, {
+
+        width: 120,
+        height: 60,
+
+        style: {
+            backgroundColor: 0x4444aa,
+            radius: 8,
+            stroke: 2,
+            strokeColor: 0xffffff
+        }
+    });
+
+
+const content =
+    new Card(this.scene, {
+
+        width: 120,
+        height: 60,
+
+        style: {
+            backgroundColor: 0x44aa66,
+            radius: 8,
+            stroke: 2,
+            strokeColor: 0xffffff
+        }
+    });
+
+
+const footer =
+    new Card(this.scene, {
+
+        width: 200,
+        height: 50,
+
+        style: {
+            backgroundColor: 0xaa6644,
+            radius: 8,
+            stroke: 2,
+            strokeColor: 0xffffff
+        }
+    });
+    
+
+settingsColumn.add(header);
+
+settingsColumn.add(content, {
+    fill: true
 });
 
-const fillItem = new Card(this.scene, {
-    width: 120,
-    height: 60,
+settingsColumn.add(footer);
 
-    style: {
-        backgroundColor: 0x4444aa,
-        radius: 8,
-        stroke: 2,
-        strokeColor: 0xffffff
-    }
-});
-
-const fillItem2 = new Card(this.scene, {
-    width: 120,
-    height: 60,
-
-    style: {
-        backgroundColor: 0x4444aa,
-        radius: 8,
-        stroke: 2,
-        strokeColor: 0xffffff
-    }
-});
-
-fillColumn.add(fillItem, {
-    fill: 'vertical'
-});
-
-fillColumn.add(fillItem2, {
-    fill: 'vertical'
-});
-
-this.scene.parent.add(fillColumn);
+this.scene.parent.add(settingsColumn);
 
 
         this.addCycle =
             this.createClickCycle([
                 // Clicks hwre...
 
-
-        // 1. Intrinsic
-        () => {
-            fillColumn.setChildOptions(fillItem, {
-                width: null,
-                height: null,
-                fill: null,
-                margin: 0,
-                horizontalAlign: 'start',
-                verticalAlign: 'start'
-            });
-        },
-
-        // 2. Fill both dimensions
-        () => {
-            fillColumn.setChildOptions(fillItem, {
-                width: null,
-                height: null,
-                fill: true,
-                margin: 0,
-                horizontalAlign: 'start',
-                verticalAlign: 'start'
-            });
-        },
-
-        // 3. Explicit width + fill
-        // Width should win.
-        () => {
-            fillColumn.setChildOptions(fillItem, {
-                width: 200,
-                height: null,
-                fill: true,
-                margin: 0,
-                horizontalAlign: 'start',
-                verticalAlign: 'start'
-            });
-        },
-
-        // 4. Explicit height + fill
-        // Height should win.
-        () => {
-            fillColumn.setChildOptions(fillItem, {
-                width: null,
-                height: 100,
-                fill: true,
-                margin: 0,
-                horizontalAlign: 'start',
-                verticalAlign: 'start'
-            });
-        },
-
-        // 5. Explicit width + height + fill
-        // Both explicit dimensions should win.
-        () => {
-            fillColumn.setChildOptions(fillItem, {
-                width: 200,
-                height: 100,
-                fill: true,
-                margin: 0,
-                horizontalAlign: 'start',
-                verticalAlign: 'start'
-            });
-        },
-
-        // 6. Horizontal fill
-        () => {
-            fillColumn.setChildOptions(fillItem, {
-                width: null,
-                height: null,
-                fill: 'horizontal',
-                margin: 0,
-                horizontalAlign: 'start',
-                verticalAlign: 'start'
-            });
-        },
-
-        // 7. Vertical fill
-        () => {
-            fillColumn.setChildOptions(fillItem, {
-                width: null,
-                height: null,
-                fill: 'vertical',
-                margin: 0,
-                horizontalAlign: 'start',
-                verticalAlign: 'start'
-            });
-        },
-
-        // 8. Fill + margin
-        () => {
-            fillColumn.setChildOptions(fillItem, {
-                width: null,
-                height: null,
-                fill: true,
-                margin: 20,
-                horizontalAlign: 'start',
-                verticalAlign: 'start'
-            });
-        },
-
-        // 9. Horizontal fill + vertical center
-        // This makes alignment visibly meaningful.
-        () => {
-            console.log('9: horizontal test');
-            fillColumn.setChildOptions(fillItem, {
-                width: null,
-                height: null,
-                fill: 'horizontal',
-                margin: 0,
-                horizontalAlign: 'start',
-                verticalAlign: 'center'
-            });
-        },
-        () => {
-            console.log('9: horizontal test2');
-            fillColumn.setChildOptions(fillItem2, {
-                width: null,
-                height: null,
-                fill: 'horizontal',
-                margin: 0,
-                horizontalAlign: 'start',
-                verticalAlign: 'center'
-            });
-        },   
+                // 1. BASELINE
+                //
+                // Header and footer are intrinsic.
+                // Content fills the remaining area.
+                () => {
         
-
-        // 10. Vertical fill + horizontal center
-        () => {
-            console.log('10: Vertical test');
-            fillColumn.setChildOptions(fillItem, {
-                width: null,
-                height: null,
-                fill: 'vertical',
-                margin: 15,
-                horizontalAlign: 'center',
-                verticalAlign: 'start'
-            });
-        }
-
-    ]);
+                    settingsColumn.setChildOptions(content, {
+                        width: null,
+                        height: null,
+                        fill: true,
+                        margin: 0,
+                        horizontalAlign: 'start',
+                        verticalAlign: 'start'
+                    });
+        
+                },
+        
+        
+                // 2. CONTENT: horizontal fill only
+                //
+                // Content becomes full width,
+                // but returns to intrinsic height.
+                () => {
+        
+                    settingsColumn.setChildOptions(content, {
+                        width: null,
+                        height: null,
+                        fill: 'horizontal',
+                        margin: 0,
+                        horizontalAlign: 'start',
+                        verticalAlign: 'start'
+                    });
+        
+                },
+        
+        
+                // 3. CONTENT: vertical fill only
+                //
+                // Content gets the remaining height,
+                // but keeps intrinsic width.
+                () => {
+        
+                    settingsColumn.setChildOptions(content, {
+                        width: null,
+                        height: null,
+                        fill: 'vertical',
+                        margin: 0,
+                        horizontalAlign: 'start',
+                        verticalAlign: 'start'
+                    });
+        
+                },
+        
+        
+                // 4. CONTENT: explicit width + fill
+                //
+                // Width should win.
+                // Height should still fill.
+                () => {
+        
+                    settingsColumn.setChildOptions(content, {
+                        width: 250,
+                        height: null,
+                        fill: true,
+                        margin: 0,
+                        horizontalAlign: 'start',
+                        verticalAlign: 'start'
+                    });
+        
+                },
+        
+        
+                // 5. CONTENT: explicit height + fill
+                //
+                // Height should win.
+                // Width should still fill.
+                () => {
+        
+                    settingsColumn.setChildOptions(content, {
+                        width: null,
+                        height: 100,
+                        fill: true,
+                        margin: 0,
+                        horizontalAlign: 'start',
+                        verticalAlign: 'start'
+                    });
+        
+                },
+        
+        
+                // 6. CONTENT: explicit width + height
+                //
+                // Fill has nothing left to do.
+                () => {
+        
+                    settingsColumn.setChildOptions(content, {
+                        width: 250,
+                        height: 100,
+                        fill: true,
+                        margin: 0,
+                        horizontalAlign: 'start',
+                        verticalAlign: 'start'
+                    });
+        
+                },
+        
+        
+                // 7. CONTENT: fill + margin
+                //
+                // Margin should reduce the usable
+                // cross-axis and main-axis area.
+                () => {
+        
+                    settingsColumn.setChildOptions(content, {
+                        width: null,
+                        height: null,
+                        fill: true,
+                        margin: 20,
+                        horizontalAlign: 'start',
+                        verticalAlign: 'start'
+                    });
+        
+                },
+        
+        
+                // 8. CONTENT: fill + horizontal center
+                //
+                // Because fill is active horizontally,
+                // there should be no visible horizontal
+                // movement unless margins constrain it.
+                () => {
+        
+                    settingsColumn.setChildOptions(content, {
+                        width: null,
+                        height: null,
+                        fill: true,
+                        margin: 20,
+                        horizontalAlign: 'center',
+                        verticalAlign: 'start'
+                    });
+        
+                },
+        
+        
+                // 9. CONTENT: remove fill
+                //
+                // Return to intrinsic size and center it.
+                () => {
+        
+                    settingsColumn.setChildOptions(content, {
+                        width: null,
+                        height: null,
+                        fill: null,
+                        margin: 20,
+                        horizontalAlign: 'center',
+                        verticalAlign: 'start'
+                    });
+        
+                },
+        
+        
+                // 10. CONTENT: fill again
+                //
+                // Final expected flexible-panel state.
+                () => {
+        
+                    settingsColumn.setChildOptions(content, {
+                        width: null,
+                        height: null,
+                        fill: true,
+                        margin: 0,
+                        horizontalAlign: 'center',
+                        verticalAlign: 'start'
+                    });
+        
+                }
+        
+            ]);
 
 this.addCycle();
 
