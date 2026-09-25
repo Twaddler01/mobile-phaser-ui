@@ -34,6 +34,7 @@ const fillRow = new Row(this.scene, {
     width: 500,
     height: 300,
     align: 'center',
+    gap: 10,
 
     padding: 20,
 
@@ -211,7 +212,7 @@ this.scene.parent.add(fillRow);
                 width: null,
                 height: null,
                 fill: 'vertical',
-                margin: 0,
+                margin: 15,
                 horizontalAlign: 'center',
                 verticalAlign: 'start'
             });
