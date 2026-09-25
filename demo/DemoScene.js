@@ -47,7 +47,7 @@ this.items =
 //this.parent = this.add.container();
 
 this.parent =
-    new Column(this, {
+    new Row(this, {
         x: 0,
         y: 0,
         id: 'parent',

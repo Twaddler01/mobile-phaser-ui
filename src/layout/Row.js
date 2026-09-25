@@ -128,96 +128,6 @@ export default class Row extends Container {
         };
     }
 
-    setChildOptions(childOrId, options = {}) {
-    
-        const child =
-            this.getChild(childOrId);
-    
-        if (!child) {
-            if (Debug.enabled) {
-                console.warn(
-                    'Cannot update child options: component was not found.'
-                );
-            }
-    
-            return this;
-        }
-    
-        const current =
-            this.childLayoutOptions.get(child);
-    
-        if (!current) {
-            if (Debug.enabled) {
-                console.warn(
-                    'Cannot update child options: component has no layout options.'
-                );
-            }
-    
-            return this;
-        }
-
-        if (options.width !== undefined) {
-            current.width =
-                options.width;
-        }
-
-        if (options.height !== undefined) {
-            current.height =
-                options.height;
-        }
-
-        if (options.margin !== undefined) {
-            current.margin =
-                this.getMargin(options.margin);
-        }
-    
-        if (options.horizontalAlign !== undefined) {
-            current.horizontalAlign =
-                options.horizontalAlign;
-        }
-    
-        if (options.verticalAlign !== undefined) {
-            current.verticalAlign =
-                options.verticalAlign;
-        }
-    
-        this.markLayoutDirty();
-    
-        return this;
-    }
-
-    getChildOptions(childOrId) {
-        const child =
-            this.getChild(childOrId);
-    
-        if (!child) {
-            return null;
-        }
-    
-        const options =
-            this.childLayoutOptions.get(child);
-    
-        if (!options) {
-            return null;
-        }
-    
-        return {
-            width: options.width,
-
-            height: options.height,
-
-            margin: {
-                ...options.margin
-            },
-
-            horizontalAlign:
-                options.horizontalAlign,
-    
-            verticalAlign:
-                options.verticalAlign
-        };
-    }
-
     layout() {
 
         // Resolve child layouts first.
@@ -255,12 +165,82 @@ export default class Row extends Container {
             this.padding.left -
             this.padding.right;
 
-        const availableHeight =
-            this.height -
-            this.padding.top -
-            this.padding.bottom;
-
-        // Total width occupied by children.
+        ////////////////////////////////////////
+        // HORIZONTAL ALLOCATION
+        // Horizontal fill children share the remaining
+        // main-axis space equally.
+        ////////////////////////////////////////
+        
+        // Children that explicitly consume width.
+        let fixedWidth = 0;
+        
+        // Number of children requesting
+        // horizontal fill.
+        let fillCount = 0;
+        
+        for (const child of this.children) {
+        
+            const options =
+                this.childLayoutOptions.get(child);
+        
+            if (!options) {
+                continue;
+            }
+        
+            const {
+                margin,
+                fill
+            } = options;
+        
+            const childWidth =
+                options.width ?? child.width;
+        
+            const horizontalFill =
+                options.width === null &&
+                (
+                    fill === true ||
+                    fill === 'horizontal'
+                );
+        
+            if (horizontalFill) {
+        
+                fillCount++;
+        
+            } else {
+        
+                fixedWidth +=
+                    margin.left +
+                    childWidth +
+                    margin.right;
+            }
+        }
+        
+        // Gaps are always fixed.
+        const totalGaps =
+            Math.max(
+                0,
+                this.children.length - 1
+            ) * this.gap;
+        
+        // Space available for fill children.
+        const fillSpace =
+            Math.max(
+                0,
+                availableWidth -
+                fixedWidth -
+                totalGaps
+            );
+        
+        // Each fill child receives an equal share.
+        const fillWidth =
+            fillCount > 0
+                ? fillSpace / fillCount
+                : 0;
+        
+        ////////////////////////////////////////
+        // RESOLVED CHILDREN WIDTH
+        ////////////////////////////////////////
+        
         const childrenWidth =
             this.children.reduce(
                 (total, child) => {
@@ -272,11 +252,24 @@ export default class Row extends Container {
                         return total;
                     }
         
-                    const childWidth =
+                    const {
+                        margin,
+                        fill
+                    } = options;
+        
+                    let childWidth =
                         options.width ?? child.width;
         
-                    const { margin } =
-                        options;
+                    if (
+                        options.width === null &&
+                        (
+                            fill === true ||
+                            fill === 'horizontal'
+                        )
+                    ) {
+                        childWidth =
+                            fillWidth;
+                    }
         
                     return (
                         total +
@@ -291,7 +284,7 @@ export default class Row extends Container {
                 0,
                 this.children.length - 1
             ) * this.gap;
-
+        
         const remainingWidth =
             Math.max(
                 0,
@@ -365,39 +358,110 @@ export default class Row extends Container {
                 break;
         }
         
-        
         // POSITION CHILDREN
         for (const child of this.children) {
-        
+
             const options =
                 this.childLayoutOptions.get(child);
         
             if (!options) {
                 continue;
             }
-        
-            const childWidth =
-                options.width ?? child.width;
-        
-            const childHeight =
-                options.height ?? child.height;
-        
+
             const {
-                margin
+                margin,
+                fill
             } = options;
         
+            ////////////////////////////////////////
+            // AVAILABLE AREA
+            ////////////////////////////////////////
+
+            const availableHeight =
+                this.height -
+                this.padding.top -
+                this.padding.bottom -
+                margin.top -
+                margin.bottom;
+        
+            ////////////////////////////////////////
+            // CHILD SIZE
+            ////////////////////////////////////////
+            
+            let childWidth =
+                options.width ?? child.width;
+            
+            let childHeight =
+                options.height ?? child.height;
+            
+            // fill consumes available main-axis
+            // space first; justify distributes 
+            // whatever remains.
+
+            ////////////////////////////////////////
+            // HORIZONTAL FILL
+            ////////////////////////////////////////
+            
+            if (
+                options.width === null &&
+                (
+                    fill === true ||
+                    fill === 'horizontal'
+                )
+            ) {
+                childWidth =
+                    fillWidth;
+            }
+            
+            ////////////////////////////////////////
+            // VERTICAL FILL
+            ////////////////////////////////////////
+            
+            if (
+                options.height === null &&
+                (
+                    fill === true ||
+                    fill === 'vertical'
+                )
+            ) {
+                childHeight =
+                    Math.max(
+                        0,
+                        availableHeight
+                    );
+            }
+
+            ////////////////////////////////////////
+            // APPLY LAYOUT SIZE
+            ////////////////////////////////////////
+        
+            const layoutSizeChanged =
+                child.setLayoutSize(
+                    childWidth,
+                    childHeight
+                );
+        
+            if (layoutSizeChanged) {
+                child.layout();
+            }
+
             // The actual child starts
             // after its left margin.
             const childX =
                 x +
                 margin.left;
         
-            let outerY;
+            const contentHeight =
+                this.height -
+                this.padding.top -
+                this.padding.bottom;
             
             const outerHeight =
                 margin.top +
                 childHeight +
                 margin.bottom;
+            
+            let outerY;
             
             switch (this.align) {
             
@@ -405,7 +469,7 @@ export default class Row extends Container {
                     outerY =
                         this.padding.top +
                         (
-                            availableHeight -
+                            contentHeight -
                             outerHeight
                         ) / 2;
                     break;

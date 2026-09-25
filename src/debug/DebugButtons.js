@@ -1,3 +1,4 @@
+import Row from '../layout/Row.js';
 import Card from '../components/Card.js';
 import Text from '../components/Text.js';
 import Button from '../components/Button.js';
@@ -27,11 +28,12 @@ export default class DebugButtons {
 
 
 
-const fillCard = new Card(this.scene, {
+const fillRow = new Row(this.scene, {
     x: 300,
     y: 150,
     width: 500,
     height: 300,
+    align: 'center',
 
     padding: 20,
 
@@ -55,9 +57,21 @@ const fillItem = new Card(this.scene, {
     }
 });
 
-fillCard.add(fillItem);
+const fillItem2 = new Card(this.scene, {
+    width: 120,
+    height: 60,
 
-this.scene.parent.add(fillCard);
+    style: {
+        backgroundColor: 0x4444aa,
+        radius: 8,
+        stroke: 2,
+        strokeColor: 0xffffff
+    }
+});
+
+fillRow.add([fillItem, fillItem2]);
+
+this.scene.parent.add(fillRow);
 
 
         this.addCycle =
@@ -67,7 +81,7 @@ this.scene.parent.add(fillCard);
 
         // 1. Intrinsic
         () => {
-            fillCard.setChildOptions(fillItem, {
+            fillRow.setChildOptions(fillItem, {
                 width: null,
                 height: null,
                 fill: null,
@@ -79,7 +93,7 @@ this.scene.parent.add(fillCard);
 
         // 2. Fill both dimensions
         () => {
-            fillCard.setChildOptions(fillItem, {
+            fillRow.setChildOptions(fillItem, {
                 width: null,
                 height: null,
                 fill: true,
@@ -92,7 +106,7 @@ this.scene.parent.add(fillCard);
         // 3. Explicit width + fill
         // Width should win.
         () => {
-            fillCard.setChildOptions(fillItem, {
+            fillRow.setChildOptions(fillItem, {
                 width: 200,
                 height: null,
                 fill: true,
@@ -105,7 +119,7 @@ this.scene.parent.add(fillCard);
         // 4. Explicit height + fill
         // Height should win.
         () => {
-            fillCard.setChildOptions(fillItem, {
+            fillRow.setChildOptions(fillItem, {
                 width: null,
                 height: 100,
                 fill: true,
@@ -118,7 +132,7 @@ this.scene.parent.add(fillCard);
         // 5. Explicit width + height + fill
         // Both explicit dimensions should win.
         () => {
-            fillCard.setChildOptions(fillItem, {
+            fillRow.setChildOptions(fillItem, {
                 width: 200,
                 height: 100,
                 fill: true,
@@ -130,7 +144,7 @@ this.scene.parent.add(fillCard);
 
         // 6. Horizontal fill
         () => {
-            fillCard.setChildOptions(fillItem, {
+            fillRow.setChildOptions(fillItem, {
                 width: null,
                 height: null,
                 fill: 'horizontal',
@@ -142,7 +156,7 @@ this.scene.parent.add(fillCard);
 
         // 7. Vertical fill
         () => {
-            fillCard.setChildOptions(fillItem, {
+            fillRow.setChildOptions(fillItem, {
                 width: null,
                 height: null,
                 fill: 'vertical',
@@ -154,7 +168,7 @@ this.scene.parent.add(fillCard);
 
         // 8. Fill + margin
         () => {
-            fillCard.setChildOptions(fillItem, {
+            fillRow.setChildOptions(fillItem, {
                 width: null,
                 height: null,
                 fill: true,
@@ -167,7 +181,8 @@ this.scene.parent.add(fillCard);
         // 9. Horizontal fill + vertical center
         // This makes alignment visibly meaningful.
         () => {
-            fillCard.setChildOptions(fillItem, {
+            console.log('9: horizontal test');
+            fillRow.setChildOptions(fillItem, {
                 width: null,
                 height: null,
                 fill: 'horizontal',
@@ -176,10 +191,23 @@ this.scene.parent.add(fillCard);
                 verticalAlign: 'center'
             });
         },
+        () => {
+            console.log('9: horizontal test2');
+            fillRow.setChildOptions(fillItem2, {
+                width: null,
+                height: null,
+                fill: 'horizontal',
+                margin: 0,
+                horizontalAlign: 'start',
+                verticalAlign: 'center'
+            });
+        },   
+        
 
         // 10. Vertical fill + horizontal center
         () => {
-            fillCard.setChildOptions(fillItem, {
+            console.log('10: Vertical test');
+            fillRow.setChildOptions(fillItem, {
                 width: null,
                 height: null,
                 fill: 'vertical',
