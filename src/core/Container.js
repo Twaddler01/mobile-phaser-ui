@@ -777,6 +777,30 @@ export default class Container extends Component {
     }
 
     //////////////////////////////////////////
+    // PADDING
+    //////////////////////////////////////////
+
+    getPadding(padding = 0) {
+    
+        if (typeof padding === 'number') {
+    
+            return {
+                top: padding,
+                right: padding,
+                bottom: padding,
+                left: padding
+            };
+        }
+    
+        return {
+            top: padding.top ?? 0,
+            right: padding.right ?? 0,
+            bottom: padding.bottom ?? 0,
+            left: padding.left ?? 0
+        };
+    }
+
+    //////////////////////////////////////////
     // MARGIN
     //////////////////////////////////////////
 

@@ -1,6 +1,6 @@
-import Component from '../core/Component.js';
+import Container from '../core/Container.js';
 
-export default class ScrollView extends Component {
+export default class ScrollView extends Container {
 
     constructor(scene, config = {}) {
 
@@ -12,6 +12,11 @@ export default class ScrollView extends Component {
 
         this.direction =
             config.direction ?? 'vertical';
+
+        this.padding =
+            this.getPadding(
+                config.padding
+            );
 
         this.maskPadding =
             config.maskPadding ?? 0;
@@ -79,60 +84,70 @@ export default class ScrollView extends Component {
     // CONTENT
     ////////////////////////////////////////
 
-    add(content) {
+    add(content, options = {}) {
     
-        // Remove existing content.
-        if (this.content) {
+        if (!content) {
+            return this;
+        }
     
-            this.remove(
-                this.content
-            );
+        if (this.content && this.content !== content) {
+            this.remove(this.content);
         }
     
         this.content = content;
     
-        content.layoutParent = this;
+        const defaultOptions = {
+            ...options
+        };
     
-        this.container.add(
-            content.container
+        if (
+            this.direction === 'vertical' &&
+            defaultOptions.fill === undefined
+        ) {
+            defaultOptions.fill = 'horizontal';
+        }
+    
+        if (
+            this.direction === 'horizontal' &&
+            defaultOptions.fill === undefined
+        ) {
+            defaultOptions.fill = 'vertical';
+        }
+    
+        if (
+            this.direction === 'both' &&
+            defaultOptions.fill === undefined
+        ) {
+            defaultOptions.fill = true;
+        }
+    
+        super.add(
+            content,
+            defaultOptions
         );
-    
-        this.markLayoutDirty();
     
         return this;
     }
 
     remove(content) {
-
-        if (
-            this.content !== content
-        ) {
+    
+        if (this.content !== content) {
             return this;
         }
-
-        this.container.remove(
-            content.container
-        );
-
-        if (
-            content.layoutParent === this
-        ) {
-            content.layoutParent = null;
-        }
-
+    
+        super.remove(content);
+    
         this.content = null;
-
+    
         this.contentWidth = 0;
         this.contentHeight = 0;
-
+    
         this.scrollX = 0;
         this.scrollY = 0;
-
+    
         this.maxScrollX = 0;
         this.maxScrollY = 0;
-
-        this.markLayoutDirty();
-        
+    
         return this;
     }
 
@@ -189,8 +204,8 @@ export default class ScrollView extends Component {
         );
 
         this.maskShape.fillRect(
-            this.x + padding,
-            this.y + padding,
+            padding,
+            padding,
             width,
             height
         );
@@ -236,8 +251,8 @@ export default class ScrollView extends Component {
                 this.y
             )
             .setSize(
-                this.width,
-                this.height
+                this.getLayoutWidth(),
+                this.getLayoutHeight()
             );
 
         return this;
@@ -759,16 +774,34 @@ export default class ScrollView extends Component {
     ////////////////////////////////////////
 
     updateScroll() {
-
+    
         if (!this.content) {
             return this;
         }
-
+    
+        const options =
+            this.childLayoutOptions.get(
+                this.content
+            ) ?? {};
+    
+        const margin =
+            options.margin;
+    
+        const x =
+            this.padding.left +
+            margin.left -
+            this.scrollX;
+    
+        const y =
+            this.padding.top +
+            margin.top -
+            this.scrollY;
+    
         this.content.setPosition(
-            -this.scrollX,
-            -this.scrollY
+            x,
+            y
         );
-
+    
         return this;
     }
 
@@ -826,13 +859,89 @@ export default class ScrollView extends Component {
 
     layout() {
     
-        // Resolve content layout first.
-        if (
-            this.content &&
-            this.content.layoutDirty &&
-            typeof this.content.layout === 'function'
-        ) {
-            this.content.layout();
+        const layoutWidth =
+            this.getLayoutWidth();
+    
+        const layoutHeight =
+            this.getLayoutHeight();
+    
+        const availableWidth =
+            Math.max(
+                0,
+                layoutWidth -
+                this.padding.left -
+                this.padding.right
+            );
+    
+        const availableHeight =
+            Math.max(
+                0,
+                layoutHeight -
+                this.padding.top -
+                this.padding.bottom
+            );
+    
+        if (this.content) {
+    
+            const options =
+                this.childLayoutOptions.get(
+                    this.content
+                ) ?? {};
+    
+            ////////////////////////////////////////
+            // CONTENT SIZE
+            ////////////////////////////////////////
+    
+            const contentWidth =
+                this.resolveChildWidth(
+                    this.content,
+                    options,
+                    availableWidth
+                );
+    
+            const contentHeight =
+                this.resolveChildHeight(
+                    this.content,
+                    options,
+                    availableHeight
+                );
+    
+            ////////////////////////////////////////
+            // APPLY LAYOUT SIZE
+            ////////////////////////////////////////
+    
+            const layoutSizeChanged =
+                this.content.setLayoutSize(
+                    contentWidth,
+                    contentHeight
+                );
+    
+            if (
+                layoutSizeChanged ||
+                this.content.layoutDirty
+            ) {
+                this.content.layout();
+            }
+    
+            ////////////////////////////////////////
+            // CONTENT POSITION
+            ////////////////////////////////////////
+    
+            const margin =
+                options.margin;
+    
+            const contentX =
+                this.padding.left +
+                margin.left;
+    
+            const contentY =
+                this.padding.top +
+                margin.top;
+    
+            this.content.setPosition(
+                contentX,
+                contentY
+            );
         }
     
         this.updateScrollLimits();

@@ -28,119 +28,98 @@ export default class Column extends Container {
         );
     }
 
-updateSize() {
-
-    // AUTO WIDTH
-    if (
-        this.widthAuto &&
-        this.layoutWidth === null
-    ) {
-
-        const contentWidth =
-            this.children.reduce(
-                (max, child) => {
-
-                    const options =
-                        this.childLayoutOptions.get(child);
-
-                    if (!options) {
-                        return max;
-                    }
-
-                    const childWidth =
-                        options.width ??
-                        child.getLayoutWidth();
-
-                    const { margin } =
-                        options;
-
-                    return Math.max(
-                        max,
-                        margin.left +
-                        childWidth +
-                        margin.right
-                    );
-                },
-                0
-            );
-
-        this.width =
-            this.padding.left +
-            contentWidth +
-            this.padding.right;
-    }
-
-    // AUTO HEIGHT
-    if (
-        this.heightAuto &&
-        this.layoutHeight === null
-    ) {
-
-        const contentHeight =
-            this.children.reduce(
-                (total, child) => {
-
-                    const options =
-                        this.childLayoutOptions.get(child);
-
-                    if (!options) {
-                        return total;
-                    }
-
-                    const childHeight =
-                        options.height ??
-                        child.getLayoutHeight();
-
-                    const { margin } =
-                        options;
-
-                    return (
-                        total +
-                        margin.top +
-                        childHeight +
-                        margin.bottom
-                    );
-                },
-                0
-            ) +
-            Math.max(
-                0,
-                this.children.length - 1
-            ) * this.gap;
-
-        this.height =
-            this.padding.top +
-            contentHeight +
-            this.padding.bottom;
-    }
-
-    this.updateDebugBounds();
-
-    return this;
-}
-
-    getPadding(padding = 0) {
-
-        if (typeof padding === 'number') {
-
-            return {
-                top: padding,
-                right: padding,
-                bottom: padding,
-                left: padding
-            };
+    updateSize() {
+    
+        // AUTO WIDTH
+        if (
+            this.widthAuto &&
+            this.layoutWidth === null
+        ) {
+    
+            const contentWidth =
+                this.children.reduce(
+                    (max, child) => {
+    
+                        const options =
+                            this.childLayoutOptions.get(child);
+    
+                        if (!options) {
+                            return max;
+                        }
+    
+                        const childWidth =
+                            options.width ??
+                            child.getLayoutWidth();
+    
+                        const { margin } =
+                            options;
+    
+                        return Math.max(
+                            max,
+                            margin.left +
+                            childWidth +
+                            margin.right
+                        );
+                    },
+                    0
+                );
+    
+            this.width =
+                this.padding.left +
+                contentWidth +
+                this.padding.right;
         }
-
-        return {
-            top: padding.top ?? 0,
-            right: padding.right ?? 0,
-            bottom: padding.bottom ?? 0,
-            left: padding.left ?? 0
-        };
+    
+        // AUTO HEIGHT
+        if (
+            this.heightAuto &&
+            this.layoutHeight === null
+        ) {
+    
+            const contentHeight =
+                this.children.reduce(
+                    (total, child) => {
+    
+                        const options =
+                            this.childLayoutOptions.get(child);
+    
+                        if (!options) {
+                            return total;
+                        }
+    
+                        const childHeight =
+                            options.height ??
+                            child.getLayoutHeight();
+    
+                        const { margin } =
+                            options;
+    
+                        return (
+                            total +
+                            margin.top +
+                            childHeight +
+                            margin.bottom
+                        );
+                    },
+                    0
+                ) +
+                Math.max(
+                    0,
+                    this.children.length - 1
+                ) * this.gap;
+    
+            this.height =
+                this.padding.top +
+                contentHeight +
+                this.padding.bottom;
+        }
+    
+        this.updateDebugBounds();
+    
+        return this;
     }
 
     layout() {
-    
         // Resolve child layouts first.
         for (const child of this.children) {
     

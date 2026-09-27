@@ -28,9 +28,6 @@ export default class DebugButtons {
     create() {
         this.addTitle('DEBUG BUTTONS:');
 
-
-
-/*
 const stackTest =
     new Stack(this.scene, {
 
@@ -101,40 +98,9 @@ stackTest.add(childB, {
     horizontalAlign: 'center',
     verticalAlign: 'center'
 });
-*/
 
+this.scene.parent.add(stackTest);
 
-
-//// temp
-const outer =
-    new Column(this.scene, {
-        width: 600,
-        height: 800,
-        padding: 20
-    });
-
-const inner =
-    new Column(this.scene, {
-        height: 500,
-        padding: 20
-    });
-
-const card =
-    new Card(this.scene, {
-        width: 100
-    });
-
-outer.add(inner, {
-    fill: 'vertical'
-});
-
-inner.add(card, {
-    fill: 'vertical'
-});
-//// temp
-
-//this.scene.parent.add(stackTest);
-//this.scene.parent.add(stackTest);
 
         this.addCycle =
             this.createClickCycle([
@@ -182,7 +148,7 @@ inner.add(card, {
                 // but keeps intrinsic width.
                 () => {
         
-                    stackTest.setChildOptions(childA, {
+                    stackTest.setChildOptions(childB, {
                         width: null,
                         height: null,
                         fill: 'vertical',

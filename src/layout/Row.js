@@ -116,26 +116,7 @@ export default class Row extends Container {
         return this;
     }
 
-    getPadding(padding = 0) {
-        if (typeof padding === 'number') {
-            return {
-                top: padding,
-                right: padding,
-                bottom: padding,
-                left: padding
-            };
-        }
-
-        return {
-            top: padding.top ?? 0,
-            right: padding.right ?? 0,
-            bottom: padding.bottom ?? 0,
-            left: padding.left ?? 0
-        };
-    }
-
     layout() {
-
         // Resolve child layouts first.
         for (const child of this.children) {
 
