@@ -45,9 +45,16 @@ export default class DemoScene extends Phaser.Scene {
 // container alone
 //this.parent = this.add.container();
 
+const scrollView =
+    new ScrollView(this, {
+        width: this.width,
+        height: this.height / 2,
+        padding: 20,
+        direction: 'vertical'
+    });
+
 this.parent =
     new Column(this, {
-        width: this.width,
         height: this.height,
         id: 'parent',
         justify: 'start',
@@ -55,9 +62,10 @@ this.parent =
         gap: 20
     });
 
-/*const headerSection =
+scrollView.add(this.parent);
+
+const headerSection =
     new Card(this, {
-        width: this.width - 40,
         height: this.height / 4,
         style: {
             backgroundColor: 0x90D5FF,
@@ -67,7 +75,9 @@ this.parent =
         }
     });
 
-this.parent.add(headerSection);
+this.parent.add(headerSection, {
+    fill: 'horizontal'
+});
 
 const headerTitle =
     new Text(this, {
@@ -78,12 +88,11 @@ const headerTitle =
 
 headerSection.add(headerTitle, {
     horizontalAlign: 'center',
-    verticalAlign: 'center',
+    verticalAlign: 'center'
 });
 
 const middleSection =
     new Card(this, {
-        width: this.width - 40,
         height: this.height / 2,
         padding: 20,
         style: {
@@ -94,16 +103,9 @@ const middleSection =
         }
     });
 
-this.parent.add(middleSection);
-
-const scrollView = new ScrollView(this, {
-    width: this.width - 40,
-    height: this.height / 2,
-    padding: 20,
-    direction: 'vertical'
+this.parent.add(middleSection, {
+    fill: 'horizontal'
 });
-scrollView.add(this.parent);
-*/
 
 
 /*
