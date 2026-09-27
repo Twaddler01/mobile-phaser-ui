@@ -8,7 +8,7 @@ export default class Component {
         this.width = config.width ?? 0;
         this.height = config.height ?? 0;
 
-        // No parent-assigned size; use normal width/height
+        // No parent has assigned this dimension
         this.layoutWidth = null;
         this.layoutHeight = null;
 
@@ -101,8 +101,14 @@ export default class Component {
         return this;
     }
 
+    // child.setLayoutSize(null, null);
+    // return completely to intrinsic sizing
+    // 
+    // child.setLayoutSize(500, null);
+    // width  → parent-controlled: 500
+    // height → use intrinsic height
+
     setLayoutSize(width = null, height = null) {
-    
         const changed =
             this.layoutWidth !== width ||
             this.layoutHeight !== height;
@@ -114,7 +120,7 @@ export default class Component {
         this.layoutWidth = width;
         this.layoutHeight = height;
     
-        this.layoutDirty = true;
+        this.markLayoutDirty();
     
         return true;
     }
@@ -180,8 +186,10 @@ export default class Component {
         let left = 0;
         let top = 0;
 
-        let right = this.width;
-        let bottom = this.height;
+        let right =
+            this.getLayoutWidth();
+        let bottom =
+            this.getLayoutHeight();
 
         for (const child of this.children ?? []) {
 
@@ -286,44 +294,50 @@ export default class Component {
         if (!Debug.enabled || !this.debugBounds) {
             return this;
         }
-
+    
         this.debugBounds.clear();
-
+    
+        const width =
+            this.getLayoutWidth();
+    
+        const height =
+            this.getLayoutHeight();
+    
         if (Debug.bounds.fill) {
-
+    
             this.debugBounds.fillStyle(
                 Debug.bounds.fillColor,
                 Debug.bounds.fillAlpha
             );
-
+    
             this.debugBounds.fillRect(
                 0,
                 0,
-                this.width,
-                this.height
+                width,
+                height
             );
         }
-
+    
         if (Debug.bounds.border) {
-
+    
             this.debugBounds.lineStyle(
                 Debug.bounds.borderWidth,
                 Debug.bounds.borderColor,
                 Debug.bounds.borderAlpha
             );
-
+    
             this.debugBounds.strokeRect(
                 0,
                 0,
-                this.width,
-                this.height
+                width,
+                height
             );
         }
-
+    
         this.container?.bringToTop(
             this.debugChildrenBounds
         );
-
+    
         return this;
     }
 
