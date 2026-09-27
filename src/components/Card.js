@@ -89,7 +89,10 @@ export default class Card extends Container {
 
     updateSize() {
         // AUTO WIDTH
-        if (this.widthAuto) {
+        if (
+            this.widthAuto &&
+            this.layoutWidth === null
+        ) {
     
             let contentWidth = 0;
     
@@ -103,7 +106,7 @@ export default class Card extends Container {
                 }
                 
                 const childWidth =
-                    options.width ?? child.width;
+                    options.width ?? child.getLayoutWidth();
 
                 const { margin } = options;
     
@@ -123,7 +126,10 @@ export default class Card extends Container {
         }
     
         // AUTO HEIGHT
-        if (this.heightAuto) {
+        if (
+            this.heightAuto &&
+            this.layoutHeight === null
+        ) {
     
             let contentHeight = 0;
     
@@ -137,8 +143,8 @@ export default class Card extends Container {
                 }
     
                 const childHeight =
-                options.height ?? child.height;
-    
+                    options.height ?? child.getLayoutHeight();
+
                 const { margin } = options;
     
                 contentHeight =
@@ -199,30 +205,36 @@ export default class Card extends Container {
             // AVAILABLE AREA
             ////////////////////////////////////////
             
+            const layoutWidth =
+                this.getLayoutWidth();
+            
+            const layoutHeight =
+                this.getLayoutHeight();
+            
             const availableWidth =
-                this.width -
+                layoutWidth -
                 this.padding.left -
                 this.padding.right -
                 margin.left -
                 margin.right;
             
             const availableHeight =
-                this.height -
+                layoutHeight -
                 this.padding.top -
                 this.padding.bottom -
                 margin.top -
                 margin.bottom;
-            
+
             ////////////////////////////////////////
             // CHILD SIZE
             ////////////////////////////////////////
             
             let childWidth =
-                options.width ?? child.width;
+                options.width ?? child.getLayoutWidth();
             
             let childHeight =
-                options.height ?? child.height;
-            
+                options.height ?? child.getLayoutHeight();
+
             ////////////////////////////////////////
             // FILL
             ////////////////////////////////////////
@@ -276,7 +288,7 @@ export default class Card extends Container {
                 case 'end':
     
                     x =
-                        this.width -
+                        layoutWidth -
                         this.padding.right -
                         margin.right -
                         childWidth;
@@ -316,7 +328,7 @@ export default class Card extends Container {
                 case 'end':
     
                     y =
-                        this.height -
+                        layoutHeight -
                         this.padding.bottom -
                         margin.bottom -
                         childHeight;
