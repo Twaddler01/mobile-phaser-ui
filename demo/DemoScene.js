@@ -48,14 +48,14 @@ export default class DemoScene extends Phaser.Scene {
 this.parent =
     new Column(this, {
         width: this.width,
-        height: this.height * 3,
+        height: this.height,
         id: 'parent',
         justify: 'start',
         padding: 20,
         gap: 20
     });
 
-const headerSection =
+/*const headerSection =
     new Card(this, {
         width: this.width - 40,
         height: this.height / 4,
@@ -103,7 +103,7 @@ const scrollView = new ScrollView(this, {
     direction: 'vertical'
 });
 scrollView.add(this.parent);
-
+*/
 
 
 /*

@@ -28,88 +28,96 @@ export default class Column extends Container {
         );
     }
 
-    updateSize() {
+updateSize() {
 
-        // AUTO WIDTH
-        if (this.widthAuto) {
+    // AUTO WIDTH
+    if (
+        this.widthAuto &&
+        this.layoutWidth === null
+    ) {
 
-            const contentWidth =
-                this.children.reduce(
-                    (max, child) => {
+        const contentWidth =
+            this.children.reduce(
+                (max, child) => {
 
-                        const options =
-                            this.childLayoutOptions.get(child);
+                    const options =
+                        this.childLayoutOptions.get(child);
 
-                        if (!options) {
-                            return max;
-                        }
+                    if (!options) {
+                        return max;
+                    }
 
-                        const childWidth =
-                            options.width ?? child.width;
+                    const childWidth =
+                        options.width ??
+                        child.getLayoutWidth();
 
-                        const { margin } =
-                            options;
+                    const { margin } =
+                        options;
 
-                        return Math.max(
-                            max,
-                            margin.left +
-                            childWidth +
-                            margin.right
-                        );
-                    },
-                    0
-                );
+                    return Math.max(
+                        max,
+                        margin.left +
+                        childWidth +
+                        margin.right
+                    );
+                },
+                0
+            );
 
-            this.width =
-                this.padding.left +
-                contentWidth +
-                this.padding.right;
-        }
-
-        // AUTO HEIGHT
-        if (this.heightAuto) {
-
-            const contentHeight =
-                this.children.reduce(
-                    (total, child) => {
-
-                        const options =
-                            this.childLayoutOptions.get(child);
-
-                        if (!options) {
-                            return total;
-                        }
-
-                        const childHeight =
-                            options.height ?? child.height;
-
-                        const { margin } =
-                            options;
-
-                        return (
-                            total +
-                            margin.top +
-                            childHeight +
-                            margin.bottom
-                        );
-                    },
-                    0
-                ) +
-                Math.max(
-                    0,
-                    this.children.length - 1
-                ) * this.gap;
-
-            this.height =
-                this.padding.top +
-                contentHeight +
-                this.padding.bottom;
-        }
-
-        this.updateDebugBounds();
-
-        return this;
+        this.width =
+            this.padding.left +
+            contentWidth +
+            this.padding.right;
     }
+
+    // AUTO HEIGHT
+    if (
+        this.heightAuto &&
+        this.layoutHeight === null
+    ) {
+
+        const contentHeight =
+            this.children.reduce(
+                (total, child) => {
+
+                    const options =
+                        this.childLayoutOptions.get(child);
+
+                    if (!options) {
+                        return total;
+                    }
+
+                    const childHeight =
+                        options.height ??
+                        child.getLayoutHeight();
+
+                    const { margin } =
+                        options;
+
+                    return (
+                        total +
+                        margin.top +
+                        childHeight +
+                        margin.bottom
+                    );
+                },
+                0
+            ) +
+            Math.max(
+                0,
+                this.children.length - 1
+            ) * this.gap;
+
+        this.height =
+            this.padding.top +
+            contentHeight +
+            this.padding.bottom;
+    }
+
+    this.updateDebugBounds();
+
+    return this;
+}
 
     getPadding(padding = 0) {
 
@@ -163,16 +171,22 @@ export default class Column extends Container {
             );
         }
     
+        const layoutWidth =
+            this.getLayoutWidth();
+        
+        const layoutHeight =
+            this.getLayoutHeight();
+        
         const availableWidth =
-            this.width -
+            layoutWidth -
             this.padding.left -
             this.padding.right;
-    
+        
         const availableHeight =
-            this.height -
+            layoutHeight -
             this.padding.top -
             this.padding.bottom;
-    
+
         ////////////////////////////////////////
         // VERTICAL ALLOCATION
         //
@@ -407,7 +421,7 @@ export default class Column extends Container {
                 case 'end':
     
                     outerX =
-                        this.width -
+                        layoutWidth -
                         this.padding.right -
                         outerWidth;
     

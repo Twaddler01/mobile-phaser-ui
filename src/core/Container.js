@@ -131,21 +131,17 @@ export default class Container extends Component {
         );
     }
 
-
     getChildWidth(child, options) {
-
         return (
             options.width ??
-            child.width
+            child.getLayoutWidth()
         );
     }
 
-
     getChildHeight(child, options) {
-
         return (
             options.height ??
-            child.height
+            child.getLayoutHeight()
         );
     }
 
@@ -614,34 +610,40 @@ export default class Container extends Component {
     //////////////////////////////////////////
 
     remove(childOrId) {
-
         const child =
             this.getChild(childOrId);
-
+    
         if (!child) {
             return this;
         }
-
+    
         const index =
             this.children.indexOf(child);
-
+    
         if (index !== -1) {
             this.children.splice(
                 index,
                 1
             );
         }
-
+    
         this.childLayoutOptions.delete(
             child
         );
-
+    
         super.remove(child);
-
+    
         child.layoutParent = null;
-
+    
+        // Return the child to its
+        // intrinsic dimensions.
+        child.setLayoutSize(
+            null,
+            null
+        );
+    
         this.markLayoutDirty();
-
+    
         return this;
     }
 
@@ -650,20 +652,24 @@ export default class Container extends Component {
     //////////////////////////////////////////
 
     clear() {
-
         for (const child of this.children) {
-
+    
             super.remove(child);
-
+    
             child.layoutParent = null;
+    
+            child.setLayoutSize(
+                null,
+                null
+            );
         }
-
+    
         this.children.length = 0;
-
+    
         this.childLayoutOptions.clear();
-
+    
         this.markLayoutDirty();
-
+    
         return this;
     }
 

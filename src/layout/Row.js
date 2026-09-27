@@ -30,7 +30,10 @@ export default class Row extends Container {
     updateSize() {
     
         // AUTO WIDTH
-        if (this.widthAuto) {
+        if (
+            this.widthAuto &&
+            this.layoutWidth === null
+        ) {
     
             const contentWidth =
                 this.children.reduce(
@@ -44,8 +47,8 @@ export default class Row extends Container {
                         }
     
                         const childWidth =
-                            options.width ?? child.width;
-    
+                            options.width ?? child.getLayoutWidth();
+
                         const { margin } =
                             options;
     
@@ -70,7 +73,10 @@ export default class Row extends Container {
         }
     
         // AUTO HEIGHT
-        if (this.heightAuto) {
+        if (
+            this.heightAuto &&
+            this.layoutHeight === null
+        ) {
     
             const contentHeight =
                 this.children.reduce(
@@ -84,8 +90,8 @@ export default class Row extends Container {
                         }
     
                         const childHeight =
-                            options.height ?? child.height;
-    
+                            options.height ?? child.getLayoutHeight();
+
                         const { margin } =
                             options;
     
@@ -160,8 +166,14 @@ export default class Row extends Container {
             );
         }
 
+        const layoutWidth =
+            this.getLayoutWidth();
+        
+        const layoutHeight =
+            this.getLayoutHeight();
+        
         const availableWidth =
-            this.width -
+            layoutWidth -
             this.padding.left -
             this.padding.right;
 
@@ -311,7 +323,7 @@ export default class Row extends Container {
             ////////////////////////////////////////
 
             const availableHeight =
-                this.height -
+                layoutHeight -
                 this.padding.top -
                 this.padding.bottom -
                 margin.top -
@@ -360,7 +372,7 @@ export default class Row extends Container {
                 margin.left;
         
             const contentHeight =
-                this.height -
+                layoutHeight -
                 this.padding.top -
                 this.padding.bottom;
             
@@ -384,9 +396,10 @@ export default class Row extends Container {
             
                 case 'end':
                     outerY =
-                        this.height -
-                        this.padding.bottom -
-                        outerHeight;
+                        outerY =
+                            layoutHeight -
+                            this.padding.bottom -
+                            outerHeight;
                     break;
             
                 case 'start':
