@@ -5,6 +5,7 @@ import Card from '../components/Card.js';
 import Text from '../components/Text.js';
 import Button from '../components/Button.js';
 import ScrollView from '../layout/ScrollView.js';
+import Grid from '../layout/Grid.js';
 
 export default class DebugButtons {
 
@@ -48,7 +49,59 @@ this.testContainer =
 
 this.testContainer.setDepth(1);
 
+////
+const grid =
+    new Grid(this.scene, {
+        width: this.width,
+        height: 700,
+        columns: 3,
+        padding: 20,
+        gap: 20
+    });
 
+for (let i = 1; i <= 8; i++) {
+
+    const card =
+        new Card(this.scene, {
+            width: null,
+            height: null,
+            style: {
+                backgroundColor:
+                    i % 2 === 0
+                        ? 0xdddddd
+                        : 0xbbbbbb,
+
+                radius: 8,
+                stroke: 2,
+                strokeColor: 0xffffff
+            }
+        });
+
+    const text =
+        new Text(this.scene, {
+            text: `CARD ${i}`,
+            fontSize: '32px',
+            color: '#000000'
+        });
+
+    card.add(text, {
+        horizontalAlign: 'center',
+        verticalAlign: 'center'
+    });
+
+    grid.add(card, {
+        fill: true,
+        margin: 10,
+        horizontalAlign: 'center',
+        verticalAlign: 'center'
+    });
+}
+
+grid.layout();
+////
+
+
+/*
 // ------------------------------------------
 // DESTROY CURRENT TEST
 // ------------------------------------------
