@@ -42,70 +42,7 @@ export default class DemoScene extends Phaser.Scene {
 
 // DEBUG
 
-// container alone
-//this.parent = this.add.container();
 
-const scrollView =
-    new ScrollView(this, {
-        width: this.width,
-        height: this.height / 2,
-        padding: 20,
-        direction: 'vertical'
-    });
-
-this.parent =
-    new Column(this, {
-        height: this.height,
-        id: 'parent',
-        justify: 'start',
-        padding: 20,
-        gap: 20
-    });
-
-scrollView.add(this.parent);
-
-const headerSection =
-    new Card(this, {
-        height: this.height / 4,
-        style: {
-            backgroundColor: 0x90D5FF,
-            radius: 8,
-            stroke: 2,
-            strokeColor: 0xffffff
-        }
-    });
-
-this.parent.add(headerSection, {
-    fill: 'horizontal'
-});
-
-const headerTitle =
-    new Text(this, {
-        text: 'HEADER',
-        fontSize: '40px',
-        color: '#000000'
-    });
-
-headerSection.add(headerTitle, {
-    horizontalAlign: 'center',
-    verticalAlign: 'center'
-});
-
-const middleSection =
-    new Card(this, {
-        height: this.height / 2,
-        padding: 20,
-        style: {
-            backgroundColor: 0x000000,
-            radius: 8,
-            stroke: 2,
-            strokeColor: 0xffffff
-        }
-    });
-
-this.parent.add(middleSection, {
-    fill: 'horizontal'
-});
 
 
 /*

@@ -560,15 +560,17 @@ export default class ScrollView extends Container {
     ////////////////////////////////////////
 
     isPointerInside(pointer) {
-
+        const width =
+            this.getLayoutWidth();
+    
+        const height =
+            this.getLayoutHeight();
+    
         return (
             pointer.x >= this.x &&
-            pointer.x <=
-                this.x + this.width &&
-
+            pointer.x <= this.x + width &&
             pointer.y >= this.y &&
-            pointer.y <=
-                this.y + this.height
+            pointer.y <= this.y + height
         );
     }
 
@@ -635,43 +637,111 @@ export default class ScrollView extends Container {
     }
 
     ////////////////////////////////////////
+    // VIEWPORT SIZE
+    ////////////////////////////////////////
+    
+    getViewportWidth() {
+    
+        return Math.max(
+            0,
+            this.getLayoutWidth() -
+            this.padding.left -
+            this.padding.right
+        );
+    }
+    
+    getViewportHeight() {
+    
+        return Math.max(
+            0,
+            this.getLayoutHeight() -
+            this.padding.top -
+            this.padding.bottom
+        );
+    }
+
+    ////////////////////////////////////////
     // SCROLL LIMITS
     ////////////////////////////////////////
-
+    
     updateScrollLimits() {
-
+    
         this.updateContentSize();
-
+    
+        const viewportWidth =
+            this.getViewportWidth();
+    
+        const viewportHeight =
+            this.getViewportHeight();
+    
+        let marginLeft = 0;
+        let marginRight = 0;
+        let marginTop = 0;
+        let marginBottom = 0;
+    
+        if (this.content) {
+    
+            const options =
+                this.childLayoutOptions.get(
+                    this.content
+                ) ?? {};
+    
+            const margin =
+                options.margin;
+    
+            marginLeft =
+                margin.left;
+    
+            marginRight =
+                margin.right;
+    
+            marginTop =
+                margin.top;
+    
+            marginBottom =
+                margin.bottom;
+        }
+    
+        const scrollableWidth =
+            marginLeft +
+            this.contentWidth +
+            marginRight;
+    
+        const scrollableHeight =
+            marginTop +
+            this.contentHeight +
+            marginBottom;
+    
         this.maxScrollX =
             Math.max(
                 0,
-                this.contentWidth -
-                this.width
+                scrollableWidth -
+                viewportWidth
             );
-
+    
         this.maxScrollY =
             Math.max(
                 0,
-                this.contentHeight -
-                this.height
+                scrollableHeight -
+                viewportHeight
             );
-
+    
         this.scrollX =
             Phaser.Math.Clamp(
                 this.scrollX,
                 0,
                 this.maxScrollX
             );
-
+    
         this.scrollY =
             Phaser.Math.Clamp(
                 this.scrollY,
                 0,
                 this.maxScrollY
             );
-
+    
         this.updateScroll();
-
+    
         return this;
     }
 

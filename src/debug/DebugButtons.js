@@ -4,6 +4,7 @@ import Column from '../layout/Column.js';
 import Card from '../components/Card.js';
 import Text from '../components/Text.js';
 import Button from '../components/Button.js';
+import ScrollView from '../layout/ScrollView.js';
 
 export default class DebugButtons {
 
@@ -18,6 +19,12 @@ export default class DebugButtons {
         this.x = options.x ?? 50;
         this.y = options.y ?? 150;
 
+this.width =
+    this.scene.width;
+this.height = 
+    this.scene.height;
+this.testComponents = [];
+
         this.buttonWidth = 180;
         this.buttonHeight = 40;
         this.spacing = 10;
@@ -27,265 +34,575 @@ export default class DebugButtons {
 
     create() {
         this.addTitle('DEBUG BUTTONS:');
-/*
-const stackTest =
-    new Stack(this.scene, {
 
-        width: 500,
-        height: 400,
 
-        padding: 30
-    });
 
-const childA =
-    new Card(this.scene, {
+// ==========================================
+// LAYOUT TEST AREA
+// ==========================================
 
-        width: 100,
-        height: 50,
-        
-        style: {
-            backgroundColor: 0xff0000,
-            radius: 8,
-            stroke: 2,
-            strokeColor: 0xffffff
+// This container is completely separate from
+// the debug button container.
+this.testContainer =
+    this.scene.add.container();
+
+this.testContainer.setDepth(1);
+
+
+// ------------------------------------------
+// DESTROY CURRENT TEST
+// ------------------------------------------
+
+this.destroyTest = () => {
+
+    for (const component of this.testComponents) {
+        component.destroy();
+    }
+
+    this.testComponents = [];
+
+    this.testContainer.removeAll(false);
+};
+
+// ------------------------------------------
+// ADD COMPONENT TO TEST CONTAINER
+// ------------------------------------------
+
+this.addTest = (component) => {
+
+    if (!component) {
+        return;
+    }
+
+    this.testComponents.push(component);
+
+    this.testContainer.add(
+        component.container
+    );
+
+    return component;
+};
+
+
+// ------------------------------------------
+// BUILD TEST
+// ------------------------------------------
+
+this.buildTest = () => {
+
+    this.destroyTest();
+
+    const test = {};
+
+    // ======================================
+    // VERTICAL SCROLL
+    // ======================================
+
+    test.scrollView =
+        new ScrollView(this.scene, {
+            width: this.width,
+            height: this.height / 2,
+            padding: 20,
+            direction: 'vertical'
+        });
+
+    this.addTest(test.scrollView);
+
+
+    test.column =
+        new Column(this.scene, {
+            width: this.width,
+            padding: 20,
+            gap: 20,
+            justify: 'start'
+        });
+
+    test.scrollView.add(
+        test.column
+    );
+
+
+    // ======================================
+    // CONTENT
+    // ======================================
+
+    test.header =
+        new Card(this.scene, {
+            width: null,
+            height: 180,
+            style: {
+                backgroundColor: 0x90D5FF,
+                radius: 8,
+                stroke: 2,
+                strokeColor: 0xffffff
+            }
+        });
+
+    test.column.add(
+        test.header,
+        {
+            width: null,
+            height: 180,
+            fill: 'horizontal',
+            horizontalAlign: 'center',
+            verticalAlign: 'center'
         }
-    });
+    );
 
-const childB =
-    new Card(this.scene, {
 
-        width: 50,
-        height: 100,
+    test.headerTitle =
+        new Text(this.scene, {
+            text: 'HEADER',
+            fontSize: '40px',
+            color: '#000000'
+        });
 
-        style: {
-            backgroundColor: 0x00ff00,
-            radius: 8,
-            stroke: 2,
-            strokeColor: 0xffffff
+    test.header.add(
+        test.headerTitle,
+        {
+            horizontalAlign: 'center',
+            verticalAlign: 'center'
         }
-    });
+    );
 
-const childC =
-    new Card(this.scene, {
 
-        width: 100,
-        height: 100,
+    // ======================================
+    // MIDDLE CARDS
+    // ======================================
 
-        style: {
-            backgroundColor: 0x0000ff,
-            radius: 8,
-            stroke: 2,
-            strokeColor: 0xffffff
-        }
-    });
-    
+    for (let i = 1; i <= 6; i++) {
 
-stackTest.add(childC, {
-    fill: true,
-    horizontalAlign: 'start',
-    verticalAlign: 'start'
-});
+        const card =
+            new Card(this.scene, {
+                width: null,
+                height: 180,
+                style: {
+                    backgroundColor:
+                        i % 2 === 0
+                            ? 0xdddddd
+                            : 0xbbbbbb,
 
-stackTest.add(childA, {
-    fill: true,
-    margin: 20,
-    horizontalAlign: 'end',
-    verticalAlign: 'end'
-});
+                    radius: 8,
 
-stackTest.add(childB, {
-    margin: 15,
-    horizontalAlign: 'center',
-    verticalAlign: 'center'
-});
+                    stroke: 2,
 
-this.scene.parent.add(stackTest);
-*/
-
-        this.addCycle =
-            this.createClickCycle([
-                // Clicks hwre...
-
-                // 1. BASELINE
-                //
-                // Header and footer are intrinsic.
-                // Content fills the remaining area.
-                () => {
-        
-                    stackTest.setChildOptions(childA, {
-                        width: null,
-                        height: null,
-                        fill: true,
-                        margin: 0,
-                        horizontalAlign: 'start',
-                        verticalAlign: 'start'
-                    });
-        
-                },
-        
-        
-                // 2. CONTENT: horizontal fill only
-                //
-                // Content becomes full width,
-                // but returns to intrinsic height.
-                () => {
-        
-                    stackTest.setChildOptions(childA, {
-                        width: null,
-                        height: null,
-                        fill: 'horizontal',
-                        margin: 0,
-                        horizontalAlign: 'start',
-                        verticalAlign: 'start'
-                    });
-        
-                },
-        
-        
-                // 3. childA: vertical fill only
-                //
-                // childA gets the remaining height,
-                // but keeps intrinsic width.
-                () => {
-        
-                    stackTest.setChildOptions(childB, {
-                        width: null,
-                        height: null,
-                        fill: 'vertical',
-                        margin: 0,
-                        horizontalAlign: 'start',
-                        verticalAlign: 'start'
-                    });
-        
-                },
-        
-        
-                // 4. childA: explicit width + fill
-                //
-                // Width should win.
-                // Height should still fill.
-                () => {
-        
-                    stackTest.setChildOptions(childA, {
-                        width: 250,
-                        height: null,
-                        fill: true,
-                        margin: 0,
-                        horizontalAlign: 'start',
-                        verticalAlign: 'start'
-                    });
-        
-                },
-        
-        
-                // 5. childA: explicit height + fill
-                //
-                // Height should win.
-                // Width should still fill.
-                () => {
-        
-                    stackTest.setChildOptions(childA, {
-                        width: null,
-                        height: 100,
-                        fill: true,
-                        margin: 0,
-                        horizontalAlign: 'start',
-                        verticalAlign: 'start'
-                    });
-        
-                },
-        
-        
-                // 6. childA: explicit width + height
-                //
-                // Fill has nothing left to do.
-                () => {
-        
-                    stackTest.setChildOptions(childA, {
-                        width: 250,
-                        height: 100,
-                        fill: true,
-                        margin: 0,
-                        horizontalAlign: 'start',
-                        verticalAlign: 'start'
-                    });
-        
-                },
-        
-        
-                // 7. childA: fill + margin
-                //
-                // Margin should reduce the usable
-                // cross-axis and main-axis area.
-                () => {
-        
-                    stackTest.setChildOptions(childA, {
-                        width: null,
-                        height: null,
-                        fill: true,
-                        margin: 20,
-                        horizontalAlign: 'start',
-                        verticalAlign: 'start'
-                    });
-        
-                },
-        
-        
-                // 8. childA: fill + horizontal center
-                //
-                // Because fill is active horizontally,
-                // there should be no visible horizontal
-                // movement unless margins constrain it.
-                () => {
-        
-                    stackTest.setChildOptions(childA, {
-                        width: null,
-                        height: null,
-                        fill: true,
-                        margin: 20,
-                        horizontalAlign: 'center',
-                        verticalAlign: 'start'
-                    });
-        
-                },
-        
-        
-                // 9. childA: remove fill
-                //
-                // Return to intrinsic size and center it.
-                () => {
-        
-                    stackTest.setChildOptions(childA, {
-                        width: null,
-                        height: null,
-                        fill: null,
-                        margin: 20,
-                        horizontalAlign: 'center',
-                        verticalAlign: 'start'
-                    });
-        
-                },
-        
-        
-                // 10. childA: fill again
-                //
-                // Final expected flexible-panel state.
-                () => {
-        
-                    stackTest.setChildOptions(childA, {
-                        width: null,
-                        height: null,
-                        fill: true,
-                        margin: 0,
-                        horizontalAlign: 'center',
-                        verticalAlign: 'start'
-                    });
-        
+                    strokeColor:
+                        0xffffff
                 }
-        
-            ]);
+            });
 
-//this.addCycle();
+        const label =
+            new Text(this.scene, {
+                text: `CARD ${i}`,
+                fontSize: '32px',
+                color: '#000000'
+            });
+
+        card.add(
+            label,
+            {
+                horizontalAlign: 'center',
+                verticalAlign: 'center'
+            }
+        );
+
+        test.column.add(
+            card,
+            {
+                width: null,
+                height: 180,
+                fill: 'horizontal',
+                horizontalAlign: 'center',
+                verticalAlign: 'center'
+            }
+        );
+    }
+
+
+    // ======================================
+    // LAYOUT
+    // ======================================
+
+    test.scrollView.layout();
+
+    test.scrollView.scrollToTop();
+
+    this.testObjects =
+        test;
+
+    return test;
+};
+
+
+// ==========================================
+// CYCLE
+// ==========================================
+
+this.addCycle =
+    this.createClickCycle([
+
+        // ==================================
+        // 1. BASELINE
+        // ==================================
+
+        () => {
+
+            console.log(
+                '1. BASELINE'
+            );
+
+            const test =
+                this.buildTest();
+
+            test.scrollView.scrollToTop();
+        },
+
+
+        // ==================================
+        // 2. INTRINSIC CONTENT WIDTH
+        // ==================================
+
+        () => {
+
+            console.log(
+                '2. CONTENT INTRINSIC WIDTH'
+            );
+
+            const test =
+                this.buildTest();
+
+            test.scrollView.setChildOptions(
+                test.column,
+                {
+                    width: null,
+                    height: null,
+                    fill: null,
+                    margin: 0,
+                    horizontalAlign: 'start',
+                    verticalAlign: 'start'
+                }
+            );
+
+            test.scrollView.layout();
+            test.scrollView.scrollToTop();
+        },
+
+
+        // ==================================
+        // 3. HORIZONTAL FILL
+        // ==================================
+
+        () => {
+
+            console.log(
+                '3. CONTENT HORIZONTAL FILL'
+            );
+
+            const test =
+                this.buildTest();
+
+            test.scrollView.setChildOptions(
+                test.column,
+                {
+                    width: null,
+                    height: null,
+                    fill: 'horizontal',
+                    margin: 0,
+                    horizontalAlign: 'start',
+                    verticalAlign: 'start'
+                }
+            );
+
+            test.scrollView.layout();
+            test.scrollView.scrollToTop();
+        },
+
+
+        // ==================================
+        // 4. CONTENT MARGIN
+        // ==================================
+
+        () => {
+
+            console.log(
+                '4. CONTENT MARGIN'
+            );
+
+            const test =
+                this.buildTest();
+
+            test.scrollView.setChildOptions(
+                test.column,
+                {
+                    width: null,
+                    height: null,
+                    fill: 'horizontal',
+                    margin: 30,
+                    horizontalAlign: 'start',
+                    verticalAlign: 'start'
+                }
+            );
+
+            test.scrollView.layout();
+            test.scrollView.scrollToTop();
+        },
+
+
+        // ==================================
+        // 5. SCROLL MIDDLE
+        // ==================================
+
+        () => {
+
+            console.log(
+                '5. SCROLL MIDDLE'
+            );
+
+            const test =
+                this.buildTest();
+
+            test.scrollView.setScrollY(
+                test.scrollView.maxScrollY / 2
+            );
+        },
+
+
+        // ==================================
+        // 6. SCROLL BOTTOM
+        // ==================================
+
+        () => {
+
+            console.log(
+                '6. SCROLL BOTTOM'
+            );
+
+            const test =
+                this.buildTest();
+
+            test.scrollView.scrollToBottom();
+        },
+
+
+        // ==================================
+        // 7. SCROLL TOP
+        // ==================================
+
+        () => {
+
+            console.log(
+                '7. SCROLL TOP'
+            );
+
+            const test =
+                this.buildTest();
+
+            test.scrollView.scrollToTop();
+        },
+
+
+        // ==================================
+        // 8. EXPLICIT CONTENT HEIGHT
+        // ==================================
+
+        () => {
+
+            console.log(
+                '8. CONTENT EXPLICIT HEIGHT'
+            );
+
+            const test =
+                this.buildTest();
+
+            test.scrollView.setChildOptions(
+                test.column,
+                {
+                    width: null,
+                    height:
+                        test.scrollView.height - 40,
+                    fill: 'horizontal',
+                    margin: 20,
+                    horizontalAlign: 'start',
+                    verticalAlign: 'start'
+                }
+            );
+
+            test.scrollView.layout();
+            test.scrollView.scrollToTop();
+        },
+
+
+        // ==================================
+        // 9. HORIZONTAL SCROLL
+        // ==================================
+
+        () => {
+
+            console.log(
+                '9. HORIZONTAL SCROLL'
+            );
+
+            this.destroyTest();
+
+            const scroll =
+                new ScrollView(this.scene, {
+                    width: this.width,
+                    height: this.height / 2,
+                    padding: 20,
+                    direction: 'horizontal'
+                });
+
+            this.addTest(scroll);
+
+            const row =
+                new Row(this.scene, {
+                    height:
+                        this.height / 2 - 40,
+                    gap: 20,
+                    padding: 20
+                });
+
+            scroll.add(row);
+
+            for (let i = 1; i <= 8; i++) {
+
+                const card =
+                    new Card(this.scene, {
+                        width: 300,
+                        height: 300,
+                        style: {
+                            backgroundColor:
+                                0x90d5ff,
+                            radius: 8,
+                            stroke: 2,
+                            strokeColor:
+                                0xffffff
+                        }
+                    });
+
+                const text =
+                    new Text(this.scene, {
+                        text: `CARD ${i}`,
+                        fontSize: '32px',
+                        color: '#000000'
+                    });
+
+                card.add(
+                    text,
+                    {
+                        horizontalAlign: 'center',
+                        verticalAlign: 'center'
+                    }
+                );
+
+                row.add(
+                    card,
+                    {
+                        width: 300,
+                        height: 300,
+                        horizontalAlign: 'start',
+                        verticalAlign: 'center'
+                    }
+                );
+            }
+
+            scroll.layout();
+            scroll.scrollToLeft();
+        },
+
+
+        // ==================================
+        // 10. BOTH AXIS
+        // ==================================
+
+        () => {
+
+            console.log(
+                '10. BOTH-AXIS SCROLL'
+            );
+
+            this.destroyTest();
+
+            const scroll =
+                new ScrollView(this.scene, {
+                    width: this.width,
+                    height: this.height / 2,
+                    padding: 20,
+                    direction: 'both'
+                });
+
+            this.addTest(scroll);
+
+            const content =
+                new Column(this.scene, {
+                    width: this.width * 1.5,
+                    padding: 20,
+                    gap: 20
+                });
+
+            scroll.add(content);
+
+            for (let i = 1; i <= 10; i++) {
+
+                const card =
+                    new Card(this.scene, {
+                        width: this.width * 1.2,
+                        height: 180,
+                        style: {
+                            backgroundColor:
+                                0xbbbbbb,
+                            radius: 8,
+                            stroke: 2,
+                            strokeColor:
+                                0xffffff
+                        }
+                    });
+
+                const text =
+                    new Text(this.scene, {
+                        text: `BOTH AXIS ${i}`,
+                        fontSize: '28px',
+                        color: '#000000'
+                    });
+
+                card.add(
+                    text,
+                    {
+                        horizontalAlign: 'center',
+                        verticalAlign: 'center'
+                    }
+                );
+
+                content.add(
+                    card,
+                    {
+                        width:
+                            this.width * 1.2,
+                        height: 180,
+                        horizontalAlign: 'start',
+                        verticalAlign: 'center'
+                    }
+                );
+            }
+
+            scroll.layout();
+
+            scroll.setScroll(
+                scroll.maxScrollX / 2,
+                scroll.maxScrollY / 2
+            );
+        }
+
+    ]);
+
+
+// ==========================================
+// FIRST RUN
+// ==========================================
+
+this.addCycle();
+
+
 
 /*
                 () => this.scene.parent.add(this.scene.items.cards[0], { margin: 10 } ),
