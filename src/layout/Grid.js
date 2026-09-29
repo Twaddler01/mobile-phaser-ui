@@ -1,3 +1,4 @@
+import Debug from '../core/Debug.js';
 import Container from '../core/Container.js';
 
 export default class Grid extends Container {
@@ -17,7 +18,13 @@ export default class Grid extends Container {
             );
 
         this.rows =
-            config.rows ?? null;
+            config.rows === null ||
+            config.rows === undefined
+                ? null
+                : Math.max(
+                    1,
+                    config.rows
+                );
 
         this.padding =
             this.getPadding(
@@ -32,6 +39,108 @@ export default class Grid extends Container {
         ////////////////////////////////////////
 
         this.markLayoutDirty();
+    }
+
+    ////////////////////////////////////////
+    // ADD
+    ////////////////////////////////////////
+    
+    add(child, options = {}) {
+    
+        if (Array.isArray(child)) {
+    
+            for (const item of child) {
+                this.add(item, options);
+            }
+    
+            return this;
+        }
+    
+        if (!child) {
+            return this;
+        }
+    
+        ////////////////////////////////////////
+        // ADD THROUGH CONTAINER
+        ////////////////////////////////////////
+    
+        super.add(
+            child,
+            options
+        );
+    
+        ////////////////////////////////////////
+        // GRID POSITION
+        ////////////////////////////////////////
+    
+        const childOptions =
+            this.childLayoutOptions.get(child);
+    
+        if (!childOptions) {
+            return this;
+        }
+    
+        childOptions.column =
+            options.column ?? null;
+    
+        childOptions.row =
+            options.row ?? null;
+    
+        this.childLayoutOptions.set(
+            child,
+            childOptions
+        );
+    
+        this.markLayoutDirty();
+    
+        return this;
+    }
+
+    ////////////////////////////////////////
+    // SET CHILD OPTIONS
+    ////////////////////////////////////////
+    
+    setChildOptions(childOrId, options = {}) {
+    
+        super.setChildOptions(
+            childOrId,
+            options
+        );
+    
+        const child =
+            this.getChild(childOrId);
+    
+        if (!child) {
+            return this;
+        }
+    
+        const current =
+            this.childLayoutOptions.get(child);
+    
+        if (!current) {
+            return this;
+        }
+    
+        if (options.column !== undefined) {
+    
+            current.column =
+                options.column;
+        }
+    
+        if (options.row !== undefined) {
+    
+            current.row =
+                options.row;
+        }
+    
+        this.childLayoutOptions.set(
+            child,
+            current
+        );
+    
+        this.markLayoutDirty();
+    
+        return this;
     }
 
     ////////////////////////////////////////
@@ -173,63 +282,97 @@ export default class Grid extends Container {
                 width;
         }
 
+        // AUTO HEIGHT
         if (
             this.heightAuto &&
             this.layoutHeight === null
         ) {
-
-            let height = 0;
-
-            for (const child of this.children) {
-
-                const options =
-                    this.childLayoutOptions.get(
-                        child
-                    );
-
-                if (!options) {
-                    continue;
-                }
-
-                const childHeight =
-                    options.height ??
-                    child.getLayoutHeight();
-
-                const margin =
-                    options.margin;
-
-                height =
-                    Math.max(
-                        height,
-                        margin.top +
-                        childHeight +
-                        margin.bottom
-                    );
-            }
-
-            const rows =
-                this.getRowCount();
-
-            height =
-                height *
-                rows;
-
-            height +=
-                this.padding.top +
-                this.padding.bottom;
-
-            height +=
+        
+            const rowHeights =
+                this.getRowHeights();
+        
+            const totalRowsHeight =
+                rowHeights.reduce(
+                    (total, height) =>
+                        total + height,
+                    0
+                );
+        
+            const totalGap =
                 Math.max(
                     0,
-                    rows - 1
+                    rowHeights.length - 1
                 ) *
                 this.gap;
-
+        
             this.height =
-                height;
+                this.padding.top +
+                totalRowsHeight +
+                totalGap +
+                this.padding.bottom;
         }
 
         return this;
+    }
+
+    ////////////////////////////////////////
+    // GRID ROW HEIGHT
+    ////////////////////////////////////////
+
+    getRowHeights() {
+        const rows =
+            this.getRowCount();
+    
+        const rowHeights =
+            new Array(rows).fill(0);
+    
+        for (const child of this.children) {
+    
+            const options =
+                this.childLayoutOptions.get(child);
+    
+            if (!options) continue;
+    
+            const index =
+                this.children.indexOf(child);
+    
+            const column =
+                options.column ??
+                (index % this.columns);
+    
+            const row =
+                options.row ??
+                Math.floor(index / this.columns);
+    
+            if (
+                row < 0 ||
+                row >= rows ||
+                column < 0 ||
+                column >= this.columns
+            ) {
+                continue;
+            }
+    
+            const childHeight =
+                options.height ??
+                child.getLayoutHeight();
+    
+            const margin =
+                options.margin;
+    
+            const outerHeight =
+                margin.top +
+                childHeight +
+                margin.bottom;
+    
+            rowHeights[row] =
+                Math.max(
+                    rowHeights[row],
+                    outerHeight
+                );
+        }
+    
+        return rowHeights;
     }
 
     ////////////////////////////////////////
@@ -299,12 +442,35 @@ export default class Grid extends Container {
                 ////////////////////////////////////////
 
                 const column =
-                    index % columns;
-
+                    options.column ??
+                    (index % columns);
+                
                 const row =
-                    Math.floor(
-                        index / columns
-                    );
+                    options.row ??
+                    Math.floor(index / columns);
+
+                if (
+                    column < 0 ||
+                    column >= columns ||
+                    row < 0 ||
+                    row >= rows
+                ) {
+                
+                    if (Debug.enabled) {
+                        console.warn(
+                            `Grid: child "${child.id ?? 'unknown'}" ` +
+                            `is outside the grid bounds.`,
+                            {
+                                column,
+                                row,
+                                columns,
+                                rows
+                            }
+                        );
+                    }
+                
+                    return;
+                }
 
                 const cellX =
                     this.padding.left +
@@ -484,6 +650,52 @@ export default class Grid extends Container {
         );
 
         this.layoutDirty = false;
+
+
+if (Debug.enabled) {
+
+    console.log('========== GRID DEBUG ==========');
+
+    console.log('Grid:', {
+        width: this.width,
+        height: this.height,
+        layoutWidth: this.layoutWidth,
+        layoutHeight: this.layoutHeight,
+        effectiveWidth: this.getLayoutWidth(),
+        effectiveHeight: this.getLayoutHeight(),
+        columns,
+        rows,
+        cellWidth,
+        cellHeight,
+        children: this.children.length
+    });
+
+    for (const [index, child] of this.children.entries()) {
+
+        const options =
+            this.childLayoutOptions.get(child);
+
+        console.log(`Grid Child ${index}:`, {
+            id: child.id,
+            x: child.x,
+            y: child.y,
+            width: child.getLayoutWidth(),
+            height: child.getLayoutHeight(),
+            row: options?.row,
+            column: options?.column,
+            margin: options?.margin
+        });
+    }
+
+    console.log('Content Bounds:', {
+        bounds: this.getContentBounds()
+    });
+
+    console.log('================================');
+}
+
+
+
 
         return this;
     }

@@ -50,71 +50,20 @@ this.testContainer =
 this.testContainer.setDepth(1);
 
 ////
-const grid =
-    new Grid(this.scene, {
-        width: this.width,
-        height: 700,
-        columns: 3,
-        padding: 20,
-        gap: 20
-    });
 
-for (let i = 1; i <= 8; i++) {
-
-    const card =
-        new Card(this.scene, {
-            width: null,
-            height: null,
-            style: {
-                backgroundColor:
-                    i % 2 === 0
-                        ? 0xdddddd
-                        : 0xbbbbbb,
-
-                radius: 8,
-                stroke: 2,
-                strokeColor: 0xffffff
-            }
-        });
-
-    const text =
-        new Text(this.scene, {
-            text: `CARD ${i}`,
-            fontSize: '32px',
-            color: '#000000'
-        });
-
-    card.add(text, {
-        horizontalAlign: 'center',
-        verticalAlign: 'center'
-    });
-
-    grid.add(card, {
-        fill: true,
-        margin: 10,
-        horizontalAlign: 'center',
-        verticalAlign: 'center'
-    });
-}
-
-grid.layout();
-////
-
-
-/*
 // ------------------------------------------
 // DESTROY CURRENT TEST
 // ------------------------------------------
 
 this.destroyTest = () => {
 
-    for (const component of this.testComponents) {
-        component.destroy();
-    }
+for (const component of this.testComponents) {  
+    component.destroy();  
+}
 
-    this.testComponents = [];
+this.testComponents = [];  
+this.testContainer.removeAll(false);
 
-    this.testContainer.removeAll(false);
 };
 
 // ------------------------------------------
@@ -123,112 +72,76 @@ this.destroyTest = () => {
 
 this.addTest = (component) => {
 
-    if (!component) {
-        return;
-    }
+if (!component) {  
+    return;  
+}  
 
-    this.testComponents.push(component);
+this.testComponents.push(component);  
 
-    this.testContainer.add(
-        component.container
-    );
+this.testContainer.add(  
+    component.container  
+);  
 
-    return component;
+return component;
+
 };
 
+// ==========================================
+// BUILD GRID TEST
+// ==========================================
 
-// ------------------------------------------
-// BUILD TEST
-// ------------------------------------------
-
-this.buildTest = () => {
+this.buildTest = (config = {}) => {
 
     this.destroyTest();
 
     const test = {};
 
-    // ======================================
-    // VERTICAL SCROLL
-    // ======================================
+    test.grid =
+        new Grid(this.scene, {
+            width:
+                config.width ??
+                this.width,
 
-    test.scrollView =
-        new ScrollView(this.scene, {
-            width: this.width,
-            height: this.height / 2,
-            padding: 20,
-            direction: 'vertical'
+            height:
+                config.height ??
+                this.height,
+
+            columns:
+                config.columns ?? 3,
+
+            rows:
+                config.rows ?? null,
+
+            padding:
+                config.padding ?? 20,
+
+            gap:
+                config.gap ?? 20
         });
 
-    this.addTest(test.scrollView);
-
-
-    test.column =
-        new Column(this.scene, {
-            width: this.width,
-            padding: 20,
-            gap: 20,
-            justify: 'start'
-        });
-
-    test.scrollView.add(
-        test.column
-    );
+    this.addTest(test.grid);
 
 
     // ======================================
-    // CONTENT
+    // GRID ITEMS
     // ======================================
 
-    test.header =
-        new Card(this.scene, {
-            width: null,
-            height: 180,
-            style: {
-                backgroundColor: 0x90D5FF,
-                radius: 8,
-                stroke: 2,
-                strokeColor: 0xffffff
-            }
-        });
+    const count =
+        config.count ??
+        8;
 
-    test.column.add(
-        test.header,
-        {
-            width: null,
-            height: 180,
-            fill: 'horizontal',
-            horizontalAlign: 'center',
-            verticalAlign: 'center'
-        }
-    );
-
-
-    test.headerTitle =
-        new Text(this.scene, {
-            text: 'HEADER',
-            fontSize: '40px',
-            color: '#000000'
-        });
-
-    test.header.add(
-        test.headerTitle,
-        {
-            horizontalAlign: 'center',
-            verticalAlign: 'center'
-        }
-    );
-
-
-    // ======================================
-    // MIDDLE CARDS
-    // ======================================
-
-    for (let i = 1; i <= 6; i++) {
+    for (let i = 1; i <= count; i++) {
 
         const card =
             new Card(this.scene, {
-                width: null,
-                height: 180,
+                width:
+                    config.cardWidth ??
+                    null,
+
+                height:
+                    config.cardHeight ??
+                    null,
+
                 style: {
                     backgroundColor:
                         i % 2 === 0
@@ -246,27 +159,53 @@ this.buildTest = () => {
 
         const label =
             new Text(this.scene, {
-                text: `CARD ${i}`,
-                fontSize: '32px',
-                color: '#000000'
+                text:
+                    `CARD ${i}`,
+
+                fontSize:
+                    config.fontSize ??
+                    '32px',
+
+                color:
+                    '#000000'
             });
 
         card.add(
             label,
             {
-                horizontalAlign: 'center',
-                verticalAlign: 'center'
+                horizontalAlign:
+                    config.horizontalAlign ??
+                    'center',
+
+                verticalAlign:
+                    config.verticalAlign ??
+                    'center'
             }
         );
 
-        test.column.add(
+
+        test.grid.add(
             card,
             {
-                width: null,
-                height: 180,
-                fill: 'horizontal',
-                horizontalAlign: 'center',
-                verticalAlign: 'center'
+                width:
+                    config.childWidth ?? null,
+
+                height:
+                    config.childHeight ?? null,
+
+                fill:
+                    config.fill ?? true,
+
+                margin:
+                    config.margin ?? 0,
+
+                horizontalAlign:
+                    config.horizontalAlign ??
+                    'center',
+
+                verticalAlign:
+                    config.verticalAlign ??
+                    'center'
             }
         );
     }
@@ -276,9 +215,7 @@ this.buildTest = () => {
     // LAYOUT
     // ======================================
 
-    test.scrollView.layout();
-
-    test.scrollView.scrollToTop();
+    test.grid.layout();
 
     this.testObjects =
         test;
@@ -294,356 +231,342 @@ this.buildTest = () => {
 this.addCycle =
     this.createClickCycle([
 
+
         // ==================================
-        // 1. BASELINE
+        // 1. BASIC 3 COLUMN GRID
         // ==================================
 
         () => {
 
             console.log(
-                '1. BASELINE'
+                '1. BASIC 3 COLUMN GRID'
             );
 
             const test =
-                this.buildTest();
-
-            test.scrollView.scrollToTop();
-        },
-
-
-        // ==================================
-        // 2. INTRINSIC CONTENT WIDTH
-        // ==================================
-
-        () => {
-
-            console.log(
-                '2. CONTENT INTRINSIC WIDTH'
-            );
-
-            const test =
-                this.buildTest();
-
-            test.scrollView.setChildOptions(
-                test.column,
-                {
-                    width: null,
-                    height: null,
-                    fill: null,
-                    margin: 0,
-                    horizontalAlign: 'start',
-                    verticalAlign: 'start'
-                }
-            );
-
-            test.scrollView.layout();
-            test.scrollView.scrollToTop();
-        },
-
-
-        // ==================================
-        // 3. HORIZONTAL FILL
-        // ==================================
-
-        () => {
-
-            console.log(
-                '3. CONTENT HORIZONTAL FILL'
-            );
-
-            const test =
-                this.buildTest();
-
-            test.scrollView.setChildOptions(
-                test.column,
-                {
-                    width: null,
-                    height: null,
-                    fill: 'horizontal',
-                    margin: 0,
-                    horizontalAlign: 'start',
-                    verticalAlign: 'start'
-                }
-            );
-
-            test.scrollView.layout();
-            test.scrollView.scrollToTop();
-        },
-
-
-        // ==================================
-        // 4. CONTENT MARGIN
-        // ==================================
-
-        () => {
-
-            console.log(
-                '4. CONTENT MARGIN'
-            );
-
-            const test =
-                this.buildTest();
-
-            test.scrollView.setChildOptions(
-                test.column,
-                {
-                    width: null,
-                    height: null,
-                    fill: 'horizontal',
-                    margin: 30,
-                    horizontalAlign: 'start',
-                    verticalAlign: 'start'
-                }
-            );
-
-            test.scrollView.layout();
-            test.scrollView.scrollToTop();
-        },
-
-
-        // ==================================
-        // 5. SCROLL MIDDLE
-        // ==================================
-
-        () => {
-
-            console.log(
-                '5. SCROLL MIDDLE'
-            );
-
-            const test =
-                this.buildTest();
-
-            test.scrollView.setScrollY(
-                test.scrollView.maxScrollY / 2
-            );
-        },
-
-
-        // ==================================
-        // 6. SCROLL BOTTOM
-        // ==================================
-
-        () => {
-
-            console.log(
-                '6. SCROLL BOTTOM'
-            );
-
-            const test =
-                this.buildTest();
-
-            test.scrollView.scrollToBottom();
-        },
-
-
-        // ==================================
-        // 7. SCROLL TOP
-        // ==================================
-
-        () => {
-
-            console.log(
-                '7. SCROLL TOP'
-            );
-
-            const test =
-                this.buildTest();
-
-            test.scrollView.scrollToTop();
-        },
-
-
-        // ==================================
-        // 8. EXPLICIT CONTENT HEIGHT
-        // ==================================
-
-        () => {
-
-            console.log(
-                '8. CONTENT EXPLICIT HEIGHT'
-            );
-
-            const test =
-                this.buildTest();
-
-            test.scrollView.setChildOptions(
-                test.column,
-                {
-                    width: null,
-                    height:
-                        test.scrollView.height - 40,
-                    fill: 'horizontal',
-                    margin: 20,
-                    horizontalAlign: 'start',
-                    verticalAlign: 'start'
-                }
-            );
-
-            test.scrollView.layout();
-            test.scrollView.scrollToTop();
-        },
-
-
-        // ==================================
-        // 9. HORIZONTAL SCROLL
-        // ==================================
-
-        () => {
-
-            console.log(
-                '9. HORIZONTAL SCROLL'
-            );
-
-            this.destroyTest();
-
-            const scroll =
-                new ScrollView(this.scene, {
-                    width: this.width,
-                    height: this.height / 2,
-                    padding: 20,
-                    direction: 'horizontal'
-                });
-
-            this.addTest(scroll);
-
-            const row =
-                new Row(this.scene, {
-                    height:
-                        this.height / 2 - 40,
-                    gap: 20,
-                    padding: 20
-                });
-
-            scroll.add(row);
-
-            for (let i = 1; i <= 8; i++) {
-
-                const card =
-                    new Card(this.scene, {
-                        width: 300,
-                        height: 300,
-                        style: {
-                            backgroundColor:
-                                0x90d5ff,
-                            radius: 8,
-                            stroke: 2,
-                            strokeColor:
-                                0xffffff
-                        }
-                    });
-
-                const text =
-                    new Text(this.scene, {
-                        text: `CARD ${i}`,
-                        fontSize: '32px',
-                        color: '#000000'
-                    });
-
-                card.add(
-                    text,
-                    {
-                        horizontalAlign: 'center',
-                        verticalAlign: 'center'
-                    }
-                );
-
-                row.add(
-                    card,
-                    {
-                        width: 300,
-                        height: 300,
-                        horizontalAlign: 'start',
-                        verticalAlign: 'center'
-                    }
-                );
-            }
-
-            scroll.layout();
-            scroll.scrollToLeft();
-        },
-
-
-        // ==================================
-        // 10. BOTH AXIS
-        // ==================================
-
-        () => {
-
-            console.log(
-                '10. BOTH-AXIS SCROLL'
-            );
-
-            this.destroyTest();
-
-            const scroll =
-                new ScrollView(this.scene, {
-                    width: this.width,
-                    height: this.height / 2,
-                    padding: 20,
-                    direction: 'both'
-                });
-
-            this.addTest(scroll);
-
-            const content =
-                new Column(this.scene, {
-                    width: this.width * 1.5,
+                this.buildTest({
+                    columns: 3,
+                    count: 8,
                     padding: 20,
                     gap: 20
                 });
 
-            scroll.add(content);
+            test.grid.layout();
+        },
 
-            for (let i = 1; i <= 10; i++) {
+
+        // ==================================
+        // 2. TWO COLUMNS
+        // ==================================
+
+        () => {
+
+            console.log(
+                '2. TWO COLUMN GRID'
+            );
+
+            const test =
+                this.buildTest({
+                    columns: 2,
+                    count: 8,
+                    padding: 20,
+                    gap: 20
+                });
+
+            test.grid.layout();
+        },
+
+
+        // ==================================
+        // 3. FOUR COLUMNS
+        // ==================================
+
+        () => {
+
+            console.log(
+                '3. FOUR COLUMN GRID'
+            );
+
+            const test =
+                this.buildTest({
+                    columns: 4,
+                    count: 10,
+                    padding: 20,
+                    gap: 20
+                });
+
+            test.grid.layout();
+        },
+
+
+        // ==================================
+        // 4. EXPLICIT ROWS
+        // ==================================
+
+        () => {
+
+            console.log(
+                '4. EXPLICIT ROWS'
+            );
+
+            const test =
+                this.buildTest({
+                    columns: 3,
+                    rows: 4,
+                    count: 10,
+                    padding: 20,
+                    gap: 20
+                });
+
+            test.grid.layout();
+        },
+
+
+        // ==================================
+        // 5. NO GAP
+        // ==================================
+
+        () => {
+
+            console.log(
+                '5. NO GAP'
+            );
+
+            const test =
+                this.buildTest({
+                    columns: 3,
+                    count: 8,
+                    padding: 20,
+                    gap: 0
+                });
+
+            test.grid.layout();
+        },
+
+
+        // ==================================
+        // 6. LARGE GAP
+        // ==================================
+
+        () => {
+
+            console.log(
+                '6. LARGE GAP'
+            );
+
+            const test =
+                this.buildTest({
+                    columns: 3,
+                    count: 8,
+                    padding: 20,
+                    gap: 40
+                });
+
+            test.grid.layout();
+        },
+
+
+        // ==================================
+        // 7. LARGE PADDING
+        // ==================================
+
+        () => {
+
+            console.log(
+                '7. LARGE PADDING'
+            );
+
+            const test =
+                this.buildTest({
+                    columns: 3,
+                    count: 8,
+                    padding: 60,
+                    gap: 20
+                });
+
+            test.grid.layout();
+        },
+
+
+        // ==================================
+        // 8. MARGINS
+        // ==================================
+
+        () => {
+
+            console.log(
+                '8. CELL MARGINS'
+            );
+
+            const test =
+                this.buildTest({
+                    columns: 3,
+                    count: 8,
+                    padding: 20,
+                    gap: 20,
+                    margin: 15
+                });
+
+            test.grid.layout();
+        },
+
+
+        // ==================================
+        // 9. ALIGNMENT
+        // ==================================
+
+        () => {
+
+            console.log(
+                '9. CELL ALIGNMENT'
+            );
+
+            const test =
+                this.buildTest({
+                    columns: 3,
+                    count: 8,
+                    padding: 20,
+                    gap: 20,
+
+                    childWidth: 100,
+                    childHeight: 100,
+
+                    fill: false,
+
+                    horizontalAlign:
+                        'center',
+
+                    verticalAlign:
+                        'center'
+                });
+
+            test.grid.layout();
+        },
+
+
+        // ==================================
+        // 10. GRID IN SCROLLVIEW
+        // ==================================
+
+        () => {
+
+            console.log(
+                '10. GRID IN SCROLLVIEW'
+            );
+
+            this.destroyTest();
+
+            const scroll =
+                new ScrollView(this.scene, {
+                    width:
+                        this.width,
+
+                    height:
+                        this.height / 2,
+
+                    padding: 20,
+
+                    direction:
+                        'vertical'
+                });
+
+            this.addTest(scroll);
+
+
+            const grid =
+                new Grid(this.scene, {
+                    width:
+                        this.width,
+                    
+                    //height: null,
+
+                    columns: 3,
+
+                    padding: 20,
+
+                    gap: 20
+                });
+
+            scroll.add(grid, { 
+                width: null,
+                height: null,
+                fill: 'horizontal'
+            });
+
+
+            // ----------------------------------
+            // GRID CONTENT
+            // ----------------------------------
+
+            for (let i = 1; i <= 15; i++) {
 
                 const card =
                     new Card(this.scene, {
-                        width: this.width * 1.2,
+                        width: null,
                         height: 180,
+
                         style: {
                             backgroundColor:
-                                0xbbbbbb,
+                                i % 2 === 0
+                                    ? 0xdddddd
+                                    : 0xbbbbbb,
+
                             radius: 8,
+
                             stroke: 2,
+
                             strokeColor:
                                 0xffffff
                         }
                     });
 
-                const text =
+                const label =
                     new Text(this.scene, {
-                        text: `BOTH AXIS ${i}`,
-                        fontSize: '28px',
-                        color: '#000000'
+                        text:
+                            `CARD ${i}`,
+
+                        fontSize:
+                            '28px',
+
+                        color:
+                            '#000000'
                     });
 
                 card.add(
-                    text,
+                    label,
                     {
-                        horizontalAlign: 'center',
-                        verticalAlign: 'center'
+                        horizontalAlign:
+                            'center',
+
+                        verticalAlign:
+                            'center'
                     }
                 );
 
-                content.add(
+
+                grid.add(
                     card,
                     {
-                        width:
-                            this.width * 1.2,
+                        width: null,
                         height: 180,
-                        horizontalAlign: 'start',
-                        verticalAlign: 'center'
+
+                        fill:
+                            'horizontal',
+
+                        horizontalAlign:
+                            'center',
+
+                        verticalAlign:
+                            'center'
                     }
                 );
             }
 
-            scroll.layout();
+            scroll.scrollToTop();
 
-            scroll.setScroll(
-                scroll.maxScrollX / 2,
-                scroll.maxScrollY / 2
-            );
+            this.testObjects = {
+                scroll,
+                grid
+            };
         }
 
     ]);
@@ -657,37 +580,6 @@ this.addCycle();
 
 
 
-/*
-                () => this.scene.parent.add(this.scene.items.cards[0], { margin: 10 } ),
-                () => {
-                    this.scene.items.cards[0].add(this.scene.items.texts[0], { width: 200, height: 120 });
-                    //console.log(this.scene.parent.getChildOptions(this.scene.items.cards[0]));
-                },
-                () => this.scene.parent.add(this.scene.items.buttons[0]),
-                () => this.scene.parent.remove(this.scene.items.cards[0]),
-                () => this.scene.parent.add(this.scene.items.texts[1]),
-                () => this.scene.parent.add(this.scene.items.texts[2]),
-                () => this.scene.parent.add(this.scene.items.texts[4]),
-                () => this.scene.parent.add(this.scene.items.buttons[1]),
-                () => this.scene.parent.insertBefore(this.scene.items.cards[0], this.scene.items.texts[2]),
-                () => this.scene.parent.add(this.scene.items.cards[1]),
-                () => this.scene.parent.add(this.scene.items.cards[2]),
-                () => this.scene.items.cards[2].add(this.scene.items.texts[3]),
-                () => this.scene.parent.add(this.scene.items.cards[3]),
-                () => this.scene.parent.add(this.scene.items.cards[4]),
-                () => this.scene.parent.add(this.scene.items.buttons[2]),
-                () => this.scene.parent.add(this.scene.items.buttons[3]),
-                () => this.scene.parent.add(this.scene.items.buttons[4]),
-                () => this.scene.items.buttons[0].destroy(),
-                () => this.scene.items.cards[0].destroy(),
-                () => this.scene.parent.move(this.scene.items.buttons[2], this.scene.items.buttons[1]),
-                () => this.scene.parent.move(this.scene.items.buttons[3], this.scene.items.buttons[1]),
-                () => this.scene.parent.move(this.scene.items.buttons[4], 1),
-                
-
-                
-            ]);
-*/
 
 /* v
 // BUTTONS
