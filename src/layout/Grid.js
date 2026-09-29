@@ -171,10 +171,22 @@ export default class Grid extends Container {
     }
 
     ////////////////////////////////////////
-    // CELL SIZE
+    // LAYOUT TRACK WIDTHS
     ////////////////////////////////////////
 
-    getCellWidth() {
+    getColumnWidthsForLayout() {
+
+        // INTRINSIC GRID
+        if (
+            this.widthAuto &&
+            this.layoutWidth === null
+        ) {
+            return this.getColumnWidths();
+        }
+
+        // FIXED GRID
+        const columns =
+            this.getColumnCount();
 
         const availableWidth =
             Math.max(
@@ -185,20 +197,35 @@ export default class Grid extends Container {
                 (
                     Math.max(
                         0,
-                        this.columns - 1
+                        columns - 1
                     ) *
                     this.gap
                 )
             );
 
-        return (
+        const cellWidth =
             availableWidth /
-            this.columns
-        );
+            columns;
+
+        return new Array(columns)
+            .fill(cellWidth);
     }
 
-    getCellHeight() {
+    ////////////////////////////////////////
+    // LAYOUT TRACK HEIGHTS
+    ////////////////////////////////////////
 
+    getRowHeightsForLayout() {
+
+        // INTRINSIC GRID
+        if (
+            this.heightAuto &&
+            this.layoutHeight === null
+        ) {
+            return this.getRowHeights();
+        }
+
+        // FIXED GRID
         const rows =
             this.getRowCount();
 
@@ -217,10 +244,12 @@ export default class Grid extends Container {
                 )
             );
 
-        return (
+        const cellHeight =
             availableHeight /
-            rows
-        );
+            rows;
+
+        return new Array(rows)
+            .fill(cellHeight);
     }
 
     ////////////////////////////////////////
@@ -297,6 +326,7 @@ export default class Grid extends Container {
     ////////////////////////////////////////
 
     getRowHeights() {
+
         const rows =
             this.getRowCount();
     
@@ -348,7 +378,8 @@ export default class Grid extends Container {
                     outerHeight
                 );
         }
-    
+
+console.log('GRID getRowHeights: ', rowHeights);
         return rowHeights;
     }
 
@@ -357,7 +388,7 @@ export default class Grid extends Container {
     ////////////////////////////////////////
     
     getColumnWidths() {
-    
+
         const columns =
             this.getColumnCount();
     
@@ -411,7 +442,7 @@ export default class Grid extends Container {
                     outerWidth
                 );
         }
-    
+console.log('GRID getColumnWidths: ', columnWidths);
         return columnWidths;
     }
 
@@ -497,10 +528,10 @@ export default class Grid extends Container {
         const rows = this.getRowCount();
         
         const columnWidths =
-            this.getColumnWidths();
-        
+            this.getColumnWidthsForLayout();
+
         const rowHeights =
-            this.getRowHeights();
+            this.getRowHeightsForLayout();
         
         const columnOffsets =
             this.getColumnOffsets(columnWidths);
@@ -742,7 +773,6 @@ export default class Grid extends Container {
         this.layoutDirty = false;
 
 
-/*
 if (Debug.enabled) {
 
     console.log('========== GRID DEBUG ==========');
@@ -752,29 +782,51 @@ if (Debug.enabled) {
         height: this.height,
         layoutWidth: this.layoutWidth,
         layoutHeight: this.layoutHeight,
-        effectiveWidth: this.getLayoutWidth(),
-        effectiveHeight: this.getLayoutHeight(),
         columns,
         rows,
-        cellWidth,
-        cellHeight,
+        columnWidths,
+        rowHeights,
+        columnOffsets,
+        rowOffsets,
         children: this.children.length
     });
 
     for (const [index, child] of this.children.entries()) {
-
+    
         const options =
             this.childLayoutOptions.get(child);
-
+    
+        const column =
+            options?.column ??
+            (index % columns);
+    
+        const row =
+            options?.row ??
+            Math.floor(index / columns);
+    
         console.log(`Grid Child ${index}:`, {
-            id: child.id,
             x: child.x,
             y: child.y,
             width: child.getLayoutWidth(),
             height: child.getLayoutHeight(),
-            row: options?.row,
-            column: options?.column,
-            margin: options?.margin
+    
+            column,
+            row,
+    
+            columnWidth:
+                columnWidths[column],
+    
+            rowHeight:
+                rowHeights[row],
+    
+            columnOffset:
+                columnOffsets[column],
+    
+            rowOffset:
+                rowOffsets[row],
+    
+            margin:
+                options?.margin
         });
     }
 
@@ -784,7 +836,7 @@ if (Debug.enabled) {
 
     console.log('================================');
 }
-*/
+
 
 
 

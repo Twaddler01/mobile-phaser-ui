@@ -122,15 +122,15 @@ this.addCycle =
 
             const grid =
                 new Grid(this.scene, {
-            
                     columns: 6,
-            
                     padding: 20,
-            
                     gap: 20
                 });
-            this.addTest(grid);
-            scroll.add(grid);
+            
+            scroll.add(grid, {
+                width: null,
+                height: null
+            });
             
             for (let i = 1; i <= 15; i++) {
 
@@ -144,11 +144,12 @@ this.addCycle =
             
                 const card =
                     new Card(this.scene, {
-            
+                        
                         width:
                             cardWidths[i - 1],
             
-                        height: 180,
+                        height:
+                            cardWidths[i - 1] * 0.7,
             
                         style: {
                             backgroundColor:
@@ -164,18 +165,18 @@ this.addCycle =
                                 0xffffff
                         }
                     });
-                this.addTest(card);
                     
                 grid.add(
                     card,
                     {
-                        height: 180,
+                        height:
+                            cardWidths[i - 1] * 0.7,
                 
                         fill: false,
                 
                         horizontalAlign: 'start',
                 
-                        verticalAlign: 'center'
+                        verticalAlign: 'start'
                     }
                 );
             }

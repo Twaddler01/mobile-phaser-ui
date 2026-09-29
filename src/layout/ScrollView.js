@@ -604,7 +604,7 @@ add(content, options = {}) {
         const bounds =
             this.content.getContentBounds();
 
-
+/*
 console.log('========== SCROLL CONTENT ==========');
 
     console.log({
@@ -634,7 +634,7 @@ console.log('========== SCROLL CONTENT ==========');
     });
 
     console.log('====================================');
-
+*/
 
         this.contentWidth =
             bounds.width;
@@ -1121,7 +1121,7 @@ layout() {
             this.content.layout();
         }
 
-
+/*
         ////////////////////////////////////////
         // RESOLVE FINAL SIZE
         ////////////////////////////////////////
@@ -1136,7 +1136,6 @@ layout() {
                 ? this.content.getLayoutHeight()
                 : contentHeight;
 
-
         ////////////////////////////////////////
         // APPLY FINAL SIZE
         ////////////////////////////////////////
@@ -1145,6 +1144,15 @@ layout() {
             finalWidth,
             finalHeight
         );
+*/
+////////////////////////////////////////
+// APPLY FINAL SIZE
+////////////////////////////////////////
+
+this.content.setLayoutSize(
+    contentWidth,
+    contentHeight
+);
 
 
         ////////////////////////////////////////
