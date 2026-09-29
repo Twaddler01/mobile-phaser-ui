@@ -229,57 +229,34 @@ export default class Grid extends Container {
 
     updateSize() {
 
+        // AUTO WIDTH
         if (
             this.widthAuto &&
             this.layoutWidth === null
         ) {
-
-            let width = 0;
-
-            for (const child of this.children) {
-
-                const options =
-                    this.childLayoutOptions.get(
-                        child
-                    );
-
-                if (!options) {
-                    continue;
-                }
-
-                const childWidth =
-                    options.width ??
-                    child.getLayoutWidth();
-
-                const margin =
-                    options.margin;
-
-                width =
-                    Math.max(
-                        width,
-                        margin.left +
-                        childWidth +
-                        margin.right
-                    );
-            }
-
-            width =
-                width *
-                this.columns;
-
-            width +=
-                this.padding.left +
-                this.padding.right;
-
-            width +=
+        
+            const columnWidths =
+                this.getColumnWidths();
+        
+            const totalColumnsWidth =
+                columnWidths.reduce(
+                    (total, width) =>
+                        total + width,
+                    0
+                );
+        
+            const totalGap =
                 Math.max(
                     0,
-                    this.columns - 1
+                    columnWidths.length - 1
                 ) *
                 this.gap;
-
+        
             this.width =
-                width;
+                this.padding.left +
+                totalColumnsWidth +
+                totalGap +
+                this.padding.right;
         }
 
         // AUTO HEIGHT
@@ -316,7 +293,7 @@ export default class Grid extends Container {
     }
 
     ////////////////////////////////////////
-    // GRID ROW HEIGHT
+    // GRID ROW HEIGHTS
     ////////////////////////////////////////
 
     getRowHeights() {
@@ -373,6 +350,69 @@ export default class Grid extends Container {
         }
     
         return rowHeights;
+    }
+
+    ////////////////////////////////////////
+    // GRID COLUMN WIDTHS
+    ////////////////////////////////////////
+    
+    getColumnWidths() {
+    
+        const columns =
+            this.getColumnCount();
+    
+        const columnWidths =
+            new Array(columns).fill(0);
+    
+        for (const child of this.children) {
+    
+            const options =
+                this.childLayoutOptions.get(child);
+    
+            if (!options) {
+                continue;
+            }
+    
+            const index =
+                this.children.indexOf(child);
+    
+            const column =
+                options.column ??
+                (index % this.columns);
+    
+            const row =
+                options.row ??
+                Math.floor(index / this.columns);
+    
+            if (
+                column < 0 ||
+                column >= columns ||
+                row < 0 ||
+                row >= this.getRowCount()
+            ) {
+                continue;
+            }
+    
+            const childWidth =
+                options.width ??
+                child.getLayoutWidth();
+    
+            const margin =
+                options.margin;
+    
+            const outerWidth =
+                margin.left +
+                childWidth +
+                margin.right;
+    
+            columnWidths[column] =
+                Math.max(
+                    columnWidths[column],
+                    outerWidth
+                );
+        }
+    
+        return columnWidths;
     }
 
     ////////////////////////////////////////
@@ -652,6 +692,7 @@ export default class Grid extends Container {
         this.layoutDirty = false;
 
 
+/*
 if (Debug.enabled) {
 
     console.log('========== GRID DEBUG ==========');
@@ -693,7 +734,7 @@ if (Debug.enabled) {
 
     console.log('================================');
 }
-
+*/
 
 
 

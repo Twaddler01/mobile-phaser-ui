@@ -49,8 +49,6 @@ this.testContainer =
 
 this.testContainer.setDepth(1);
 
-////
-
 // ------------------------------------------
 // DESTROY CURRENT TEST
 // ------------------------------------------
@@ -87,372 +85,24 @@ return component;
 };
 
 // ==========================================
-// BUILD GRID TEST
-// ==========================================
-
-this.buildTest = (config = {}) => {
-
-    this.destroyTest();
-
-    const test = {};
-
-    test.grid =
-        new Grid(this.scene, {
-            width:
-                config.width ??
-                this.width,
-
-            height:
-                config.height ??
-                this.height,
-
-            columns:
-                config.columns ?? 3,
-
-            rows:
-                config.rows ?? null,
-
-            padding:
-                config.padding ?? 20,
-
-            gap:
-                config.gap ?? 20
-        });
-
-    this.addTest(test.grid);
-
-
-    // ======================================
-    // GRID ITEMS
-    // ======================================
-
-    const count =
-        config.count ??
-        8;
-
-    for (let i = 1; i <= count; i++) {
-
-        const card =
-            new Card(this.scene, {
-                width:
-                    config.cardWidth ??
-                    null,
-
-                height:
-                    config.cardHeight ??
-                    null,
-
-                style: {
-                    backgroundColor:
-                        i % 2 === 0
-                            ? 0xdddddd
-                            : 0xbbbbbb,
-
-                    radius: 8,
-
-                    stroke: 2,
-
-                    strokeColor:
-                        0xffffff
-                }
-            });
-
-        const label =
-            new Text(this.scene, {
-                text:
-                    `CARD ${i}`,
-
-                fontSize:
-                    config.fontSize ??
-                    '32px',
-
-                color:
-                    '#000000'
-            });
-
-        card.add(
-            label,
-            {
-                horizontalAlign:
-                    config.horizontalAlign ??
-                    'center',
-
-                verticalAlign:
-                    config.verticalAlign ??
-                    'center'
-            }
-        );
-
-
-        test.grid.add(
-            card,
-            {
-                width:
-                    config.childWidth ?? null,
-
-                height:
-                    config.childHeight ?? null,
-
-                fill:
-                    config.fill ?? true,
-
-                margin:
-                    config.margin ?? 0,
-
-                horizontalAlign:
-                    config.horizontalAlign ??
-                    'center',
-
-                verticalAlign:
-                    config.verticalAlign ??
-                    'center'
-            }
-        );
-    }
-
-
-    // ======================================
-    // LAYOUT
-    // ======================================
-
-    test.grid.layout();
-
-    this.testObjects =
-        test;
-
-    return test;
-};
-
-
-// ==========================================
 // CYCLE
 // ==========================================
 
 this.addCycle =
     this.createClickCycle([
 
-
         // ==================================
         // 1. BASIC 3 COLUMN GRID
         // ==================================
 
         () => {
-
+            this.destroyTest();
             console.log(
-                '1. BASIC 3 COLUMN GRID'
+                '0 SETUP'
             );
-
-            const test =
-                this.buildTest({
-                    columns: 3,
-                    count: 8,
-                    padding: 20,
-                    gap: 20
-                });
-
-            test.grid.layout();
         },
 
-
-        // ==================================
-        // 2. TWO COLUMNS
-        // ==================================
-
         () => {
-
-            console.log(
-                '2. TWO COLUMN GRID'
-            );
-
-            const test =
-                this.buildTest({
-                    columns: 2,
-                    count: 8,
-                    padding: 20,
-                    gap: 20
-                });
-
-            test.grid.layout();
-        },
-
-
-        // ==================================
-        // 3. FOUR COLUMNS
-        // ==================================
-
-        () => {
-
-            console.log(
-                '3. FOUR COLUMN GRID'
-            );
-
-            const test =
-                this.buildTest({
-                    columns: 4,
-                    count: 10,
-                    padding: 20,
-                    gap: 20
-                });
-
-            test.grid.layout();
-        },
-
-
-        // ==================================
-        // 4. EXPLICIT ROWS
-        // ==================================
-
-        () => {
-
-            console.log(
-                '4. EXPLICIT ROWS'
-            );
-
-            const test =
-                this.buildTest({
-                    columns: 3,
-                    rows: 4,
-                    count: 10,
-                    padding: 20,
-                    gap: 20
-                });
-
-            test.grid.layout();
-        },
-
-
-        // ==================================
-        // 5. NO GAP
-        // ==================================
-
-        () => {
-
-            console.log(
-                '5. NO GAP'
-            );
-
-            const test =
-                this.buildTest({
-                    columns: 3,
-                    count: 8,
-                    padding: 20,
-                    gap: 0
-                });
-
-            test.grid.layout();
-        },
-
-
-        // ==================================
-        // 6. LARGE GAP
-        // ==================================
-
-        () => {
-
-            console.log(
-                '6. LARGE GAP'
-            );
-
-            const test =
-                this.buildTest({
-                    columns: 3,
-                    count: 8,
-                    padding: 20,
-                    gap: 40
-                });
-
-            test.grid.layout();
-        },
-
-
-        // ==================================
-        // 7. LARGE PADDING
-        // ==================================
-
-        () => {
-
-            console.log(
-                '7. LARGE PADDING'
-            );
-
-            const test =
-                this.buildTest({
-                    columns: 3,
-                    count: 8,
-                    padding: 60,
-                    gap: 20
-                });
-
-            test.grid.layout();
-        },
-
-
-        // ==================================
-        // 8. MARGINS
-        // ==================================
-
-        () => {
-
-            console.log(
-                '8. CELL MARGINS'
-            );
-
-            const test =
-                this.buildTest({
-                    columns: 3,
-                    count: 8,
-                    padding: 20,
-                    gap: 20,
-                    margin: 15
-                });
-
-            test.grid.layout();
-        },
-
-
-        // ==================================
-        // 9. ALIGNMENT
-        // ==================================
-
-        () => {
-
-            console.log(
-                '9. CELL ALIGNMENT'
-            );
-
-            const test =
-                this.buildTest({
-                    columns: 3,
-                    count: 8,
-                    padding: 20,
-                    gap: 20,
-
-                    childWidth: 100,
-                    childHeight: 100,
-
-                    fill: false,
-
-                    horizontalAlign:
-                        'center',
-
-                    verticalAlign:
-                        'center'
-                });
-
-            test.grid.layout();
-        },
-
-
-        // ==================================
-        // 10. GRID IN SCROLLVIEW
-        // ==================================
-
-        () => {
-
-            console.log(
-                '10. GRID IN SCROLLVIEW'
-            );
-
             this.destroyTest();
 
             const scroll =
@@ -466,117 +116,83 @@ this.addCycle =
                     padding: 20,
 
                     direction:
-                        'vertical'
+                        'both'
                 });
-
             this.addTest(scroll);
-
 
             const grid =
                 new Grid(this.scene, {
-                    width:
-                        this.width,
-                    
-                    //height: null,
-
+            
                     columns: 3,
-
+            
                     padding: 20,
-
+            
                     gap: 20
                 });
-
-            scroll.add(grid, { 
-                width: null,
-                height: null,
-                fill: 'horizontal'
-            });
-
-
-            // ----------------------------------
-            // GRID CONTENT
-            // ----------------------------------
-
+            this.addTest(grid);
+            scroll.add(grid);
+            
             for (let i = 1; i <= 15; i++) {
 
+                const cardWidths = [
+                    140, 220, 300,
+                    180, 260, 340,
+                    200, 280, 160,
+                    320, 190, 250,
+                    150, 310, 230
+                ];
+            
                 const card =
                     new Card(this.scene, {
-                        width: null,
+            
+                        width:
+                            cardWidths[i - 1],
+            
                         height: 180,
-
+            
                         style: {
                             backgroundColor:
                                 i % 2 === 0
                                     ? 0xdddddd
                                     : 0xbbbbbb,
-
+            
                             radius: 8,
-
+            
                             stroke: 2,
-
+            
                             strokeColor:
                                 0xffffff
                         }
                     });
-
-                const label =
-                    new Text(this.scene, {
-                        text:
-                            `CARD ${i}`,
-
-                        fontSize:
-                            '28px',
-
-                        color:
-                            '#000000'
-                    });
-
-                card.add(
-                    label,
-                    {
-                        horizontalAlign:
-                            'center',
-
-                        verticalAlign:
-                            'center'
-                    }
-                );
-
-
+                this.addTest(card);
+                    
                 grid.add(
                     card,
                     {
-                        width: null,
                         height: 180,
-
-                        fill:
-                            'horizontal',
-
-                        horizontalAlign:
-                            'center',
-
-                        verticalAlign:
-                            'center'
+                
+                        fill: false,
+                
+                        horizontalAlign: 'start',
+                
+                        verticalAlign: 'center'
                     }
                 );
             }
-
-            scroll.scrollToTop();
-
-            this.testObjects = {
-                scroll,
-                grid
-            };
-        }
-
+            
+            
+            
+            
+        } // LAST
     ]);
-
 
 // ==========================================
 // FIRST RUN
 // ==========================================
 
 this.addCycle();
+
+
 
 
 
