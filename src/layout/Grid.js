@@ -415,6 +415,57 @@ export default class Grid extends Container {
         return columnWidths;
     }
 
+    //////////////////////////////////////////
+    // GET COLUMN OFFSETS
+    //////////////////////////////////////////
+    
+    getColumnOffsets(columnWidths = this.getColumnWidths()) {
+    
+        const offsets =
+            new Array(columnWidths.length);
+    
+        let x = this.padding.left;
+    
+        for (let column = 0; column < columnWidths.length; column++) {
+    
+            offsets[column] = x;
+    
+            x += columnWidths[column];
+    
+            if (column < columnWidths.length - 1) {
+                x += this.gap;
+            }
+        }
+    
+        return offsets;
+    }
+    
+    
+    //////////////////////////////////////////
+    // GET ROW OFFSETS
+    //////////////////////////////////////////
+    
+    getRowOffsets(rowHeights = this.getRowHeights()) {
+    
+        const offsets =
+            new Array(rowHeights.length);
+    
+        let y = this.padding.top;
+    
+        for (let row = 0; row < rowHeights.length; row++) {
+    
+            offsets[row] = y;
+    
+            y += rowHeights[row];
+    
+            if (row < rowHeights.length - 1) {
+                y += this.gap;
+            }
+        }
+    
+        return offsets;
+    }
+
     ////////////////////////////////////////
     // LAYOUT
     ////////////////////////////////////////
@@ -442,17 +493,20 @@ export default class Grid extends Container {
 
         this.updateSize();
 
-        const columns =
-            this.getColumnCount();
-
-        const rows =
-            this.getRowCount();
-
-        const cellWidth =
-            this.getCellWidth();
-
-        const cellHeight =
-            this.getCellHeight();
+        const columns = this.getColumnCount();
+        const rows = this.getRowCount();
+        
+        const columnWidths =
+            this.getColumnWidths();
+        
+        const rowHeights =
+            this.getRowHeights();
+        
+        const columnOffsets =
+            this.getColumnOffsets(columnWidths);
+        
+        const rowOffsets =
+            this.getRowOffsets(rowHeights);
 
         ////////////////////////////////////////
         // POSITION CHILDREN
@@ -513,20 +567,16 @@ export default class Grid extends Container {
                 }
 
                 const cellX =
-                    this.padding.left +
-                    column *
-                    (
-                        cellWidth +
-                        this.gap
-                    );
-
+                    columnOffsets[column];
+                
                 const cellY =
-                    this.padding.top +
-                    row *
-                    (
-                        cellHeight +
-                        this.gap
-                    );
+                    rowOffsets[row];
+                
+                const cellWidth =
+                    columnWidths[column];
+                
+                const cellHeight =
+                    rowHeights[row];
 
                 ////////////////////////////////////////
                 // AVAILABLE AREA

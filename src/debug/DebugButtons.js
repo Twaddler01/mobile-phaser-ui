@@ -123,7 +123,7 @@ this.addCycle =
             const grid =
                 new Grid(this.scene, {
             
-                    columns: 3,
+                    columns: 6,
             
                     padding: 20,
             
