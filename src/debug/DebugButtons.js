@@ -91,21 +91,634 @@ return component;
 this.addCycle =
     this.createClickCycle([
 
-        // ==================================
-        // 1. BASIC 3 COLUMN GRID
-        // ==================================
+// ==================================
+// 0. SETUP
+// ==================================
 
         () => {
+
             this.destroyTest();
+
             console.log(
                 '0 SETUP'
             );
+
+            console.log(
+                'Grid test suite ready.'
+            );
         },
 
-////////////////
 
+// ==================================
+// 1. INTRINSIC — 3 COLUMNS
+// ==================================
+
+        () => {
+
+            this.destroyTest();
+
+            console.log(
+                '1 — INTRINSIC GRID / 3 COLUMNS'
+            );
+
+            console.log(
+                'Expected: 3 columns, 5 automatic rows. ' +
+                'Grid sizes itself from the cards.'
+            );
+
+            const grid =
+                new Grid(this.scene, {
+
+                    columns: 3,
+
+                    padding: 20,
+
+                    gap: 20
+                });
+
+            this.addTest(grid);
+
+            for (let i = 1; i <= 15; i++) {
+
+                const card =
+                    new Card(this.scene, {
+
+                        width: 100,
+
+                        height: 100,
+
+                        style: {
+
+                            backgroundColor:
+                                i % 2 === 0
+                                    ? 0xdddddd
+                                    : 0xbbbbbb,
+
+                            radius: 8,
+
+                            stroke: 2,
+
+                            strokeColor: 0xffffff
+                        }
+                    });
+
+                const text =
+                    new Text(this.scene, {
+
+                        text: `Card ${i}`,
+
+                        color: '0x000000'
+                    });
+
+                card.add(text, {
+
+                    horizontalAlign:
+                        'center',
+
+                    verticalAlign:
+                        'center'
+                });
+
+                grid.add(card, {
+
+                    horizontalAlign:
+                        'start',
+
+                    verticalAlign:
+                        'start'
+                });
+            }
+        },
+
+
+// ==================================
+// 2. INTRINSIC — 3 ROWS
+// ==================================
+
+        () => {
+
+            this.destroyTest();
+
+            console.log(
+                '2 — INTRINSIC GRID / 3 ROWS'
+            );
+
+            console.log(
+                'Expected: 3 rows, 5 automatic columns. ' +
+                'Cards should form three horizontal rows.'
+            );
+
+            const grid =
+                new Grid(this.scene, {
+
+                    rows: 3,
+
+                    padding: 20,
+
+                    gap: 20
+                });
+
+            this.addTest(grid);
+
+            for (let i = 1; i <= 15; i++) {
+
+                const card =
+                    new Card(this.scene, {
+
+                        width: 100,
+
+                        height: 100,
+
+                        style: {
+
+                            backgroundColor:
+                                i % 2 === 0
+                                    ? 0xdddddd
+                                    : 0xbbbbbb,
+
+                            radius: 8,
+
+                            stroke: 2,
+
+                            strokeColor: 0xffffff
+                        }
+                    });
+
+                const text =
+                    new Text(this.scene, {
+
+                        text: `Card ${i}`,
+
+                        color: '0x000000'
+                    });
+
+                card.add(text, {
+
+                    horizontalAlign:
+                        'center',
+
+                    verticalAlign:
+                        'center'
+                });
+
+                grid.add(card, {
+
+                    horizontalAlign:
+                        'start',
+
+                    verticalAlign:
+                        'start'
+                });
+            }
+        },
+
+
+// ==================================
+// 3. DEFAULT — ONE COLUMN
+// ==================================
+
+        () => {
+
+            this.destroyTest();
+
+            console.log(
+                '3 — DEFAULT GRID / ONE COLUMN'
+            );
+
+            console.log(
+                'Expected: one column with 8 automatic rows. ' +
+                'No rows or columns were specified.'
+            );
+
+            const grid =
+                new Grid(this.scene, {
+
+                    padding: 20,
+
+                    gap: 20,
+
+                    width: 300
+                });
+
+            this.addTest(grid);
+
+            for (let i = 1; i <= 8; i++) {
+
+                const card =
+                    new Card(this.scene, {
+
+                        width: 240,
+
+                        height: 70,
+
+                        style: {
+
+                            backgroundColor:
+                                i % 2 === 0
+                                    ? 0xdddddd
+                                    : 0xbbbbbb,
+
+                            radius: 8,
+
+                            stroke: 2,
+
+                            strokeColor: 0xffffff
+                        }
+                    });
+
+                const text =
+                    new Text(this.scene, {
+
+                        text: `Card ${i}`,
+
+                        color: '0x000000'
+                    });
+
+                card.add(text, {
+
+                    horizontalAlign:
+                        'center',
+
+                    verticalAlign:
+                        'center'
+                });
+
+                grid.add(card);
+            }
+        },
+
+
+// ==================================
+// 4. FIXED WIDTH — EQUAL COLUMNS
+// ==================================
+
+        () => {
+
+            this.destroyTest();
+
+            console.log(
+                '4 — FIXED WIDTH / EQUAL GRID COLUMNS'
+            );
+
+            console.log(
+                'Expected: 3 equal-width columns. ' +
+                'Cards retain their own smaller sizes and align to the start.'
+            );
+
+            const grid =
+                new Grid(this.scene, {
+
+                    columns: 3,
+
+                    width:
+                        this.width,
+
+                    padding: 20,
+
+                    gap: 20
+                });
+
+            this.addTest(grid);
+
+            for (let i = 1; i <= 12; i++) {
+
+                const card =
+                    new Card(this.scene, {
+
+                        width:
+                            60 + (i % 4) * 20,
+
+                        height:
+                            60 + (i % 3) * 20,
+
+                        style: {
+
+                            backgroundColor:
+                                i % 2 === 0
+                                    ? 0xdddddd
+                                    : 0xbbbbbb,
+
+                            radius: 8,
+
+                            stroke: 2,
+
+                            strokeColor: 0xffffff
+                        }
+                    });
+
+                const text =
+                    new Text(this.scene, {
+
+                        text: `Card ${i}`,
+
+                        color: '0x000000'
+                    });
+
+                card.add(text, {
+
+                    horizontalAlign:
+                        'center',
+
+                    verticalAlign:
+                        'center'
+                });
+
+                grid.add(card, {
+
+                    horizontalAlign:
+                        'start',
+
+                    verticalAlign:
+                        'start'
+                });
+            }
+        },
+
+
+// ==================================
+// 5. FIXED HEIGHT — EQUAL ROWS
+// ==================================
+
+        () => {
+
+            this.destroyTest();
+
+            console.log(
+                '5 — FIXED HEIGHT / EQUAL GRID ROWS'
+            );
+
+            console.log(
+                'Expected: 3 equal-height rows. ' +
+                'Cards retain their own heights and sit at the top of each cell.'
+            );
+
+            const grid =
+                new Grid(this.scene, {
+
+                    columns: 3,
+
+                    width:
+                        this.width,
+
+                    height: 600,
+
+                    padding: 20,
+
+                    gap: 20
+                });
+
+            this.addTest(grid);
+
+            for (let i = 1; i <= 12; i++) {
+
+                const card =
+                    new Card(this.scene, {
+
+                        width:
+                            80 + (i % 4) * 20,
+
+                        height:
+                            50 + (i % 3) * 20,
+
+                        style: {
+
+                            backgroundColor:
+                                i % 2 === 0
+                                    ? 0xdddddd
+                                    : 0xbbbbbb,
+
+                            radius: 8,
+
+                            stroke: 2,
+
+                            strokeColor: 0xffffff
+                        }
+                    });
+
+                const text =
+                    new Text(this.scene, {
+
+                        text: `Card ${i}`,
+
+                        color: '0x000000'
+                    });
+
+                card.add(text, {
+
+                    horizontalAlign:
+                        'center',
+
+                    verticalAlign:
+                        'center'
+                });
+
+                grid.add(card, {
+
+                    horizontalAlign:
+                        'start',
+
+                    verticalAlign:
+                        'start'
+                });
+            }
+        },
+
+
+// ==================================
+// 6. FILL — HORIZONTAL
+// ==================================
+
+        () => {
+
+            this.destroyTest();
+
+            console.log(
+                '6 — FILL HORIZONTAL'
+            );
+
+            console.log(
+                'Expected: every card expands horizontally ' +
+                'to fill its entire grid cell.'
+            );
+
+            const grid =
+                new Grid(this.scene, {
+
+                    columns: 3,
+
+                    width:
+                        this.width,
+
+                    padding: 20,
+
+                    gap: 20
+                });
+
+            this.addTest(grid);
+
+            for (let i = 1; i <= 9; i++) {
+
+                const card =
+                    new Card(this.scene, {
+
+                        width: 60,
+
+                        height: 80,
+
+                        style: {
+
+                            backgroundColor:
+                                i % 2 === 0
+                                    ? 0xdddddd
+                                    : 0xbbbbbb,
+
+                            radius: 8,
+
+                            stroke: 2,
+
+                            strokeColor: 0xffffff
+                        }
+                    });
+
+                const text =
+                    new Text(this.scene, {
+
+                        text: `Card ${i}`,
+
+                        color: '0x000000'
+                    });
+
+                card.add(text, {
+
+                    horizontalAlign:
+                        'center',
+
+                    verticalAlign:
+                        'center'
+                });
+
+                grid.add(card, {
+
+                    width: null,
+
+                    fill: 'horizontal',
+
+                    horizontalAlign:
+                        'start',
+
+                    verticalAlign:
+                        'start'
+                });
+            }
+        },
+
+
+// ==================================
+// 7. FILL — BOTH
+// ==================================
+
+        () => {
+
+            this.destroyTest();
+
+            console.log(
+                '7 — FILL BOTH'
+            );
+
+            console.log(
+                'Expected: every card completely fills its grid cell.'
+            );
+
+            const grid =
+                new Grid(this.scene, {
+
+                    columns: 3,
+
+                    width:
+                        this.width,
+
+                    height: 500,
+
+                    padding: 20,
+
+                    gap: 20
+                });
+
+            this.addTest(grid);
+
+            for (let i = 1; i <= 9; i++) {
+
+                const card =
+                    new Card(this.scene, {
+
+                        width: 50,
+
+                        height: 50,
+
+                        style: {
+
+                            backgroundColor:
+                                i % 2 === 0
+                                    ? 0xdddddd
+                                    : 0xbbbbbb,
+
+                            radius: 8,
+
+                            stroke: 2,
+
+                            strokeColor: 0xffffff
+                        }
+                    });
+
+                const text =
+                    new Text(this.scene, {
+
+                        text: `Cell ${i}`,
+
+                        color: '0x000000'
+                    });
+
+                card.add(text, {
+
+                    horizontalAlign:
+                        'center',
+
+                    verticalAlign:
+                        'center'
+                });
+
+                grid.add(card, {
+
+                    width: null,
+
+                    height: null,
+
+                    fill: true,
+
+                    horizontalAlign:
+                        'center',
+
+                    verticalAlign:
+                        'center'
+                });
+            }
+        },
+
+
+// ==================================
+// 8. EXPLICIT ROW / COLUMN
+// ==================================
 () => {
     this.destroyTest();
+
+    console.log(
+        '8 EXPLICIT ROW / COLUMN'
+    );
+
+    console.log(
+        'Expected: Cards with row/column appear in those exact cells. ' +
+        'Cards without them fill the remaining cells automatically.'
+    );
 
     const scroll =
         new ScrollView(this.scene, {
@@ -119,31 +732,21 @@ this.addCycle =
 
     const grid =
         new Grid(this.scene, {
-            //rows: 3,
+            columns: 4,
+            rows: 3,
+            width: this.width,
             padding: 20,
             gap: 20
         });
 
-    scroll.add(grid, {
-        fill: 'horizontal',
-        //width: null,
-        //height: null
-    });
+    scroll.add(grid);
 
-    for (let i = 1; i <= 15; i++) {
-
-        const cardWidths = [
-            140, 220, 300,
-            180, 260, 340,
-            200, 280, 160,
-            320, 190, 250,
-            150, 310, 230
-        ];
+    for (let i = 1; i <= 10; i++) {
 
         const card =
             new Card(this.scene, {
-                width: 100, //cardWidths[i - 1],
-                height: 100, //cardWidths[i - 1] * 0.7,
+                width: 100,
+                height: 80,
 
                 style: {
                     backgroundColor:
@@ -168,245 +771,310 @@ this.addCycle =
             verticalAlign: 'center'
         });
 
-        grid.add(card, {
-            horizontalAlign: 'start',
-            verticalAlign: 'start'
-        });
+        // Explicit placements
+        const explicit = {
+            1: { column: 3, row: 2 },
+            2: { column: 0, row: 1 },
+            3: { column: 2, row: 0 }
+        };
+
+        grid.add(
+            card,
+            explicit[i] ?? {
+                horizontalAlign: 'start',
+                verticalAlign: 'start'
+            }
+        );
     }
 },
-() => {
-    this.destroyTest();
+// ==================================
+// 9. GRID INSIDE COLUMN
+// ==================================
 
-    const scroll =
-        new ScrollView(this.scene, {
-            width: this.width,
-            height: this.height / 2,
-            padding: 20,
-            direction: 'both'
-        });
+        () => {
 
-    this.addTest(scroll);
+            this.destroyTest();
 
-    const grid =
-        new Grid(this.scene, {
-            columns: 3,
-            width: this.width * 1.5,
-            padding: 20,
-            gap: 20
-        });
+            console.log(
+                '9 — GRID INSIDE COLUMN'
+            );
 
-    scroll.add(grid, {
-        width: null,
-        height: null
-    });
+            console.log(
+                'Expected: header, grid, footer arranged vertically. ' +
+                'Grid behaves like a normal child of Column.'
+            );
 
-    for (let i = 1; i <= 15; i++) {
+            const column =
+                new Column(this.scene, {
 
-        const cardWidths = [
-            140, 220, 300,
-            180, 260, 340,
-            200, 280, 160,
-            320, 190, 250,
-            150, 310, 230
-        ];
+                    width:
+                        this.width,
 
-        const card =
-            new Card(this.scene, {
-                width: cardWidths[i - 1],
-                height: cardWidths[i - 1] * 0.7,
+                    height:
+                        this.height / 2,
 
-                style: {
-                    backgroundColor:
-                        i % 2 === 0
-                            ? 0xdddddd
-                            : 0xbbbbbb,
+                    padding: 20,
 
-                    radius: 8,
-                    stroke: 2,
-                    strokeColor: 0xffffff
-                }
+                    gap: 20
+                });
+
+            this.addTest(column);
+
+            const header =
+                new Card(this.scene, {
+
+                    width: null,
+
+                    height: 80,
+
+                    style: {
+
+                        backgroundColor:
+                            0x444444,
+
+                        radius: 8,
+
+                        stroke: 2,
+
+                        strokeColor: 0xffffff
+                    }
+                });
+
+            const headerText =
+                new Text(this.scene, {
+
+                    text:
+                        'HEADER',
+
+                    color:
+                        '0xffffff'
+                });
+
+            header.add(headerText, {
+
+                horizontalAlign:
+                    'center',
+
+                verticalAlign:
+                    'center'
             });
 
-        const text =
-            new Text(this.scene, {
-                text: `Card ${i}`,
-                color: '0x000000'
+            column.add(header, {
+
+                fill:
+                    'horizontal'
             });
 
-        card.add(text, {
-            horizontalAlign: 'center',
-            verticalAlign: 'center'
-        });
+            const grid =
+                new Grid(this.scene, {
 
-        grid.add(card, {
-            horizontalAlign: 'start',
-            verticalAlign: 'start'
-        });
-    }
-},
-() => {
-    this.destroyTest();
+                    columns: 3,
 
-    const scroll =
-        new ScrollView(this.scene, {
-            width: this.width,
-            height: this.height / 2,
-            padding: 20,
-            direction: 'both'
-        });
+                    padding: 10,
 
-    this.addTest(scroll);
+                    gap: 10
+                });
 
-    const grid =
-        new Grid(this.scene, {
-            columns: 3,
-            height: 600,
-            padding: 20,
-            gap: 20
-        });
+            for (let i = 1; i <= 9; i++) {
 
-    scroll.add(grid, {
-        width: null,
-        height: null
-    });
+                const card =
+                    new Card(this.scene, {
 
-    for (let i = 1; i <= 15; i++) {
+                        width: 70,
 
-        const cardWidths = [
-            60, 80, 100,
-            70, 90, 110,
-            80, 100, 60,
-            110, 70, 90,
-            60, 100, 80
-        ];
-        
-        const cardHeights = [
-            60, 80, 100,
-            70, 90, 110,
-            80, 100, 60,
-            110, 70, 90,
-            60, 100, 80
-        ];
+                        height: 70,
 
-        const card =
-            new Card(this.scene, {
-                width: cardWidths[i - 1],
-                height: cardHeights[i - 1],
+                        style: {
 
-                style: {
-                    backgroundColor:
-                        i % 2 === 0
-                            ? 0xdddddd
-                            : 0xbbbbbb,
+                            backgroundColor:
+                                i % 2 === 0
+                                    ? 0xdddddd
+                                    : 0xbbbbbb,
 
-                    radius: 8,
-                    stroke: 2,
-                    strokeColor: 0xffffff
-                }
+                            radius: 8,
+
+                            stroke: 2,
+
+                            strokeColor: 0xffffff
+                        }
+                    });
+
+                const text =
+                    new Text(this.scene, {
+
+                        text:
+                            `${i}`,
+
+                        color:
+                            '0x000000'
+                    });
+
+                card.add(text, {
+
+                    horizontalAlign:
+                        'center',
+
+                    verticalAlign:
+                        'center'
+                });
+
+                grid.add(card);
+            }
+
+            column.add(grid, {
+
+                fill:
+                    'horizontal',
+
+                horizontalAlign:
+                    'center'
             });
 
-        const text =
-            new Text(this.scene, {
-                text: `Card ${i}`,
-                color: '0x000000'
+            const footer =
+                new Card(this.scene, {
+
+                    width: null,
+
+                    height: 60,
+
+                    style: {
+
+                        backgroundColor:
+                            0x444444,
+
+                        radius: 8,
+
+                        stroke: 2,
+
+                        strokeColor: 0xffffff
+                    }
+                });
+
+            const footerText =
+                new Text(this.scene, {
+
+                    text:
+                        'FOOTER',
+
+                    color:
+                        '0xffffff'
+                });
+
+            footer.add(footerText, {
+
+                horizontalAlign:
+                    'center',
+
+                verticalAlign:
+                    'center'
             });
 
-        card.add(text, {
-            horizontalAlign: 'center',
-            verticalAlign: 'center'
-        });
+            column.add(footer, {
 
-        grid.add(card, {
-            horizontalAlign: 'start',
-            verticalAlign: 'start'
-        });
-    }
-},
-() => {
-    this.destroyTest();
+                fill:
+                    'horizontal'
+            });
+        },
 
-    const scroll =
-        new ScrollView(this.scene, {
-            width: this.width,
-            height: this.height / 2,
-            padding: 20,
-            direction: 'both'
-        });
 
-    this.addTest(scroll);
+// ==================================
+// 10. GRID INSIDE SCROLLVIEW
+// ==================================
 
-    const grid =
-        new Grid(this.scene, {
-            columns: 3,
-            width: this.width * 1.5,
-            height: 600,
-            padding: 20,
-            gap: 20
-        });
+        () => {
 
-    scroll.add(grid, {
-        width: null,
-        height: null
-    });
+            this.destroyTest();
 
-    for (let i = 1; i <= 15; i++) {
+            console.log(
+                '10 — GRID INSIDE SCROLLVIEW'
+            );
 
-        const cardWidths = [
-            60, 80, 100,
-            70, 90, 110,
-            80, 100, 60,
-            110, 70, 90,
-            60, 100, 80
-        ];
-        
-        const cardHeights = [
-            60, 80, 100,
-            70, 90, 110,
-            80, 100, 60,
-            110, 70, 90,
-            60, 100, 80
-        ];
+            console.log(
+                'Expected: Grid becomes larger than the viewport. ' +
+                'Both horizontal and vertical scrolling should be possible.'
+            );
 
-        const card =
-            new Card(this.scene, {
-                width: cardWidths[i - 1],
-                height: cardHeights[i - 1],
+            const scroll =
+                new ScrollView(this.scene, {
 
-                style: {
-                    backgroundColor:
-                        i % 2 === 0
-                            ? 0xdddddd
-                            : 0xbbbbbb,
+                    width:
+                        this.width,
 
-                    radius: 8,
-                    stroke: 2,
-                    strokeColor: 0xffffff
-                }
+                    height:
+                        this.height / 2,
+
+                    padding: 20,
+
+                    direction:
+                        'both'
+                });
+
+            this.addTest(scroll);
+
+            const grid =
+                new Grid(this.scene, {
+
+                    columns: 4,
+
+                    padding: 20,
+
+                    gap: 20
+                });
+
+            scroll.add(grid, {
+
+                width: null,
+
+                height: null
             });
 
-        const text =
-            new Text(this.scene, {
-                text: `Card ${i}`,
-                color: '0x000000'
-            });
+            for (let i = 1; i <= 24; i++) {
 
-        card.add(text, {
-            horizontalAlign: 'center',
-            verticalAlign: 'center'
-        });
+                const card =
+                    new Card(this.scene, {
 
-        grid.add(card, {
-            horizontalAlign: 'start',
-            verticalAlign: 'start'
-        });
-    }
-}
+                        width: 200,
 
+                        height: 100,
 
+                        style: {
 
+                            backgroundColor:
+                                i % 2 === 0
+                                    ? 0xdddddd
+                                    : 0xbbbbbb,
 
+                            radius: 8,
 
-    // END CLICK CYCLES
+                            stroke: 2,
+
+                            strokeColor: 0xffffff
+                        }
+                    });
+
+                const text =
+                    new Text(this.scene, {
+
+                        text:
+                            `Card ${i}`,
+
+                        color:
+                            '0x000000'
+                    });
+
+                card.add(text, {
+
+                    horizontalAlign:
+                        'center',
+
+                    verticalAlign:
+                        'center'
+                });
+
+                grid.add(card);
+            }
+        }
+
     ]);
 
 // ==========================================
@@ -414,7 +1082,6 @@ this.addCycle =
 // ==========================================
 
 this.addCycle();
-
 
 
 

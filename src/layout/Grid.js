@@ -565,6 +565,25 @@ console.log('GRID getColumnWidths: ', columnWidths);
         const rowOffsets =
             this.getRowOffsets(rowHeights);
 
+        const occupiedCells = new Set();
+        
+        for (const child of this.children) {
+        
+            const options =
+                this.childLayoutOptions.get(child);
+        
+            if (
+                options?.column !== null &&
+                options?.column !== undefined &&
+                options?.row !== null &&
+                options?.row !== undefined
+            ) {
+                occupiedCells.add(
+                    `${options.column},${options.row}`
+                );
+            }
+        }
+
         ////////////////////////////////////////
         // POSITION CHILDREN
         ////////////////////////////////////////
@@ -592,13 +611,50 @@ console.log('GRID getColumnWidths: ', columnWidths);
                 // GRID POSITION
                 ////////////////////////////////////////
 
-                const column =
-                    options.column ??
-                    (index % columns);
+                let autoIndex = 0;
                 
-                const row =
-                    options.row ??
-                    Math.floor(index / columns);
+                let column;
+                let row;
+                
+                const hasExplicitPosition =
+                    options.column !== null &&
+                    options.column !== undefined &&
+                    options.row !== null &&
+                    options.row !== undefined;
+                
+                if (hasExplicitPosition) {
+                
+                    column = options.column;
+                    row = options.row;
+                
+                } else {
+                
+                    // Find next unoccupied cell
+                    while (autoIndex < columns * rows) {
+                
+                        column =
+                            autoIndex % columns;
+                
+                        row =
+                            Math.floor(
+                                autoIndex / columns
+                            );
+                
+                        autoIndex++;
+                
+                        if (
+                            !occupiedCells.has(
+                                `${column},${row}`
+                            )
+                        ) {
+                            break;
+                        }
+                    }
+                }
+                
+                occupiedCells.add(
+                    `${column},${row}`
+                );
 
                 if (
                     column < 0 ||
@@ -798,6 +854,7 @@ console.log('GRID getColumnWidths: ', columnWidths);
 
         this.layoutDirty = false;
 
+/*
         if (Debug.enabled) {
         
             console.log('========== GRID DEBUG ==========');
@@ -861,7 +918,7 @@ console.log('GRID getColumnWidths: ', columnWidths);
         
             console.log('================================');
         }
-
+*/
         return this;
     }
 
