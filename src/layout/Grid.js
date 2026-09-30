@@ -25,6 +25,14 @@ export default class Grid extends Container {
                     config.rows
                 );
 
+        // Default Grid mode
+        if (
+            this.columns === null &&
+            this.rows === null
+        ) {
+            this.columns = 1;
+        }
+
         this.padding =
             this.getPadding(
                 config.padding

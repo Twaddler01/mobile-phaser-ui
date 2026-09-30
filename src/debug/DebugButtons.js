@@ -119,14 +119,15 @@ this.addCycle =
 
     const grid =
         new Grid(this.scene, {
-            rows: 3,
+            //rows: 3,
             padding: 20,
             gap: 20
         });
 
     scroll.add(grid, {
-        width: null,
-        height: null
+        fill: 'horizontal',
+        //width: null,
+        //height: null
     });
 
     for (let i = 1; i <= 15; i++) {
