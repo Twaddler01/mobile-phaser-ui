@@ -102,89 +102,310 @@ this.addCycle =
             );
         },
 
-        () => {
-            this.destroyTest();
+////////////////
 
-            const scroll =
-                new ScrollView(this.scene, {
-                    width:
-                        this.width,
+() => {
+    this.destroyTest();
 
-                    height:
-                        this.height / 2,
+    const scroll =
+        new ScrollView(this.scene, {
+            width: this.width,
+            height: this.height / 2,
+            padding: 20,
+            direction: 'both'
+        });
 
-                    padding: 20,
+    this.addTest(scroll);
 
-                    direction:
-                        'both'
-                });
-            this.addTest(scroll);
+    const grid =
+        new Grid(this.scene, {
+            rows: 3,
+            padding: 20,
+            gap: 20
+        });
 
-            const grid =
-                new Grid(this.scene, {
-                    columns: 6,
-                    padding: 20,
-                    gap: 20
-                });
-            
-            scroll.add(grid, {
-                width: null,
-                height: null
+    scroll.add(grid, {
+        width: null,
+        height: null
+    });
+
+    for (let i = 1; i <= 15; i++) {
+
+        const cardWidths = [
+            140, 220, 300,
+            180, 260, 340,
+            200, 280, 160,
+            320, 190, 250,
+            150, 310, 230
+        ];
+
+        const card =
+            new Card(this.scene, {
+                width: cardWidths[i - 1],
+                height: cardWidths[i - 1] * 0.7,
+
+                style: {
+                    backgroundColor:
+                        i % 2 === 0
+                            ? 0xdddddd
+                            : 0xbbbbbb,
+
+                    radius: 8,
+                    stroke: 2,
+                    strokeColor: 0xffffff
+                }
             });
-            
-            for (let i = 1; i <= 15; i++) {
 
-                const cardWidths = [
-                    140, 220, 300,
-                    180, 260, 340,
-                    200, 280, 160,
-                    320, 190, 250,
-                    150, 310, 230
-                ];
-            
-                const card =
-                    new Card(this.scene, {
-                        
-                        width:
-                            cardWidths[i - 1],
-            
-                        height:
-                            cardWidths[i - 1] * 0.7,
-            
-                        style: {
-                            backgroundColor:
-                                i % 2 === 0
-                                    ? 0xdddddd
-                                    : 0xbbbbbb,
-            
-                            radius: 8,
-            
-                            stroke: 2,
-            
-                            strokeColor:
-                                0xffffff
-                        }
-                    });
-                    
-                grid.add(
-                    card,
-                    {
-                        height:
-                            cardWidths[i - 1] * 0.7,
-                
-                        fill: false,
-                
-                        horizontalAlign: 'start',
-                
-                        verticalAlign: 'start'
-                    }
-                );
-            }
-            
-            
-            
-            
-        } // LAST
+        const text =
+            new Text(this.scene, {
+                text: `Card ${i}`,
+                color: '0x000000'
+            });
+
+        card.add(text, {
+            horizontalAlign: 'center',
+            verticalAlign: 'center'
+        });
+
+        grid.add(card, {
+            horizontalAlign: 'start',
+            verticalAlign: 'start'
+        });
+    }
+},
+() => {
+    this.destroyTest();
+
+    const scroll =
+        new ScrollView(this.scene, {
+            width: this.width,
+            height: this.height / 2,
+            padding: 20,
+            direction: 'both'
+        });
+
+    this.addTest(scroll);
+
+    const grid =
+        new Grid(this.scene, {
+            columns: 3,
+            width: this.width * 1.5,
+            padding: 20,
+            gap: 20
+        });
+
+    scroll.add(grid, {
+        width: null,
+        height: null
+    });
+
+    for (let i = 1; i <= 15; i++) {
+
+        const cardWidths = [
+            140, 220, 300,
+            180, 260, 340,
+            200, 280, 160,
+            320, 190, 250,
+            150, 310, 230
+        ];
+
+        const card =
+            new Card(this.scene, {
+                width: cardWidths[i - 1],
+                height: cardWidths[i - 1] * 0.7,
+
+                style: {
+                    backgroundColor:
+                        i % 2 === 0
+                            ? 0xdddddd
+                            : 0xbbbbbb,
+
+                    radius: 8,
+                    stroke: 2,
+                    strokeColor: 0xffffff
+                }
+            });
+
+        const text =
+            new Text(this.scene, {
+                text: `Card ${i}`,
+                color: '0x000000'
+            });
+
+        card.add(text, {
+            horizontalAlign: 'center',
+            verticalAlign: 'center'
+        });
+
+        grid.add(card, {
+            horizontalAlign: 'start',
+            verticalAlign: 'start'
+        });
+    }
+},
+() => {
+    this.destroyTest();
+
+    const scroll =
+        new ScrollView(this.scene, {
+            width: this.width,
+            height: this.height / 2,
+            padding: 20,
+            direction: 'both'
+        });
+
+    this.addTest(scroll);
+
+    const grid =
+        new Grid(this.scene, {
+            columns: 3,
+            height: 600,
+            padding: 20,
+            gap: 20
+        });
+
+    scroll.add(grid, {
+        width: null,
+        height: null
+    });
+
+    for (let i = 1; i <= 15; i++) {
+
+        const cardWidths = [
+            60, 80, 100,
+            70, 90, 110,
+            80, 100, 60,
+            110, 70, 90,
+            60, 100, 80
+        ];
+        
+        const cardHeights = [
+            60, 80, 100,
+            70, 90, 110,
+            80, 100, 60,
+            110, 70, 90,
+            60, 100, 80
+        ];
+
+        const card =
+            new Card(this.scene, {
+                width: cardWidths[i - 1],
+                height: cardHeights[i - 1],
+
+                style: {
+                    backgroundColor:
+                        i % 2 === 0
+                            ? 0xdddddd
+                            : 0xbbbbbb,
+
+                    radius: 8,
+                    stroke: 2,
+                    strokeColor: 0xffffff
+                }
+            });
+
+        const text =
+            new Text(this.scene, {
+                text: `Card ${i}`,
+                color: '0x000000'
+            });
+
+        card.add(text, {
+            horizontalAlign: 'center',
+            verticalAlign: 'center'
+        });
+
+        grid.add(card, {
+            horizontalAlign: 'start',
+            verticalAlign: 'start'
+        });
+    }
+},
+() => {
+    this.destroyTest();
+
+    const scroll =
+        new ScrollView(this.scene, {
+            width: this.width,
+            height: this.height / 2,
+            padding: 20,
+            direction: 'both'
+        });
+
+    this.addTest(scroll);
+
+    const grid =
+        new Grid(this.scene, {
+            columns: 3,
+            width: this.width * 1.5,
+            height: 600,
+            padding: 20,
+            gap: 20
+        });
+
+    scroll.add(grid, {
+        width: null,
+        height: null
+    });
+
+    for (let i = 1; i <= 15; i++) {
+
+        const cardWidths = [
+            60, 80, 100,
+            70, 90, 110,
+            80, 100, 60,
+            110, 70, 90,
+            60, 100, 80
+        ];
+        
+        const cardHeights = [
+            60, 80, 100,
+            70, 90, 110,
+            80, 100, 60,
+            110, 70, 90,
+            60, 100, 80
+        ];
+
+        const card =
+            new Card(this.scene, {
+                width: cardWidths[i - 1],
+                height: cardHeights[i - 1],
+
+                style: {
+                    backgroundColor:
+                        i % 2 === 0
+                            ? 0xdddddd
+                            : 0xbbbbbb,
+
+                    radius: 8,
+                    stroke: 2,
+                    strokeColor: 0xffffff
+                }
+            });
+
+        const text =
+            new Text(this.scene, {
+                text: `Card ${i}`,
+                color: '0x000000'
+            });
+
+        card.add(text, {
+            horizontalAlign: 'center',
+            verticalAlign: 'center'
+        });
+
+        grid.add(card, {
+            horizontalAlign: 'start',
+            verticalAlign: 'start'
+        });
+    }
+}
+
+
+
+
+
+    // END CLICK CYCLES
     ]);
 
 // ==========================================

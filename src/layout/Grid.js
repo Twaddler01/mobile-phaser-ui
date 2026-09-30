@@ -12,10 +12,9 @@ export default class Grid extends Container {
         ////////////////////////////////////////
 
         this.columns =
-            Math.max(
-                1,
-                config.columns ?? 1
-            );
+            config.columns !== undefined
+                ? Math.max(1, config.columns)
+                : null;
 
         this.rows =
             config.rows === null ||
@@ -148,8 +147,24 @@ export default class Grid extends Container {
     ////////////////////////////////////////
 
     getColumnCount() {
-
-        return this.columns;
+    
+        // Explicit columns
+        if (this.columns !== null) {
+            return this.columns;
+        }
+    
+        // Auto columns from row count
+        if (this.rows !== null) {
+            return Math.max(
+                1,
+                Math.ceil(
+                    this.children.length /
+                    this.rows
+                )
+            );
+        }
+    
+        return 1;
     }
 
     getRowCount() {
@@ -772,73 +787,69 @@ console.log('GRID getColumnWidths: ', columnWidths);
 
         this.layoutDirty = false;
 
-
-if (Debug.enabled) {
-
-    console.log('========== GRID DEBUG ==========');
-
-    console.log('Grid:', {
-        width: this.width,
-        height: this.height,
-        layoutWidth: this.layoutWidth,
-        layoutHeight: this.layoutHeight,
-        columns,
-        rows,
-        columnWidths,
-        rowHeights,
-        columnOffsets,
-        rowOffsets,
-        children: this.children.length
-    });
-
-    for (const [index, child] of this.children.entries()) {
-    
-        const options =
-            this.childLayoutOptions.get(child);
-    
-        const column =
-            options?.column ??
-            (index % columns);
-    
-        const row =
-            options?.row ??
-            Math.floor(index / columns);
-    
-        console.log(`Grid Child ${index}:`, {
-            x: child.x,
-            y: child.y,
-            width: child.getLayoutWidth(),
-            height: child.getLayoutHeight(),
-    
-            column,
-            row,
-    
-            columnWidth:
-                columnWidths[column],
-    
-            rowHeight:
-                rowHeights[row],
-    
-            columnOffset:
-                columnOffsets[column],
-    
-            rowOffset:
-                rowOffsets[row],
-    
-            margin:
-                options?.margin
-        });
-    }
-
-    console.log('Content Bounds:', {
-        bounds: this.getContentBounds()
-    });
-
-    console.log('================================');
-}
-
-
-
+        if (Debug.enabled) {
+        
+            console.log('========== GRID DEBUG ==========');
+        
+            console.log('Grid:', {
+                width: this.width,
+                height: this.height,
+                layoutWidth: this.layoutWidth,
+                layoutHeight: this.layoutHeight,
+                columns,
+                rows,
+                columnWidths,
+                rowHeights,
+                columnOffsets,
+                rowOffsets,
+                children: this.children.length
+            });
+        
+            for (const [index, child] of this.children.entries()) {
+            
+                const options =
+                    this.childLayoutOptions.get(child);
+            
+                const column =
+                    options?.column ??
+                    (index % columns);
+            
+                const row =
+                    options?.row ??
+                    Math.floor(index / columns);
+            
+                console.log(`Grid Child ${index}:`, {
+                    x: child.x,
+                    y: child.y,
+                    width: child.getLayoutWidth(),
+                    height: child.getLayoutHeight(),
+            
+                    column,
+                    row,
+            
+                    columnWidth:
+                        columnWidths[column],
+            
+                    rowHeight:
+                        rowHeights[row],
+            
+                    columnOffset:
+                        columnOffsets[column],
+            
+                    rowOffset:
+                        rowOffsets[row],
+            
+                    margin:
+                        options?.margin
+                });
+            }
+        
+            console.log('Content Bounds:', {
+                bounds: this.getContentBounds()
+            });
+        
+            console.log('================================');
+        }
 
         return this;
     }

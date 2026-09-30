@@ -1121,39 +1121,14 @@ layout() {
             this.content.layout();
         }
 
-/*
-        ////////////////////////////////////////
-        // RESOLVE FINAL SIZE
-        ////////////////////////////////////////
-
-        const finalWidth =
-            contentWidth === null
-                ? this.content.getLayoutWidth()
-                : contentWidth;
-
-        const finalHeight =
-            contentHeight === null
-                ? this.content.getLayoutHeight()
-                : contentHeight;
-
         ////////////////////////////////////////
         // APPLY FINAL SIZE
         ////////////////////////////////////////
-
+        
         this.content.setLayoutSize(
-            finalWidth,
-            finalHeight
+            contentWidth,
+            contentHeight
         );
-*/
-////////////////////////////////////////
-// APPLY FINAL SIZE
-////////////////////////////////////////
-
-this.content.setLayoutSize(
-    contentWidth,
-    contentHeight
-);
-
 
         ////////////////////////////////////////
         // FINAL LAYOUT
