@@ -341,9 +341,12 @@ export default class Grid extends Container {
     ////////////////////////////////////////
 
     getRowHeights() {
-
+    
         const rows =
             this.getRowCount();
+    
+        const columns =
+            this.getColumnCount();
     
         const rowHeights =
             new Array(rows).fill(0);
@@ -360,17 +363,17 @@ export default class Grid extends Container {
     
             const column =
                 options.column ??
-                (index % this.columns);
+                (index % columns);
     
             const row =
                 options.row ??
-                Math.floor(index / this.columns);
-    
+                Math.floor(index / columns);
+
             if (
                 row < 0 ||
                 row >= rows ||
                 column < 0 ||
-                column >= this.columns
+                column >= columns
             ) {
                 continue;
             }
@@ -424,12 +427,12 @@ console.log('GRID getRowHeights: ', rowHeights);
     
             const column =
                 options.column ??
-                (index % this.columns);
-    
+                (index % columns);
+            
             const row =
                 options.row ??
-                Math.floor(index / this.columns);
-    
+                Math.floor(index / columns);
+
             if (
                 column < 0 ||
                 column >= columns ||

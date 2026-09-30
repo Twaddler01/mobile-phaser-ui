@@ -141,8 +141,8 @@ this.addCycle =
 
         const card =
             new Card(this.scene, {
-                width: cardWidths[i - 1],
-                height: cardWidths[i - 1] * 0.7,
+                width: 100, //cardWidths[i - 1],
+                height: 100, //cardWidths[i - 1] * 0.7,
 
                 style: {
                     backgroundColor:
