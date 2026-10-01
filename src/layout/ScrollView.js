@@ -1232,6 +1232,19 @@ this.updateScrollZone();
 
     this.layoutDirty = false;
 
+console.log('======== DEBUG TOP Y POS ======',
+{
+
+    scrollX: this.x,
+    scrollY: this.y,
+    worldX: this.container.getWorldTransformMatrix().tx,
+    worldY: this.container.getWorldTransformMatrix().ty,
+    width: this.getLayoutWidth(),
+    height: this.getLayoutHeight(),
+    padding: this.padding,
+    maskPadding: this.maskPadding
+});
+
     return this;
 }
 
