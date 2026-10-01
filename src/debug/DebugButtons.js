@@ -108,6 +108,102 @@ this.addCycle =
             );
         },
 
+// ==================================
+// A. THREE SCROLLVIEWS IN COLUMN
+// ==================================
+
+() => {
+
+    this.destroyTest();
+
+    console.log(
+        'A — THREE SCROLLVIEWS IN COLUMN'
+    );
+
+    console.log(
+        'Expected: three independent vertical ScrollViews ' +
+        'positioned by a parent Column.'
+    );
+
+    const root =
+        new Column(this.scene, {
+            x: 20,
+            y: 20,
+            width: this.width - 40,
+            height: this.height - 40,
+            padding: 10,
+            gap: 20
+        });
+
+    this.addTest(root);
+
+    for (let s = 1; s <= 3; s++) {
+
+        const scroll =
+            new ScrollView(this.scene, {
+                width: null,
+                height: 250,
+                padding: 20,
+                direction: 'vertical'
+            });
+
+        root.add(scroll, {
+            fill: 'horizontal'
+        });
+
+        const column =
+            new Column(this.scene, {
+                padding: 10,
+                gap: 10
+            });
+
+        scroll.add(column);
+
+        for (let i = 1; i <= 8; i++) {
+
+            const card =
+                new Card(this.scene, {
+                    width: null,
+                    height: 70,
+                    style: {
+                        backgroundColor:
+                            i % 2 === 0
+                                ? 0xdddddd
+                                : 0xbbbbbb,
+                        radius: 8,
+                        stroke: 2,
+                        strokeColor: 0xffffff
+                    }
+                });
+
+            const text =
+                new Text(this.scene, {
+                    text:
+                        `Scroll ${s} • Item ${i}`,
+                    color: '0x000000'
+                });
+
+            card.add(text, {
+                horizontalAlign: 'center',
+                verticalAlign: 'center'
+            });
+
+            column.add(card, {
+                fill: 'horizontal'
+            });
+        }
+    }
+
+    console.log(
+        'ROOT',
+        {
+            x: root.x,
+            y: root.y,
+            width: root.width,
+            height: root.height
+        }
+    );
+},
 
 // ==================================
 // 1. TWO SCROLLVIEWS

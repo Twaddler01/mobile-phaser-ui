@@ -109,6 +109,16 @@ export default class Component {
     // height → use intrinsic height
 
     setLayoutSize(width = null, height = null) {
+
+    console.log('SET LAYOUT SIZE', {
+        id: this.id,
+        type: this.constructor.name,
+        oldWidth: this.layoutWidth,
+        oldHeight: this.layoutHeight,
+        newWidth: width,
+        newHeight: height
+    });
+
         const changed =
             this.layoutWidth !== width ||
             this.layoutHeight !== height;

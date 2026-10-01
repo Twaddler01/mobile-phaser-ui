@@ -181,6 +181,32 @@ add(content, options = {}) {
 
     updateMask() {
 
+console.log('========== SCROLLVIEW MASK ==========');
+
+console.log({
+    x: this.x,
+    y: this.y,
+
+    width: this.width,
+    height: this.height,
+
+    layoutWidth: this.layoutWidth,
+    layoutHeight: this.layoutHeight,
+
+    resolvedWidth: this.getLayoutWidth(),
+    resolvedHeight: this.getLayoutHeight(),
+
+    maskWidth:
+        this.getLayoutWidth() -
+        this.maskPadding * 2,
+
+    maskHeight:
+        this.getLayoutHeight() -
+        this.maskPadding * 2
+});
+
+console.log('=====================================');
+
         if (!this.maskShape) {
             return this;
         }
@@ -188,19 +214,19 @@ add(content, options = {}) {
         const padding =
             this.maskPadding;
 
-        const width =
-            Math.max(
-                0,
-                this.width -
-                padding * 2
-            );
+const width =
+    Math.max(
+        0,
+        this.getLayoutWidth() -
+        padding * 2
+    );
 
-        const height =
-            Math.max(
-                0,
-                this.height -
-                padding * 2
-            );
+const height =
+    Math.max(
+        0,
+        this.getLayoutHeight() -
+        padding * 2
+    );
 
         this.maskShape.clear();
 
@@ -965,12 +991,40 @@ console.log('========== SCROLL CONTENT ==========');
     ////////////////////////////////////////
 
 layout() {
-
+console.log('>>> SCROLLVIEW ENTER', {
+    layoutWidth: this.layoutWidth,
+    layoutHeight: this.layoutHeight,
+    parent:
+        this.layoutParent?.constructor?.name ?? null,
+    parentChildren:
+        this.layoutParent?.children?.includes(this) ?? false
+});
     const layoutWidth =
         this.getLayoutWidth();
 
     const layoutHeight =
         this.getLayoutHeight();
+
+console.log('========== SCROLLVIEW LAYOUT ==========');
+
+console.log({
+    x: this.x,
+    y: this.y,
+
+    width: this.width,
+    height: this.height,
+
+    layoutWidth: this.layoutWidth,
+    layoutHeight: this.layoutHeight,
+
+    resolvedWidth: layoutWidth,
+    resolvedHeight: layoutHeight,
+
+    content:
+        this.content?.constructor?.name ?? null
+});
+
+console.log('========================================');
 
     const availableWidth =
         Math.max(
@@ -1163,6 +1217,14 @@ if (this.direction === 'vertical') {
 
     this.updateScrollLimits();
 
+console.log('<<< SCROLLVIEW EXIT', {
+    layoutWidth: this.layoutWidth,
+    layoutHeight: this.layoutHeight,
+    parent:
+        this.layoutParent?.constructor?.name ?? null
+});
+this.updateMask();
+this.updateScrollZone();
 
     ////////////////////////////////////////
     // CLEAN
@@ -1173,7 +1235,14 @@ if (this.direction === 'vertical') {
     return this;
 }
 
+setPosition(x, y) {
 
+    super.setPosition(x, y);
+
+    this.updateMask();
+
+    return this;
+}
 
 /*
     layout() {
