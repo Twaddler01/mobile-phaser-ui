@@ -110,7 +110,7 @@ this.addCycle =
 
 
 // ==================================
-// 1. INTRINSIC — 3 COLUMNS
+// 1. TWO SCROLLVIEWS
 // ==================================
 
         () => {
@@ -118,34 +118,55 @@ this.addCycle =
             this.destroyTest();
 
             console.log(
-                '1 — INTRINSIC GRID / 3 COLUMNS'
+                '1 — TWO SCROLLVIEWS'
             );
 
             console.log(
-                'Expected: 3 columns, 5 automatic rows. ' +
-                'Grid sizes itself from the cards.'
+                'Expected: two independent vertical ScrollViews.'
             );
 
-            const grid =
-                new Grid(this.scene, {
 
-                    columns: 3,
+            // ==================================
+            // SCROLLVIEW 1
+            // ==================================
+
+            const scroll1 =
+                new ScrollView(this.scene, {
+
+                    x: 20,
+                    y: 20,
+
+                    width: 350,
+                    height: 500,
 
                     padding: 20,
 
-                    gap: 20
+                    direction:
+                        'vertical'
                 });
 
-            this.addTest(grid);
+            this.addTest(scroll1);
 
-            for (let i = 1; i <= 15; i++) {
+
+            const column1 =
+                new Column(this.scene, {
+
+                    padding: 10,
+
+                    gap: 10
+                });
+
+            scroll1.add(column1);
+
+
+            for (let i = 1; i <= 8; i++) {
 
                 const card =
                     new Card(this.scene, {
 
-                        width: 100,
+                        width: null,
 
-                        height: 100,
+                        height: 70,
 
                         style: {
 
@@ -158,16 +179,19 @@ this.addCycle =
 
                             stroke: 2,
 
-                            strokeColor: 0xffffff
+                            strokeColor:
+                                0xffffff
                         }
                     });
 
                 const text =
                     new Text(this.scene, {
 
-                        text: `Card ${i}`,
+                        text:
+                            `Scroll 1 • ${i}`,
 
-                        color: '0x000000'
+                        color:
+                            '0x000000'
                     });
 
                 card.add(text, {
@@ -179,17 +203,123 @@ this.addCycle =
                         'center'
                 });
 
-                grid.add(card, {
+                column1.add(card, {
 
-                    horizontalAlign:
-                        'start',
-
-                    verticalAlign:
-                        'start'
+                    fill:
+                        'horizontal'
                 });
             }
-        },
 
+
+            // ==================================
+            // SCROLLVIEW 2
+            // ==================================
+
+            const scroll2 =
+                new ScrollView(this.scene, {
+
+                    x: 400,
+                    y: 20,
+
+                    width: 350,
+                    height: 500,
+
+                    padding: 20,
+
+                    direction:
+                        'vertical'
+                });
+
+            this.addTest(scroll2);
+
+
+            const column2 =
+                new Column(this.scene, {
+
+                    padding: 10,
+
+                    gap: 10
+                });
+
+            scroll2.add(column2);
+
+
+            for (let i = 1; i <= 8; i++) {
+
+                const card =
+                    new Card(this.scene, {
+
+                        width: null,
+
+                        height: 70,
+
+                        style: {
+
+                            backgroundColor:
+                                i % 2 === 0
+                                    ? 0xdddddd
+                                    : 0xbbbbbb,
+
+                            radius: 8,
+
+                            stroke: 2,
+
+                            strokeColor:
+                                0xffffff
+                        }
+                    });
+
+                const text =
+                    new Text(this.scene, {
+
+                        text:
+                            `Scroll 2 • ${i}`,
+
+                        color:
+                            '0x000000'
+                    });
+
+                card.add(text, {
+
+                    horizontalAlign:
+                        'center',
+
+                    verticalAlign:
+                        'center'
+                });
+
+                column2.add(card, {
+
+                    fill:
+                        'horizontal'
+                });
+            }
+
+
+            // ==================================
+            // DEBUG
+            // ==================================
+
+            console.log(
+                'SCROLL 1',
+                {
+                    x: scroll1.x,
+                    y: scroll1.y,
+                    width: scroll1.width,
+                    height: scroll1.height
+                }
+            );
+
+            console.log(
+                'SCROLL 2',
+                {
+                    x: scroll2.x,
+                    y: scroll2.y,
+                    width: scroll2.width,
+                    height: scroll2.height
+                }
+            );
+        },
 
 // ==================================
 // 2. INTRINSIC — 3 ROWS

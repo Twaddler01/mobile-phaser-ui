@@ -208,12 +208,12 @@ add(content, options = {}) {
             0xffffff
         );
 
-        this.maskShape.fillRect(
-            padding,
-            padding,
-            width,
-            height
-        );
+ this.maskShape.fillRect(
+        this.x + padding,
+        this.y + padding,
+        width,
+        height
+    );
 
         return this;
     }
@@ -1007,33 +1007,26 @@ layout() {
         // VERTICAL
         ////////////////////////////////////////
 
-        if (
-            this.direction === 'vertical'
-        ) {
+if (this.direction === 'vertical') {
 
-            // Cross axis fills viewport.
-            contentWidth =
-                this.resolveChildWidth(
-                    this.content,
-                    {
-                        ...options,
-                        width:
-                            options.width ?? null
-                    },
-                    availableWidth
-                );
+    contentWidth =
+        options.width === null
+            ? availableWidth
+            : this.resolveChildWidth(
+                this.content,
+                options,
+                availableWidth
+            );
 
-            // Scrolling axis remains intrinsic.
-            contentHeight =
-                options.height === null
-                    ? null
-                    : this.resolveChildHeight(
-                        this.content,
-                        options,
-                        availableHeight
-                    );
-        }
-
+    contentHeight =
+        options.height === null
+            ? null
+            : this.resolveChildHeight(
+                this.content,
+                options,
+                availableHeight
+            );
+}
 
         ////////////////////////////////////////
         // HORIZONTAL
