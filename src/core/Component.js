@@ -44,9 +44,33 @@ export default class Component {
     get x() {
         return this.container.x;
     }
-
+    
     get y() {
         return this.container.y;
+    }
+    
+    getWorldX() {
+    
+        return this.container
+            .getWorldTransformMatrix()
+            .tx;
+    }
+    
+    getWorldY() {
+    
+        return this.container
+            .getWorldTransformMatrix()
+            .ty;
+    }
+
+    getWorldPosition() {
+        const matrix =
+            this.container.getWorldTransformMatrix();
+    
+        return {
+            x: matrix.tx,
+            y: matrix.ty
+        };
     }
 
     // Ref name or id
@@ -109,16 +133,16 @@ export default class Component {
     // height → use intrinsic height
 
     setLayoutSize(width = null, height = null) {
-
-    console.log('SET LAYOUT SIZE', {
-        id: this.id,
-        type: this.constructor.name,
-        oldWidth: this.layoutWidth,
-        oldHeight: this.layoutHeight,
-        newWidth: width,
-        newHeight: height
-    });
-
+/*
+console.log('SET LAYOUT SIZE', {
+    id: this.id,
+    type: this.constructor.name,
+    oldWidth: this.layoutWidth,
+    oldHeight: this.layoutHeight,
+    newWidth: width,
+    newHeight: height
+});
+*/
         const changed =
             this.layoutWidth !== width ||
             this.layoutHeight !== height;
@@ -393,15 +417,29 @@ export default class Component {
 }
 
 /*
-Component
-├── x/y = top-left
-├── width/height
-├── content bounds
-└── no origin concept
-
-Row / Column
-└── position children by bounding box
-
-Button
-└── internally centers its own text
-*/
+ * COORDINATE SYSTEM
+ *
+ * Component x/y:
+ *     Local position relative to layout parent.
+ *
+ * Child positions:
+ *     Local position relative to parent component.
+ *
+ * width/height:
+ *     Local dimensions.
+ *
+ * getContentBounds():
+ *     Local content bounds.
+ *
+ * getWorldX()/getWorldY():
+ *     World position of the component.
+ *
+ * External Phaser objects:
+ *     Use world coordinates.
+ *
+ * Examples:
+ *     - Masks
+ *     - Zones
+ *     - Scene-level graphics
+ *     - Pointer hit testing
+ */

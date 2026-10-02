@@ -84,55 +84,55 @@ export default class ScrollView extends Container {
     // CONTENT
     ////////////////////////////////////////
 
-add(content, options = {}) {
-
-    if (!content) {
+    add(content, options = {}) {
+    
+        if (!content) {
+            return this;
+        }
+    
+        if (this.content && this.content !== content) {
+            this.remove(this.content);
+        }
+    
+        this.content = content;
+    
+        const defaultOptions = {
+            ...options
+        };
+    
+        if (this.direction === 'vertical') {
+    
+            // Vertical content determines its height.
+            if (defaultOptions.height === undefined) {
+                defaultOptions.height = null;
+            }
+    
+        } else if (this.direction === 'horizontal') {
+    
+            // Horizontal content determines its width.
+            if (defaultOptions.width === undefined) {
+                defaultOptions.width = null;
+            }
+    
+        } else if (this.direction === 'both') {
+    
+            // Both dimensions are intrinsic.
+            if (defaultOptions.width === undefined) {
+                defaultOptions.width = null;
+            }
+    
+            if (defaultOptions.height === undefined) {
+                defaultOptions.height = null;
+            }
+        }
+    
+        super.add(
+            content,
+            defaultOptions
+        );
+    
         return this;
     }
-
-    if (this.content && this.content !== content) {
-        this.remove(this.content);
-    }
-
-    this.content = content;
-
-    const defaultOptions = {
-        ...options
-    };
-
-    if (this.direction === 'vertical') {
-
-        // Vertical content determines its height.
-        if (defaultOptions.height === undefined) {
-            defaultOptions.height = null;
-        }
-
-    } else if (this.direction === 'horizontal') {
-
-        // Horizontal content determines its width.
-        if (defaultOptions.width === undefined) {
-            defaultOptions.width = null;
-        }
-
-    } else if (this.direction === 'both') {
-
-        // Both dimensions are intrinsic.
-        if (defaultOptions.width === undefined) {
-            defaultOptions.width = null;
-        }
-
-        if (defaultOptions.height === undefined) {
-            defaultOptions.height = null;
-        }
-    }
-
-    super.add(
-        content,
-        defaultOptions
-    );
-
-    return this;
-}
 
     remove(content) {
     
@@ -180,12 +180,53 @@ add(content, options = {}) {
     }
 
     updateMask() {
+        if (!this.maskShape) {
+            return this;
+        }
 
+        const padding =
+            this.maskPadding;
+
+        const width =
+            Math.max(
+                0,
+                this.getLayoutWidth() -
+                padding * 2
+            );
+        
+        const height =
+            Math.max(
+                0,
+                this.getLayoutHeight() -
+                padding * 2
+            );
+        
+                this.maskShape.clear();
+        
+                this.maskShape.fillStyle(
+                    0xffffff
+                );
+        
+        const x =
+            this.getWorldX() +
+            padding;
+        
+        const y =
+            this.getWorldY() +
+            padding;
+        
+         this.maskShape.fillRect(
+                x,
+                y,
+                width,
+                height
+            );
+
+/*
 console.log('========== SCROLLVIEW MASK ==========');
-
 console.log({
-    x: this.x,
-    y: this.y,
+    x: x,
+    y: y,
 
     width: this.width,
     height: this.height,
@@ -204,42 +245,8 @@ console.log({
         this.getLayoutHeight() -
         this.maskPadding * 2
 });
-
 console.log('=====================================');
-
-        if (!this.maskShape) {
-            return this;
-        }
-
-        const padding =
-            this.maskPadding;
-
-const width =
-    Math.max(
-        0,
-        this.getLayoutWidth() -
-        padding * 2
-    );
-
-const height =
-    Math.max(
-        0,
-        this.getLayoutHeight() -
-        padding * 2
-    );
-
-        this.maskShape.clear();
-
-        this.maskShape.fillStyle(
-            0xffffff
-        );
-
- this.maskShape.fillRect(
-        this.x + padding,
-        this.y + padding,
-        width,
-        height
-    );
+*/
 
         return this;
     }
@@ -252,10 +259,10 @@ const height =
 
         this.scrollZone =
             this.scene.add.zone(
-                this.x,
-                this.y,
-                this.width,
-                this.height
+                this.getWorldX(),
+                this.getWorldY(),
+                this.getLayoutWidth(),
+                this.getLayoutHeight()
             )
             .setOrigin(0)
             .setInteractive();
@@ -271,21 +278,20 @@ const height =
     }
 
     updateScrollZone() {
-
         if (!this.scrollZone) {
             return this;
         }
-
+    
         this.scrollZone
             .setPosition(
-                this.x,
-                this.y
+                this.getWorldX(),
+                this.getWorldY()
             )
             .setSize(
                 this.getLayoutWidth(),
                 this.getLayoutHeight()
             );
-
+    
         return this;
     }
 
@@ -591,6 +597,13 @@ const height =
     ////////////////////////////////////////
 
     isPointerInside(pointer) {
+    
+        const x =
+            this.getWorldX();
+    
+        const y =
+            this.getWorldY();
+    
         const width =
             this.getLayoutWidth();
     
@@ -598,10 +611,10 @@ const height =
             this.getLayoutHeight();
     
         return (
-            pointer.x >= this.x &&
-            pointer.x <= this.x + width &&
-            pointer.y >= this.y &&
-            pointer.y <= this.y + height
+            pointer.x >= x &&
+            pointer.x <= x + width &&
+            pointer.y >= y &&
+            pointer.y <= y + height
         );
     }
 
@@ -990,276 +1003,7 @@ console.log('========== SCROLL CONTENT ==========');
     // LAYOUT
     ////////////////////////////////////////
 
-layout() {
-console.log('>>> SCROLLVIEW ENTER', {
-    layoutWidth: this.layoutWidth,
-    layoutHeight: this.layoutHeight,
-    parent:
-        this.layoutParent?.constructor?.name ?? null,
-    parentChildren:
-        this.layoutParent?.children?.includes(this) ?? false
-});
-    const layoutWidth =
-        this.getLayoutWidth();
-
-    const layoutHeight =
-        this.getLayoutHeight();
-
-console.log('========== SCROLLVIEW LAYOUT ==========');
-
-console.log({
-    x: this.x,
-    y: this.y,
-
-    width: this.width,
-    height: this.height,
-
-    layoutWidth: this.layoutWidth,
-    layoutHeight: this.layoutHeight,
-
-    resolvedWidth: layoutWidth,
-    resolvedHeight: layoutHeight,
-
-    content:
-        this.content?.constructor?.name ?? null
-});
-
-console.log('========================================');
-
-    const availableWidth =
-        Math.max(
-            0,
-            layoutWidth -
-            this.padding.left -
-            this.padding.right
-        );
-
-    const availableHeight =
-        Math.max(
-            0,
-            layoutHeight -
-            this.padding.top -
-            this.padding.bottom
-        );
-
-    if (this.content) {
-
-        const options =
-            this.childLayoutOptions.get(
-                this.content
-            ) ?? {};
-
-        ////////////////////////////////////////
-        // DETERMINE CONTENT SIZE
-        ////////////////////////////////////////
-
-        let contentWidth;
-        let contentHeight;
-
-
-        ////////////////////////////////////////
-        // VERTICAL
-        ////////////////////////////////////////
-
-if (this.direction === 'vertical') {
-
-    contentWidth =
-        options.width === null
-            ? availableWidth
-            : this.resolveChildWidth(
-                this.content,
-                options,
-                availableWidth
-            );
-
-    contentHeight =
-        options.height === null
-            ? null
-            : this.resolveChildHeight(
-                this.content,
-                options,
-                availableHeight
-            );
-}
-
-        ////////////////////////////////////////
-        // HORIZONTAL
-        ////////////////////////////////////////
-
-        else if (
-            this.direction === 'horizontal'
-        ) {
-
-            // Scrolling axis remains intrinsic.
-            contentWidth =
-                options.width === null
-                    ? null
-                    : this.resolveChildWidth(
-                        this.content,
-                        options,
-                        availableWidth
-                    );
-
-            // Cross axis fills viewport.
-            contentHeight =
-                this.resolveChildHeight(
-                    this.content,
-                    {
-                        ...options,
-                        height:
-                            options.height ?? null
-                    },
-                    availableHeight
-                );
-        }
-
-
-        ////////////////////////////////////////
-        // BOTH
-        ////////////////////////////////////////
-
-        else {
-
-            // Both scrolling axes remain intrinsic.
-            contentWidth =
-                options.width === null
-                    ? null
-                    : this.resolveChildWidth(
-                        this.content,
-                        options,
-                        availableWidth
-                    );
-
-            contentHeight =
-                options.height === null
-                    ? null
-                    : this.resolveChildHeight(
-                        this.content,
-                        options,
-                        availableHeight
-                    );
-        }
-
-
-        ////////////////////////////////////////
-        // INTRINSIC LAYOUT
-        ////////////////////////////////////////
-
-        /*
-         * A null dimension means:
-         *
-         * "Let the content determine its
-         * own size."
-         *
-         * This is especially important for
-         * Grid, Column, and Row.
-         */
-
-        if (
-            contentWidth === null ||
-            contentHeight === null
-        ) {
-
-            this.content.setLayoutSize(
-                contentWidth,
-                contentHeight
-            );
-
-            this.content.layout();
-        }
-
-        ////////////////////////////////////////
-        // APPLY FINAL SIZE
-        ////////////////////////////////////////
-        
-        this.content.setLayoutSize(
-            contentWidth,
-            contentHeight
-        );
-
-        ////////////////////////////////////////
-        // FINAL LAYOUT
-        ////////////////////////////////////////
-
-        if (
-            this.content.layoutDirty
-        ) {
-
-            this.content.layout();
-        }
-
-
-        ////////////////////////////////////////
-        // CONTENT POSITION
-        ////////////////////////////////////////
-
-        const margin =
-            options.margin;
-
-        const contentX =
-            this.padding.left +
-            margin.left;
-
-        const contentY =
-            this.padding.top +
-            margin.top;
-
-        this.content.setPosition(
-            contentX,
-            contentY
-        );
-    }
-
-
-    ////////////////////////////////////////
-    // SCROLL LIMITS
-    ////////////////////////////////////////
-
-    this.updateScrollLimits();
-
-console.log('<<< SCROLLVIEW EXIT', {
-    layoutWidth: this.layoutWidth,
-    layoutHeight: this.layoutHeight,
-    parent:
-        this.layoutParent?.constructor?.name ?? null
-});
-this.updateMask();
-this.updateScrollZone();
-
-    ////////////////////////////////////////
-    // CLEAN
-    ////////////////////////////////////////
-
-    this.layoutDirty = false;
-
-console.log('======== DEBUG TOP Y POS ======',
-{
-
-    scrollX: this.x,
-    scrollY: this.y,
-    worldX: this.container.getWorldTransformMatrix().tx,
-    worldY: this.container.getWorldTransformMatrix().ty,
-    width: this.getLayoutWidth(),
-    height: this.getLayoutHeight(),
-    padding: this.padding,
-    maskPadding: this.maskPadding
-});
-
-    return this;
-}
-
-setPosition(x, y) {
-
-    super.setPosition(x, y);
-
-    this.updateMask();
-
-    return this;
-}
-
-/*
     layout() {
-    
         const layoutWidth =
             this.getLayoutWidth();
     
@@ -1283,44 +1027,144 @@ setPosition(x, y) {
             );
     
         if (this.content) {
-    
+
             const options =
                 this.childLayoutOptions.get(
                     this.content
                 ) ?? {};
-    
+
             ////////////////////////////////////////
-            // CONTENT SIZE
-            ////////////////////////////////////////
-    
-            const contentWidth =
-                this.resolveChildWidth(
-                    this.content,
-                    options,
-                    availableWidth
-                );
-    
-            const contentHeight =
-                this.resolveChildHeight(
-                    this.content,
-                    options,
-                    availableHeight
-                );
-    
-            ////////////////////////////////////////
-            // APPLY LAYOUT SIZE
+            // DETERMINE CONTENT SIZE
             ////////////////////////////////////////
     
-            const layoutSizeChanged =
+            let contentWidth;
+            let contentHeight;
+    
+            ////////////////////////////////////////
+            // VERTICAL
+            ////////////////////////////////////////
+
+            if (this.direction === 'vertical') {
+            
+                contentWidth =
+                    options.width === null
+                        ? availableWidth
+                        : this.resolveChildWidth(
+                            this.content,
+                            options,
+                            availableWidth
+                        );
+            
+                contentHeight =
+                    options.height === null
+                        ? null
+                        : this.resolveChildHeight(
+                            this.content,
+                            options,
+                            availableHeight
+                        );
+            }
+
+            ////////////////////////////////////////
+            // HORIZONTAL
+            ////////////////////////////////////////
+    
+            else if (
+                this.direction === 'horizontal'
+            ) {
+    
+                // Scrolling axis remains intrinsic.
+                contentWidth =
+                    options.width === null
+                        ? null
+                        : this.resolveChildWidth(
+                            this.content,
+                            options,
+                            availableWidth
+                        );
+    
+                // Cross axis fills viewport.
+                contentHeight =
+                    this.resolveChildHeight(
+                        this.content,
+                        {
+                            ...options,
+                            height:
+                                options.height ?? null
+                        },
+                        availableHeight
+                    );
+            }
+    
+            ////////////////////////////////////////
+            // BOTH
+            ////////////////////////////////////////
+    
+            else {
+                // Both scrolling axes remain intrinsic.
+                contentWidth =
+                    options.width === null
+                        ? null
+                        : this.resolveChildWidth(
+                            this.content,
+                            options,
+                            availableWidth
+                        );
+    
+                contentHeight =
+                    options.height === null
+                        ? null
+                        : this.resolveChildHeight(
+                            this.content,
+                            options,
+                            availableHeight
+                        );
+            }
+
+            ////////////////////////////////////////
+            // INTRINSIC LAYOUT
+            ////////////////////////////////////////
+    
+            /*
+             * A null dimension means:
+             *
+             * "Let the content determine its
+             * own size."
+             *
+             * This is especially important for
+             * Grid, Column, and Row.
+             */
+    
+            if (
+                contentWidth === null ||
+                contentHeight === null
+            ) {
+    
                 this.content.setLayoutSize(
                     contentWidth,
                     contentHeight
                 );
     
+                this.content.layout();
+            }
+    
+            ////////////////////////////////////////
+            // APPLY FINAL SIZE
+            ////////////////////////////////////////
+            
+            this.content.setLayoutSize(
+                contentWidth,
+                contentHeight
+            );
+    
+            ////////////////////////////////////////
+            // FINAL LAYOUT
+            ////////////////////////////////////////
+    
             if (
-                layoutSizeChanged ||
                 this.content.layoutDirty
             ) {
+    
                 this.content.layout();
             }
     
@@ -1344,26 +1188,42 @@ setPosition(x, y) {
                 contentY
             );
         }
-    
+
+        ////////////////////////////////////////
+        // FINAL SCROLLVIEW UPDATE
+        ////////////////////////////////////////
+        
         this.updateScrollLimits();
-    
+        this.updateMask();
+        this.updateScrollZone();
+        
+        ////////////////////////////////////////
+        // CLEAN
+        ////////////////////////////////////////
+        
         this.layoutDirty = false;
+        
+        return this;
+    }
+    
+    setPosition(x, y) {
+        super.setPosition(x, y);
+    
+        this.updateMask();
+        this.updateScrollZone();
     
         return this;
     }
-*/
+
     ////////////////////////////////////////
     // SIZE / POSITION
     ////////////////////////////////////////
 
     updateSize() {
-
-        this.updateMask();
-
-        this.updateScrollZone();
-
         this.updateScrollLimits();
-
+        this.updateMask();
+        this.updateScrollZone();
+    
         return this;
     }
 

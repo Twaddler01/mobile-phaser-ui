@@ -95,23 +95,39 @@ this.addCycle =
 // 0. SETUP
 // ==================================
 
-        () => {
+() => {
 
-            this.destroyTest();
+    this.destroyTest();
 
-            console.log(
-                '0 SETUP'
-            );
+    console.log(
+        '0 SETUP'
+    );
 
-            console.log(
-                'Grid test suite ready.'
-            );
-        },
+    console.log(
+        'Grid test suite ready.'
+    );
 
+    const parent = new Column(this.scene, {
+        x: 100,
+        y: 100,
+        width: 600,
+        height: 800
+    });
+    
+    const scroll = new ScrollView(this.scene, {
+        width: 500,
+        height: 400,
+        direction: 'vertical'
+    });
+
+    parent.add(scroll);
+    
+    this.addTest(parent);
+
+},
 // ==================================
 // A. THREE SCROLLVIEWS IN COLUMN
 // ==================================
-
 () => {
 
     this.destroyTest();

@@ -351,42 +351,6 @@ export default class Column extends Container {
                     fillHeight
                 );
 
-if (child.constructor.name === 'ScrollView') {
-
-    console.log(
-        '========== COLUMN → SCROLLVIEW =========='
-    );
-
-    console.log({
-        childX: child.x,
-        childY: child.y,
-
-        childWidth:
-            childWidth,
-
-        childHeight:
-            childHeight,
-
-        currentWidth:
-            child.width,
-
-        currentHeight:
-            child.height,
-
-        layoutWidth:
-            child.layoutWidth,
-
-        layoutHeight:
-            child.layoutHeight,
-
-        options
-    });
-
-    console.log(
-        '=========================================='
-    );
-}
-
             ////////////////////////////////////////
             // APPLY LAYOUT SIZE
             ////////////////////////////////////////
