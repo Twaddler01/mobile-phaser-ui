@@ -111,18 +111,27 @@ this.addCycle =
         x: 100,
         y: 100,
         width: 600,
-        height: 800
+        height: 800,
+        gap: 10,
+        padding: 10
     });
-    
+
+    for (let i = 1; i <= 6; i++) {
+        const card = new Card(this.scene, {
+            height: 100
+        });
+        parent.add(card, { fill: 'horizontal' });
+    }
+
     const scroll = new ScrollView(this.scene, {
         width: 500,
         height: 400,
-        direction: 'vertical'
+        direction: 'both'
     });
 
-    parent.add(scroll);
+    scroll.add(parent);
     
-    this.addTest(parent);
+    this.addTest(scroll);
 
 },
 // ==================================

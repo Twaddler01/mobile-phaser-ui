@@ -377,10 +377,9 @@ export default class Row extends Container {
             
                 case 'end':
                     outerY =
-                        outerY =
-                            layoutHeight -
-                            this.padding.bottom -
-                            outerHeight;
+                        layoutHeight -
+                        this.padding.bottom -
+                        outerHeight;
                     break;
             
                 case 'start':
