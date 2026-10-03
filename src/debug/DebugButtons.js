@@ -271,6 +271,45 @@ console.log(
         'Grid test suite ready.'
     );
 
+    const parent = new Row(this.scene, {
+        x: 100,
+        y: 100,
+        width: 800,
+        height: 600,
+        gap: 10,
+        padding: 10
+    });
+
+    for (let i = 1; i <= 6; i++) {
+        const card = new Card(this.scene, {
+            width: 100
+        });
+        parent.add(card, { fill: 'vertical' });
+    }
+
+    this.scroll = new ScrollView(this.scene, {
+        width: 500,
+        height: 400,
+        direction: 'both'
+    });
+
+    this.scroll.add(parent);
+    
+    this.addTest(this.scroll);
+
+},
+() => {
+
+    this.destroyTest();
+
+    console.log(
+        '0 SETUP'
+    );
+
+    console.log(
+        'Grid test suite ready.'
+    );
+
     const parent = new Column(this.scene, {
         x: 100,
         y: 100,
@@ -728,7 +767,7 @@ console.log(
                 const card =
                     new Card(this.scene, {
 
-                        width: 240,
+                        width: 260,
 
                         height: 70,
 

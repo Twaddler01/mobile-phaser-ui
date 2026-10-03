@@ -43,36 +43,55 @@ class Debug {
         ////////////////////////////////////////
 
         this.layout = {
-
+        
             enabled:
                 options.layout?.enabled ?? true,
-
+        
             borderColor:
                 options.layout?.borderColor ?? 0x0000ff,
-
+        
             borderAlpha:
                 options.layout?.borderAlpha ?? 0.7,
-
+        
             borderWidth:
                 options.layout?.borderWidth ?? 1,
-
+        
             fillColor:
                 options.layout?.fillColor ?? 0x0000ff,
-
+        
             fillAlpha:
                 options.layout?.fillAlpha ?? 0.1,
-
+        
             row: {
-
+        
                 borderColor:
                     options.layout?.row?.borderColor
                     ?? 0x00ff00,
-
+        
                 fillColor:
                     options.layout?.row?.fillColor
                     ?? 0x00ff00
+            },
+        
+            grid: {
+        
+                borderColor:
+                    options.layout?.grid?.borderColor
+                    ?? 0x66ccff,
+        
+                borderAlpha:
+                    options.layout?.grid?.borderAlpha
+                    ?? 1,
+        
+                fillColor:
+                    options.layout?.grid?.fillColor
+                    ?? 0x66ccff,
+        
+                fillAlpha:
+                    options.layout?.grid?.fillAlpha
+                    ?? 0.08
             }
-        };
+        }
 
         ////////////////////////////////////////
         // TREE
@@ -242,13 +261,16 @@ class Debug {
         return this;
     }
     
-    addLayoutBounds(
+    drawLayoutBounds(
         component,
         x,
         y,
         width,
         height,
-        color
+        color,
+        fillColor = null,
+        fillAlpha = null,
+        borderAlpha = null
     ) {
     
         if (
@@ -256,7 +278,7 @@ class Debug {
             !this.layout.enabled ||
             !component?.container
         ) {
-            return;
+            return this;
         }
     
         this.createLayoutBounds(component);
@@ -264,10 +286,25 @@ class Debug {
         const graphics =
             component.debugLayoutBounds;
     
+        if (fillColor !== null) {
+    
+            graphics.fillStyle(
+                fillColor,
+                fillAlpha ?? this.layout.fillAlpha
+            );
+    
+            graphics.fillRect(
+                x,
+                y,
+                width,
+                height
+            );
+        }
+    
         graphics.lineStyle(
             this.layout.borderWidth,
             color ?? this.layout.borderColor,
-            this.layout.borderAlpha
+            borderAlpha ?? this.layout.borderAlpha
         );
     
         graphics.strokeRect(
@@ -276,7 +313,7 @@ class Debug {
             width,
             height
         );
-        
+    
         return this;
     }
 

@@ -18,13 +18,6 @@ export default class Row extends Container {
 
         this.justify =
             config.justify ?? 'start';
-
-        // DEBUG
-        this.debugChildrenBounds =
-            this.scene.add.graphics();
-        this.container.add(
-            this.debugChildrenBounds
-        );
     }
 
     updateSize() {
@@ -111,7 +104,8 @@ export default class Row extends Container {
                 this.padding.bottom;
         }
     
-        this.updateDebugBounds();
+        // DEBUG
+        Debug.updateBounds(this);
     
         return this;
     }
@@ -131,21 +125,7 @@ export default class Row extends Container {
         this.updateSize();
 
         // DEBUG
-        if (Debug.layout.enabled) {
-        
-            this.debugChildrenBounds.clear();
-        
-            this.debugChildrenBounds.fillStyle(
-                Debug.layout.fillColor_ROW,
-                Debug.layout.fillAlpha
-            );
-        
-            this.debugChildrenBounds.lineStyle(
-                Debug.layout.borderWidth,
-                Debug.layout.borderColor_ROW,
-                Debug.layout.borderAlpha
-            );
-        }
+        Debug.clearLayoutBounds(this);
 
         const layoutWidth =
             this.getLayoutWidth();
@@ -393,41 +373,37 @@ export default class Row extends Container {
                 outerY +
                 margin.top;
 
+            ////////////////////////////////////////
+            // DEBUG
+            ////////////////////////////////////////
+
+            const outerWidth =
+                margin.left +
+                childWidth +
+                margin.right;
+
+            Debug.drawLayoutBounds(
+                this,
+                x,
+                outerY,
+                outerWidth,
+                outerHeight,
+                Debug.layout.row.borderColor
+            );
+
+            ////////////////////////////////////////
+            // REPOSITION CHILD
+            ////////////////////////////////////////
+
             child.setPosition(
                 childX,
                 childY
             );
 
-            // DEBUG
-            if (Debug.layout.enabled) {
-        
-                const outerWidth =
-                    margin.left +
-                    childWidth +
-                    margin.right;
-                
-                const outerHeight =
-                    margin.top +
-                    childHeight +
-                    margin.bottom;
-                
-                this.debugChildrenBounds.fillRect(
-                    x,
-                    outerY,
-                    outerWidth,
-                    outerHeight
-                );
-                
-                this.debugChildrenBounds.strokeRect(
-                    x,
-                    outerY,
-                    outerWidth,
-                    outerHeight
-                );
-            }
-        
-            // Advance to the next
-            // outer layout box.
+            ////////////////////////////////////////
+            // ADVANCE
+            ////////////////////////////////////////
+
             x +=
                 margin.left +
                 childWidth +

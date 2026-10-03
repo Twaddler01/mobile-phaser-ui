@@ -407,7 +407,7 @@ export default class Column extends Container {
                 childHeight +
                 margin.bottom;
 
-            Debug.addLayoutBounds(
+            Debug.drawLayoutBounds(
                     this,
                     outerX,
                     y,
