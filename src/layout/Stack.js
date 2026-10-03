@@ -10,13 +10,6 @@ export default class Stack extends Container {
         this.padding =
             this.getPadding(config.padding);
 
-        // DEBUG
-        this.debugChildrenBounds =
-            this.scene.add.graphics();
-
-        this.container.add(
-            this.debugChildrenBounds
-        );
     }
 
     updateSize() {
@@ -93,7 +86,7 @@ export default class Stack extends Container {
                 this.padding.bottom;
         }
 
-        this.updateDebugBounds();
+        Debug.updateBounds(this);
 
         return this;
     }
@@ -120,6 +113,8 @@ export default class Stack extends Container {
 
     layout() {
 
+        Debug.clearLayoutBounds(this);
+
         // Resolve child layouts first.
         for (const child of this.children) {
 
@@ -132,23 +127,6 @@ export default class Stack extends Container {
         }
 
         this.updateSize();
-
-        // DEBUG
-        if (Debug.layout.enabled) {
-
-            this.debugChildrenBounds.clear();
-
-            this.debugChildrenBounds.fillStyle(
-                Debug.layout.fillColor_ROW,
-                Debug.layout.fillAlpha
-            );
-
-            this.debugChildrenBounds.lineStyle(
-                Debug.layout.borderWidth,
-                Debug.layout.borderColor_ROW,
-                Debug.layout.borderAlpha
-            );
-        }
 
         const availableWidth =
             this.width -
@@ -181,19 +159,20 @@ export default class Stack extends Container {
             // AVAILABLE AREA
             ////////////////////////////////////////
 
-const childWidth =
-    this.resolveChildWidth(
-        child,
-        options,
-        availableWidth
-    );
+            const childWidth =
+                this.resolveChildWidth(
+                    child,
+                    options,
+                    availableWidth
+                );
+            
+            const childHeight =
+                this.resolveChildHeight(
+                    child,
+                    options,
+                    availableHeight
+                );
 
-const childHeight =
-    this.resolveChildHeight(
-        child,
-        options,
-        availableHeight
-    );
             ////////////////////////////////////////
             // APPLY LAYOUT SIZE
             ////////////////////////////////////////
@@ -293,7 +272,20 @@ const childHeight =
             }
 
             ////////////////////////////////////////
-            // CHILD POSITION
+            // DEBUG
+            ////////////////////////////////////////
+
+            Debug.drawLayoutBounds(
+                this,
+                outerX,
+                outerY,
+                outerWidth,
+                outerHeight,
+                Debug.layout.stack.borderColor
+            );
+
+            ////////////////////////////////////////
+            // REPOSITION CHILD
             ////////////////////////////////////////
 
             child.setPosition(
@@ -301,26 +293,6 @@ const childHeight =
                 outerY + margin.top
             );
 
-            ////////////////////////////////////////
-            // DEBUG
-            ////////////////////////////////////////
-
-            if (Debug.layout.enabled) {
-
-                this.debugChildrenBounds.fillRect(
-                    outerX,
-                    outerY,
-                    outerWidth,
-                    outerHeight
-                );
-
-                this.debugChildrenBounds.strokeRect(
-                    outerX,
-                    outerY,
-                    outerWidth,
-                    outerHeight
-                );
-            }
         }
 
         this.layoutDirty = false;

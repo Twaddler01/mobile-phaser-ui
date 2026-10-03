@@ -1,4 +1,5 @@
 import Stack from '../layout/Stack.js';
+import Spacer from '../layout/Spacer.js';
 import Row from '../layout/Row.js';
 import Column from '../layout/Column.js';
 import Card from '../components/Card.js';
@@ -259,6 +260,56 @@ console.log(
 // 0. SETUP MULTIPLE LAYOUTS
 // ==================================
 
+() => {
+
+    this.destroyTest();
+
+    console.log(
+        'STACK'
+    );
+
+    console.log(
+        'Stack test.'
+    );
+
+    const parent = new Column(this.scene, {
+        width: 780
+    });
+
+    const stack = new Stack(this.scene, {
+        x: 100,
+        y: 100,
+        width: 600,
+        height: 200,
+        gap: 10,
+        padding: 10
+    });
+
+    const card = new Card(this.scene, {
+        height: 100,
+        width: 100
+    });
+    stack.add(card);
+
+    const spacer = new Spacer(this.scene, {
+        height: 30,
+        width: 180
+    });
+    parent.add(spacer);
+
+    const card2 = new Card(this.scene, {
+        height: 100,
+        width: 100
+    });
+    stack.add(card2, {
+        horizontalAlign: 'end'
+    });
+
+    parent.add(stack);
+
+    this.addTest(parent);
+
+},
 () => {
 
     this.destroyTest();

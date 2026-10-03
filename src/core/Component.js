@@ -291,7 +291,7 @@ console.log('SET LAYOUT SIZE', {
     
         this.layoutWidth = width;
         this.layoutHeight = height;
-    
+
         this.markLayoutDirty();
     
         return true;

@@ -1,3 +1,4 @@
+import Debug from '../core/Debug.js';
 import Component from '../core/Component.js';
 
 export default class Spacer extends Component {
@@ -6,17 +7,15 @@ export default class Spacer extends Component {
 
         super(scene, config);
 
+        Debug.drawSpacer(this);
+    }
+
+    layout() {
+
+        Debug.drawSpacer(this);
+
+        this.layoutDirty = false;
+
+        return this;
     }
 }
-
-/*
-const spacer = new Spacer(this, {
-    width: 0,
-    height: 40
-});
-
-column
-    .add(title)
-    .add(spacer)
-    .add(button);
-*/

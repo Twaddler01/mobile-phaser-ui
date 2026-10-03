@@ -90,8 +90,49 @@ class Debug {
                 fillAlpha:
                     options.layout?.grid?.fillAlpha
                     ?? 0.08
+            },
+
+            stack: {
+            
+                borderColor:
+                    options.layout?.stack?.borderColor
+                    ?? 0xffaa00,
+            
+                fillColor:
+                    options.layout?.stack?.fillColor
+                    ?? 0xffaa00
             }
         }
+
+        ////////////////////////////////////////
+        // SPACER
+        ////////////////////////////////////////
+        
+        this.spacer = {
+        
+            enabled:
+                options.spacer?.enabled ?? true,
+        
+            fillColor:
+                options.spacer?.fillColor
+                ?? 0xffffff,
+        
+            fillAlpha:
+                options.spacer?.fillAlpha
+                ?? 0.3,
+        
+            borderColor:
+                options.spacer?.borderColor
+                ?? 0xffffff,
+        
+            borderAlpha:
+                options.spacer?.borderAlpha
+                ?? 1,
+        
+            borderWidth:
+                options.spacer?.borderWidth
+                ?? 1
+        };
 
         ////////////////////////////////////////
         // TREE
@@ -310,6 +351,59 @@ class Debug {
         graphics.strokeRect(
             x,
             y,
+            width,
+            height
+        );
+    
+        return this;
+    }
+
+    drawSpacer(component) {
+    
+        if (
+            !this.enabled ||
+            !this.spacer.enabled ||
+            !component?.container
+        ) {
+            return this;
+        }
+    
+        if (!component.debugBounds) {
+            this.createBounds(component);
+        }
+    
+        const graphics =
+            component.debugBounds;
+    
+        graphics.clear();
+    
+        const width =
+            component.getLayoutWidth();
+    
+        const height =
+            component.getLayoutHeight();
+    
+        graphics.fillStyle(
+            this.spacer.fillColor,
+            this.spacer.fillAlpha
+        );
+    
+        graphics.fillRect(
+            0,
+            0,
+            width,
+            height
+        );
+    
+        graphics.lineStyle(
+            this.spacer.borderWidth,
+            this.spacer.borderColor,
+            this.spacer.borderAlpha
+        );
+    
+        graphics.strokeRect(
+            0,
+            0,
             width,
             height
         );
