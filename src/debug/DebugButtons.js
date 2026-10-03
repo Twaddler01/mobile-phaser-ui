@@ -6,6 +6,7 @@ import Text from '../components/Text.js';
 import Button from '../components/Button.js';
 import ScrollView from '../layout/ScrollView.js';
 import Grid from '../layout/Grid.js';
+import Section from '../layout/Section.js';
 
 export default class DebugButtons {
 
@@ -91,8 +92,171 @@ return component;
 this.addCycle =
     this.createClickCycle([
 
+
+
+
+
+
 // ==================================
-// 0. SETUP
+// 1. SECTION
+// ==================================
+
+() => {
+
+    this.destroyTest();
+
+    console.log(
+        '1. SECTION INITIAL'
+    );
+
+    const sections =
+        new Column(this.scene, {
+            id: 'cardSections',
+            gap: 0
+        });
+
+    const card =
+        new Card(this.scene, {
+            id: 'sectionCard',
+            x: 100,
+            y: 100,
+
+            width: 500,
+            height: 400,
+
+            padding: 20,
+
+            style: {
+                backgroundColor: 0x222222,
+                radius: 16,
+                stroke: 2,
+                strokeColor: 0xffffff
+            }
+        });
+
+    ////////////////////////////////////////
+    // HEADER
+    ////////////////////////////////////////
+
+    const header =
+        new Section(this.scene, {
+            id: 'cardHeader',
+            name: 'header',
+
+            height: 80
+        });
+
+    const headerText =
+        new Text(this.scene, {
+            id: 'headerTitle',
+            text: 'Card Header',
+            fontSize: 28
+        });
+
+    header.add(headerText, {
+        margin: 10,
+        horizontalAlign: 'start',
+        verticalAlign: 'center'
+    });
+
+    ////////////////////////////////////////
+    // CONTENT
+    ////////////////////////////////////////
+
+    const content =
+        new Section(this.scene, {
+            id: 'cardContent',
+            name: 'content',
+
+            height: 200
+        });
+
+    const contentText =
+        new Text(this.scene, {
+            id: 'contentText',
+            text: 'This is inside a Section.',
+            fontSize: 24
+        });
+
+    content.add(contentText, {
+        margin: 10,
+        horizontalAlign: 'start',
+        verticalAlign: 'start'
+    });
+
+    ////////////////////////////////////////
+    // FOOTER
+    ////////////////////////////////////////
+
+    const footer =
+        new Section(this.scene, {
+            //id: 'cardFooter',
+            name: 'footer',
+
+            height: 80
+        });
+
+    const footerText =
+        new Text(this.scene, {
+            id: 'footerText',
+            text: 'Footer',
+            fontSize: 20
+        });
+
+    footer.add(footerText, {
+        margin: 10,
+        horizontalAlign: 'end',
+        verticalAlign: 'center'
+    });
+
+    ////////////////////////////////////////
+    // CARD
+    ////////////////////////////////////////
+
+    sections.add(header, {
+        fill: 'horizontal'
+    });
+    
+    sections.add(content, {
+        fill: 'horizontal'
+    });
+    
+    sections.add(footer, {
+        fill: 'horizontal'
+    });
+    
+    card.add(sections, {
+        fill: true
+    });
+
+    this.addTest(card);
+
+////
+
+const _footerText =
+    card.getByPath(
+        'cardSections.cardFooter.footerText'
+    );
+
+console.log(
+    'PATH RESULT:',
+    _footerText?.id
+);
+
+_footerText?.setAlpha(0.5);
+
+console.log(
+    card.getById(
+        'footerText',
+        { trace: true }
+    )
+);
+
+
+
+},
+// ==================================
+// 0. SETUP MULTIPLE LAYOUTS
 // ==================================
 
 () => {

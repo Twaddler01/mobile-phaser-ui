@@ -12,7 +12,11 @@ export default class Component {
         this.layoutWidth = null;
         this.layoutHeight = null;
 
-        this.id = config.id ?? null;
+        this.id =
+            config.id ?? null;
+        
+        this.name =
+            config.name ?? null;
 
         this.widthAuto =
             config.width === undefined;
@@ -95,6 +99,140 @@ export default class Component {
         console.log(child.id);
     }
     */
+
+    getById(id, options = {}) {
+        if (!id) {
+            return null;
+        }
+    
+        const trace =
+            options.trace ?? false;
+    
+        const path =
+            options.path ?? [];
+
+        for (const child of this.children ?? []) {
+
+            const type =
+                child.constructor.name;
+            
+            const label =
+                child.id
+                    ? `${child.id}<${type}>`
+                    : `<${type}>`;
+
+            const currentPath = [
+                ...path,
+                label
+            ];
+    
+            if (child.id === id) {
+    
+                if (trace) {
+    
+                    console.log(
+                        'FOUND:',
+                        currentPath.join(' → ')
+                    );
+                }
+    
+                return child;
+            }
+    
+            const found =
+                child.getById?.(id, {
+                    trace,
+                    path: currentPath
+                });
+    
+            if (found) {
+                return found;
+            }
+        }
+    
+        if (trace && !path.length) {
+    
+            console.warn(
+                `Component not found: ${id}`
+            );
+        }
+    
+        return null;
+    }
+
+    getByName(name) {
+    
+        if (!name) {
+            return null;
+        }
+    
+        // Check direct children first.
+        for (const child of this.children ?? []) {
+    
+            if (child.name === name) {
+                return child;
+            }
+    
+            const found =
+                child.getByName?.(name);
+    
+            if (found) {
+                return found;
+            }
+        }
+    
+        return null;
+    }
+    
+    getAllByName(name) {
+    
+        const results = [];
+    
+        if (!name) {
+            return results;
+        }
+    
+        for (const child of this.children ?? []) {
+    
+            if (child.name === name) {
+                results.push(child);
+            }
+    
+            if (typeof child.getAllByName === 'function') {
+    
+                results.push(
+                    ...child.getAllByName(name)
+                );
+            }
+        }
+    
+        return results;
+    }
+
+    getByPath(path) {
+        if (!path) {
+            return null;
+        }
+    
+        const parts =
+            Array.isArray(path)
+                ? path
+                : path.split('.');
+    
+        let current = this;
+    
+        for (const id of parts) {
+    
+            current =
+                current.getChild(id);
+    
+            if (!current) {
+                return null;
+            }
+        }
+    
+        return current;
+    }
 
     markLayoutDirty() {
         if (!this.layoutDirty) {
