@@ -19,13 +19,6 @@ export default class Column extends Container {
         this.justify =
             config.justify ?? 'start';
 
-        // DEBUG
-        this.debugChildrenBounds =
-            this.scene.add.graphics();
-
-        this.container.add(
-            this.debugChildrenBounds
-        );
     }
 
     updateSize() {
@@ -114,12 +107,15 @@ export default class Column extends Container {
                 this.padding.bottom;
         }
     
-        this.updateDebugBounds();
+        Debug.updateBounds(this);
     
         return this;
     }
 
     layout() {
+
+        Debug.clearLayoutBounds(this);
+        
         // Resolve child layouts first.
         for (const child of this.children) {
     
@@ -132,23 +128,6 @@ export default class Column extends Container {
         }
     
         this.updateSize();
-    
-        // DEBUG
-        if (Debug.layout.enabled) {
-    
-            this.debugChildrenBounds.clear();
-    
-            this.debugChildrenBounds.fillStyle(
-                Debug.layout.fillColor_ROW,
-                Debug.layout.fillAlpha
-            );
-    
-            this.debugChildrenBounds.lineStyle(
-                Debug.layout.borderWidth,
-                Debug.layout.borderColor_ROW,
-                Debug.layout.borderAlpha
-            );
-        }
     
         const layoutWidth =
             this.getLayoutWidth();
@@ -418,38 +397,34 @@ export default class Column extends Container {
             const childX =
                 outerX +
                 margin.left;
-    
+
             ////////////////////////////////////////
             // DEBUG
             ////////////////////////////////////////
-    
-            if (Debug.layout.enabled) {
-    
-                const outerHeight =
-                    margin.top +
-                    childHeight +
-                    margin.bottom;
-    
-                this.debugChildrenBounds.fillRect(
+
+            const outerHeight =
+                margin.top +
+                childHeight +
+                margin.bottom;
+
+            Debug.addLayoutBounds(
+                    this,
                     outerX,
                     y,
                     outerWidth,
-                    outerHeight
+                    outerHeight,
+                    Debug.layout.row.borderColor
                 );
-    
-                this.debugChildrenBounds.strokeRect(
-                    outerX,
-                    y,
-                    outerWidth,
-                    outerHeight
-                );
-            }
-    
+
+            ////////////////////////////////////////
+            // REPOSITION CHILD
+            ////////////////////////////////////////
+
             child.setPosition(
                 childX,
                 childY
             );
-    
+
             ////////////////////////////////////////
             // ADVANCE TO NEXT CHILD
             ////////////////////////////////////////

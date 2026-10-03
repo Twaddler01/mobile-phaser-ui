@@ -42,7 +42,7 @@ export default class Card extends Container {
 
     updateVisuals() {
         this.updateBackground();
-        this.updateDebugBounds();
+        Debug.updateBounds(this);
     
         return this;
     }

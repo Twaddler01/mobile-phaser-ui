@@ -41,7 +41,7 @@ export default class Component {
 
         // DEBUG ONLY
         if (Debug.enabled) {
-            this.createDebugBounds();
+            Debug.createBounds(this);
         }
     }
 
@@ -423,7 +423,9 @@ console.log('SET LAYOUT SIZE', {
         }
     
         this.destroyed = true;
-    
+
+        Debug.destroy(this);
+
         if (this.layoutParent) {
             this.layoutParent.remove(this);
         }
@@ -440,115 +442,6 @@ console.log('SET LAYOUT SIZE', {
         }
     
         this.layoutParent = null;
-    
-        return this;
-    }
-
-    ////////////////////////////////////////
-    // DEBUG ONLY
-    ////////////////////////////////////////
-
-    createDebugBounds() {
-
-        this.debugBounds =
-            this.scene.add.graphics();
-
-        this.container.add(
-            this.debugBounds
-        );
-
-        this.updateDebugBounds();
-
-        return this;
-    }
-
-    updateDebugBounds() {
-        if (!Debug.enabled || !this.debugBounds) {
-            return this;
-        }
-    
-        this.debugBounds.clear();
-    
-        const width =
-            this.getLayoutWidth();
-    
-        const height =
-            this.getLayoutHeight();
-    
-        if (Debug.bounds.fill) {
-    
-            this.debugBounds.fillStyle(
-                Debug.bounds.fillColor,
-                Debug.bounds.fillAlpha
-            );
-    
-            this.debugBounds.fillRect(
-                0,
-                0,
-                width,
-                height
-            );
-        }
-    
-        if (Debug.bounds.border) {
-    
-            this.debugBounds.lineStyle(
-                Debug.bounds.borderWidth,
-                Debug.bounds.borderColor,
-                Debug.bounds.borderAlpha
-            );
-    
-            this.debugBounds.strokeRect(
-                0,
-                0,
-                width,
-                height
-            );
-        }
-    
-        this.container?.bringToTop(
-            this.debugChildrenBounds
-        );
-    
-        return this;
-    }
-
-    updateDebugLayoutBounds(
-        x,
-        y,
-        width,
-        height,
-        color
-    ) {
-    
-        if (!Debug.enabled) {
-            return this;
-        }
-    
-        if (!this.debugLayoutBounds) {
-    
-            this.debugLayoutBounds =
-                this.scene.add.graphics();
-    
-            this.container.add(
-                this.debugLayoutBounds
-            );
-        }
-    
-        this.debugLayoutBounds.clear();
-    
-        this.debugLayoutBounds.lineStyle(
-            Debug.layout.borderWidth,
-            color ?? Debug.layout.borderColor,
-            Debug.layout.borderAlpha
-        );
-    
-        this.debugLayoutBounds.strokeRect(
-            x,
-            y,
-            width,
-            height
-        );
     
         return this;
     }
