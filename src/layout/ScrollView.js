@@ -159,95 +159,104 @@ export default class ScrollView extends Container {
     ////////////////////////////////////////
     // MASK
     ////////////////////////////////////////
-
+    
     createMask() {
-
+    
+        ////////////////////////////////////////
+        // MASK SOURCE
+        ////////////////////////////////////////
+    
         this.maskShape =
-            this.scene.make.graphics({
-                add: false
-            });
-
+            this.scene.add.rectangle(
+                this.getWorldX(),
+                this.getWorldY(),
+                this.getLayoutWidth(),
+                this.getLayoutHeight(),
+                0xffffff
+            )
+            .setOrigin(0);
+    
+        /*
+         * The rectangle is used only as the
+         * source for the Phaser 4 Mask filter.
+         *
+         * It must not appear in the scene.
+         */
+    
+        this.maskShape.setVisible(false);
+    
+        ////////////////////////////////////////
+        // ENABLE FILTERS
+        ////////////////////////////////////////
+    
+        this.container.enableFilters();
+    
+        ////////////////////////////////////////
+        // PHASER 4 MASK FILTER
+        ////////////////////////////////////////
+    
         this.mask =
-            this.maskShape.createGeometryMask();
-
-        this.container.setMask(
-            this.mask
-        );
-
-        this.updateMask();
-
+            this.container.filters.external.addMask(
+                this.maskShape,
+                false,
+                this.scene.cameras.main,
+                'world'
+            );
+    
+        /*
+         * We update the mask ourselves whenever
+         * the ScrollView moves or resizes.
+         */
+    
+        this.mask.autoUpdate = false;
+        this.mask.needsUpdate = true;
+    
         return this;
     }
 
     updateMask() {
+    
         if (!this.maskShape) {
             return this;
         }
-
+    
         const padding =
             this.maskPadding;
-
+    
         const width =
             Math.max(
                 0,
                 this.getLayoutWidth() -
                 padding * 2
             );
-        
+    
         const height =
             Math.max(
                 0,
                 this.getLayoutHeight() -
                 padding * 2
             );
-        
-                this.maskShape.clear();
-        
-                this.maskShape.fillStyle(
-                    0xffffff
-                );
-        
+    
         const x =
             this.getWorldX() +
             padding;
-        
+    
         const y =
             this.getWorldY() +
             padding;
-        
-         this.maskShape.fillRect(
+    
+        this.maskShape
+            .setPosition(
                 x,
-                y,
+                y
+            )
+            .setSize(
                 width,
                 height
             );
-
-/*
-console.log('========== SCROLLVIEW MASK ==========');
-console.log({
-    x: x,
-    y: y,
-
-    width: this.width,
-    height: this.height,
-
-    layoutWidth: this.layoutWidth,
-    layoutHeight: this.layoutHeight,
-
-    resolvedWidth: this.getLayoutWidth(),
-    resolvedHeight: this.getLayoutHeight(),
-
-    maskWidth:
-        this.getLayoutWidth() -
-        this.maskPadding * 2,
-
-    maskHeight:
-        this.getLayoutHeight() -
-        this.maskPadding * 2
-});
-console.log('=====================================');
-*/
-
+    
+        this.mask.needsUpdate = true;
+    
         return this;
     }
 

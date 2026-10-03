@@ -123,17 +123,23 @@ this.addCycle =
         parent.add(card, { fill: 'horizontal' });
     }
 
-    const scroll = new ScrollView(this.scene, {
+    this.scroll = new ScrollView(this.scene, {
         width: 500,
         height: 400,
         direction: 'both'
     });
 
-    scroll.add(parent);
+    this.scroll.add(parent);
     
-    this.addTest(scroll);
+    this.addTest(this.scroll);
 
 },
+() => {
+    this.scroll.setPosition(300, 300);
+},
+
+
+
 // ==================================
 // A. THREE SCROLLVIEWS IN COLUMN
 // ==================================
