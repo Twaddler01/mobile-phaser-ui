@@ -131,6 +131,7 @@ productionErrorLogClear.onclick = () => {
 
 consoleClear.onclick = () => {
     document.getElementById('js-console').innerHTML = '';
+    console.groupDepth = 0;
 };
 
 consoleToggle.onclick = () => {
@@ -209,6 +210,7 @@ document.addEventListener('pointercancel', () => {
 // Console activity
 
 let consoleDiv = document.getElementById('js-console');
+console.groupDepth = 0;
 
 // If the browser doesn't already have a console object, create an empty one
 console = console || {};
@@ -252,6 +254,82 @@ console.warn = function() {
 
 console.error = function() {
 	console.render('error', arguments);
+};
+
+console.group = function() {
+
+    console.render(
+        'group',
+        arguments
+    );
+
+    console.groupDepth++;
+};
+
+console.groupCollapsed = function() {
+
+    console.render(
+        'group',
+        arguments
+    );
+
+    console.groupDepth++;
+};
+
+console.groupEnd = function() {
+
+    console.groupDepth =
+        Math.max(0, console.groupDepth - 1);
+};
+
+console.table = function(data) {
+
+    if (!data || typeof data !== 'object') {
+        console.render('log', [data]);
+        return;
+    }
+
+    const rows = Object.entries(data)
+        .map(([key, value]) => {
+
+            let rendered;
+
+            try {
+                rendered =
+                    typeof value === 'object'
+                        ? JSON.stringify(
+                            value,
+                            null,
+                            2
+                        )
+                        : String(value);
+            } catch {
+                rendered = '[unreadable]';
+            }
+
+            return `
+                <tr>
+                    <td>${htmlEncode(key)}</td>
+                    <td>${htmlEncode(rendered)}</td>
+                </tr>
+            `;
+        })
+        .join('');
+
+    const table =
+        document.createElement('div');
+
+    table.className = 'table';
+
+    table.innerHTML = `
+        <table>
+            <tbody>
+                ${rows}
+            </tbody>
+        </table>
+    `;
+
+    consoleDiv.appendChild(table);
 };
 
 // Render a new entry to the log
@@ -339,8 +417,14 @@ console.render = function(cssClass, items, prefix) {
     // ENTRY
     // ------------------------------------------
 
+    const indent =
+        console.groupDepth * 20;
+
     const div = document.createElement('div');
     div.className = cssClass;
+
+    div.style.paddingLeft =
+        `${indent + 2}px`;
 
     const content = renderedItems.join(' ');
 
@@ -352,7 +436,7 @@ console.render = function(cssClass, items, prefix) {
         ) +
         content;
 
-    consoleDiv.prepend(div);
+    consoleDiv.appendChild(div);
 };
 
 /**
