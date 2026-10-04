@@ -309,9 +309,10 @@ console.log(
 
     this.addTest(parent);
 
-    Debug.inspect(stack, {
+    Debug.inspect(parent, {
         stats: true,
-        tree: true
+        tree: true,
+        recursive: true
     });
 
 },

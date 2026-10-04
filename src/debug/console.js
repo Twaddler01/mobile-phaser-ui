@@ -131,7 +131,7 @@ productionErrorLogClear.onclick = () => {
 
 consoleClear.onclick = () => {
     document.getElementById('js-console').innerHTML = '';
-    console.groupDepth = 0;
+    console.groupStack = [];
 };
 
 consoleToggle.onclick = () => {
@@ -209,8 +209,9 @@ document.addEventListener('pointercancel', () => {
 
 // Console activity
 
-let consoleDiv = document.getElementById('js-console');
-console.groupDepth = 0;
+let consoleDiv =
+    document.getElementById('js-console');
+console.groupStack = [];
 
 // If the browser doesn't already have a console object, create an empty one
 console = console || {};
@@ -258,28 +259,120 @@ console.error = function() {
 
 console.group = function() {
 
-    console.render(
-        'group',
+    console.createGroup(
+        false,
         arguments
     );
-
-    console.groupDepth++;
 };
 
 console.groupCollapsed = function() {
 
-    console.render(
-        'group',
+    console.createGroup(
+        true,
         arguments
     );
-
-    console.groupDepth++;
 };
 
 console.groupEnd = function() {
 
-    console.groupDepth =
-        Math.max(0, console.groupDepth - 1);
+    if (console.groupStack.length === 0) {
+        return;
+    }
+
+    console.groupStack.pop();
+};
+
+console.createGroup = function(collapsed, items) {
+
+    const renderedItems =
+        [...items].map(item =>
+            console.format(item)
+        );
+
+    const group =
+        document.createElement('div');
+
+    group.className =
+        'group';
+
+    if (collapsed) {
+        group.classList.add('collapsed');
+    }
+
+    const header =
+        document.createElement('div');
+
+    header.className =
+        'group-header';
+
+    const arrow =
+        document.createElement('span');
+
+    arrow.className =
+        'group-arrow';
+
+    arrow.textContent =
+        collapsed ? '▶' : '▼';
+
+    const label =
+        document.createElement('span');
+
+    label.innerHTML =
+        renderedItems.join(' ');
+
+    header.appendChild(arrow);
+    header.appendChild(label);
+
+    const content =
+        document.createElement('div');
+
+    content.className =
+        'group-content';
+
+    group.appendChild(header);
+    group.appendChild(content);
+
+    header.addEventListener(
+        'click',
+        () => {
+
+            const isCollapsed =
+                group.classList.toggle(
+                    'collapsed'
+                );
+
+            arrow.textContent =
+                isCollapsed
+                    ? '▶'
+                    : '▼';
+        }
+    );
+
+    console.appendToCurrentGroup(group);
+
+    console.groupStack.push({
+        group,
+        content
+    });
+};
+
+console.appendToCurrentGroup = function(element) {
+
+    if (console.groupStack.length > 0) {
+
+        const currentGroup =
+            console.groupStack[
+                console.groupStack.length - 1
+            ];
+
+        currentGroup.content.appendChild(
+            element
+        );
+
+        return;
+    }
+
+    consoleDiv.appendChild(element);
 };
 
 console.table = function(data) {
@@ -329,71 +422,77 @@ console.table = function(data) {
         </table>
     `;
 
-    consoleDiv.appendChild(table);
+    console.appendToCurrentGroup(table);
+};
+
+console.format = function(value) {
+
+    if (value === null) {
+        return 'null';
+    }
+
+    if (value === undefined) {
+        return 'undefined';
+    }
+
+    if (typeof value === 'string') {
+
+        if (value.length > 5000) {
+            return (
+                value
+                    .substring(0, 5000)
+                    .htmlEncode() +
+                '...'
+            );
+        }
+
+        return value.htmlEncode();
+    }
+
+    if (typeof value === 'function') {
+        return value.toString().htmlEncode();
+    }
+
+    if (typeof value === 'object') {
+
+        try {
+
+            const visibleObject =
+                !Array.isArray(value)
+                    ? unhideProperties(value)
+                    : value;
+
+            const result =
+                JSON.stringify(
+                    visibleObject,
+                    null,
+                    2
+                );
+
+            return (
+                result === undefined
+                    ? String(value).htmlEncode()
+                    : result.htmlEncode()
+            );
+
+        } catch (e) {
+
+            return (
+                `[Object: ${e.message}]`
+            ).htmlEncode();
+        }
+    }
+
+    return String(value).htmlEncode();
 };
 
 // Render a new entry to the log
 console.render = function(cssClass, items, prefix) {
 
-    const renderedItems = [...items].map(i => {
-
-        if (i === null) {
-            return 'null';
-        }
-
-        if (i === undefined) {
-            return 'undefined';
-        }
-
-        // Strings
-        if (typeof i === 'string') {
-            if (i.length > 5000) {
-                return i.substring(0, 5000).htmlEncode() + '...';
-            }
-
-            return i.htmlEncode();
-        }
-
-        // Functions
-        if (typeof i === 'function') {
-            return i.toString().htmlEncode();
-        }
-
-        // Objects / arrays
-        if (typeof i === 'object') {
-
-            try {
-
-                const visibleObject =
-                    !Array.isArray(i)
-                        ? unhideProperties(i)
-                        : i;
-
-                const result =
-                    JSON.stringify(
-                        visibleObject,
-                        null,
-                        2
-                    );
-
-                return (
-                    result === undefined
-                        ? String(i).htmlEncode()
-                        : result.htmlEncode()
-                );
-
-            } catch (e) {
-
-                return (
-                    `[Object: ${e.message}]`
-                ).htmlEncode();
-
-            }
-        }
-
-        // Numbers, booleans, symbols, etc.
-        return String(i).htmlEncode();
-    });
+    const renderedItems =
+        [...items].map(
+            item => console.format(item)
+        );
 
     // ------------------------------------------
     // TIMESTAMP
@@ -417,26 +516,25 @@ console.render = function(cssClass, items, prefix) {
     // ENTRY
     // ------------------------------------------
 
-    const indent =
-        console.groupDepth * 20;
-
-    const div = document.createElement('div');
-    div.className = cssClass;
-
-    div.style.paddingLeft =
-        `${indent + 2}px`;
-
-    const content = renderedItems.join(' ');
-
+    const div =
+        document.createElement('div');
+    
+    div.className =
+        cssClass;
+    
+    const content =
+        renderedItems.join(' ');
+    
     div.innerHTML =
         logHeader +
-        (prefix
-            ? `<span class="prefix">${prefix.htmlEncode()}</span>\n`
-            : ''
+        (
+            prefix
+                ? `<span class="prefix">${prefix.htmlEncode()}</span>\n`
+                : ''
         ) +
         content;
-
-    consoleDiv.appendChild(div);
+    
+    console.appendToCurrentGroup(div);
 };
 
 /**

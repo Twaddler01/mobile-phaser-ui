@@ -90,6 +90,30 @@
     border-left: 3px solid #888;
 }
 
+#js-console .group-header {
+    padding: 3px 4px;
+    cursor: pointer;
+    user-select: none;
+    font-weight: bold;
+}
+
+#js-console .group-header:hover {
+    background-color: #444;
+}
+
+#js-console .group-arrow {
+    display: inline-block;
+    width: 1em;
+}
+
+#js-console .group-content {
+    display: block;
+}
+
+#js-console .group.collapsed .group-content {
+    display: none;
+}
+
 #js-console .table {
     background: #222;
     color: white;

@@ -160,9 +160,7 @@ class Debug {
         
             showDirty:
                 options.tree?.showDirty ?? false,
-        
-            showParent:
-                options.tree?.showParent ?? false
+
         };
 
         ////////////////////////////////////////
@@ -172,7 +170,8 @@ class Debug {
         this.statsConfig = {
         
             enabled:
-                options.stats?.enabled ?? true
+                options.stats?.enabled ?? true,
+
         };
 
         ////////////////////////////////////////
@@ -188,7 +187,9 @@ class Debug {
                 options.inspect?.stats ?? true,
         
             tree:
-                options.inspect?.tree ?? false
+                options.inspect?.tree ?? false,
+            
+            // recursive: true     // (could get messy)
         };
 
         ////////////////////////////////////////
@@ -767,7 +768,10 @@ class Debug {
             ////////////////////////////////////////
             // LAYOUT STATE
             ////////////////////////////////////////
-    
+            
+            layoutOptions:
+                component.layoutParent?.childLayoutOptions?.get(component) ?? null,
+            
             layoutDirty:
                 component.layoutDirty,
     
@@ -797,27 +801,31 @@ class Debug {
         }
     
         const settings = {
-    
             ...this.inspectConfig,
-    
             ...options
         };
-    
-        const stats =
-            settings.stats
-                ? this.stats(component)
-                : null;
     
         console.group(
             `[DEBUG INSPECT] ${this.getLabel(component)}`
         );
     
-        if (stats) {
-            console.table(stats);
+        if (settings.stats) {
+            console.table(this.stats(component));
         }
     
         if (settings.tree) {
             this.tree(component);
+        }
+    
+        if (settings.recursive) {
+    
+            for (const child of component.children ?? []) {
+    
+                this.inspect(child, {
+                    ...options,
+                    recursive: true
+                });
+            }
         }
     
         console.groupEnd();
