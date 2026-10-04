@@ -8,6 +8,11 @@ The library is being developed with mobile and WebView-based Phaser applications
 
 ---
 
+# Dev Notes (current WIP):
+- Text updates, specifically wrapping and space in layout.
+
+---
+
 # Goals
 
 The project focuses on:
