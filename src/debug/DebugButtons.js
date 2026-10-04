@@ -274,7 +274,7 @@ console.log(
     );
 
     const parent = new Column(this.scene, {
-        width: 780
+        width: 400
     });
 
     const stack = new Stack(this.scene, {
@@ -307,13 +307,16 @@ console.log(
 
     parent.add(stack);
 
-    this.addTest(parent);
-
-    Debug.inspect(parent, {
-        stats: true,
-        tree: true,
-        recursive: true
+    const text = new Text(this.scene, {
+        id: 'testText',
+        text:
+            'This is a deliberately long piece of text that should automatically wrap when the parent gives the Text component a smaller width.'
     });
+    parent.add(text, {
+        fill: 'horizontal'
+    });
+
+    this.addTest(parent);
 
 },
 () => {
@@ -1635,6 +1638,28 @@ console.log(
 */
 this.addButton('ADD (cycle)', () => {
     this.addCycle();
+});
+
+this.addButton('INSPECT', () => {
+
+    const root =
+        this.testComponents[0];
+
+    if (!root) {
+        console.warn(
+            'No test component to inspect.'
+        );
+        return;
+    }
+
+    root.layout();
+
+    Debug.inspect(root, {
+        stats: true,
+        tree: true,
+        recursive: true
+    });
+
 });
 
 this.addButton('insertBefore (after item2)', () => {

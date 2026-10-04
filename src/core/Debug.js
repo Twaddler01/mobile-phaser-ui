@@ -161,6 +161,9 @@ class Debug {
             showDirty:
                 options.tree?.showDirty ?? false,
 
+            showText:
+                options.tree?.showText ?? true,
+
         };
 
         ////////////////////////////////////////
@@ -600,7 +603,22 @@ class Debug {
                     `layout:${node.getLayoutWidth()}×${node.getLayoutHeight()}`
                 );
             }
-    
+
+            if (
+                node.constructor.name === 'Text' &&
+                settings.showText
+            ) {
+            
+                const wrap =
+                    node.wordWrapWidth !== undefined
+                        ? `wrap:${node.wordWrapWidth}`
+                        : node.layoutWidth
+                            ? `autoWrap:${node.layoutWidth}`
+                            : 'wrap:none';
+            
+                details.push(wrap);
+            }
+
             if (settings.showDirty) {
     
                 details.push(
@@ -764,7 +782,34 @@ class Debug {
     
             heightAuto:
                 component.heightAuto,
-    
+
+            ////////////////////////////////////////
+            // TEXT
+            ////////////////////////////////////////
+            
+            text:
+                component.textValue,
+            
+            textWidth:
+                component.textWidth,
+            
+            textHeight:
+                component.textHeight,
+            
+            wordWrapWidth:
+                component.layoutWidth,
+            
+            wrap:
+                typeof component.getWrapMode === 'function'
+                    ? component.getWrapMode()
+                    : component.wrapMode,
+
+            textWidth:
+                component.text?.width,
+            
+            textHeight:
+                component.text?.height,
+
             ////////////////////////////////////////
             // LAYOUT STATE
             ////////////////////////////////////////

@@ -1,3 +1,4 @@
+import Debug from '../core/Debug.js';
 import Component from '../core/Component.js';
 
 export default class Text extends Component {
@@ -6,33 +7,70 @@ export default class Text extends Component {
 
         super(scene, config);
 
-        this.textValue = config.text ?? 'Text';
-        this.fontSize = config.fontSize ?? '16px';
-        this.fontFamily = config.fontFamily ?? 'Arial';
-        this.color = config.color ?? '#ffffff';
-        this.fontStyle = config.fontStyle ?? 'normal';
-        this.align = config.align ?? 'left';
-        this.originX = config.originX ?? 0;
-        this.originY = config.originY ?? 0;
-        this.wordWrapWidth = config.wordWrapWidth;
+        this.textValue =
+            config.text ?? 'Text';
+
+        this.fontSize =
+            config.fontSize ?? '16px';
+
+        this.fontFamily =
+            config.fontFamily ?? 'Arial';
+
+        this.color =
+            config.color ?? '#ffffff';
+
+        this.fontStyle =
+            config.fontStyle ?? 'normal';
+
+        this.align =
+            config.align ?? 'left';
+
+        this.originX =
+            config.originX ?? 0;
+
+        this.originY =
+            config.originY ?? 0;
+
+        // Explicit override.
+        // undefined = allow automatic parent-based wrapping.
+        this.wordWrapWidth =
+            config.wordWrapWidth;
 
         this.create();
     }
 
 
+    ////////////////////////////////////////
+    // CREATE
+    ////////////////////////////////////////
+
     create() {
 
         const style = {
-            fontSize: this.fontSize,
-            fontFamily: this.fontFamily,
-            color: this.color,
-            fontStyle: this.fontStyle,
-            align: this.align
+
+            fontSize:
+                this.fontSize,
+
+            fontFamily:
+                this.fontFamily,
+
+            color:
+                this.color,
+
+            fontStyle:
+                this.fontStyle,
+
+            align:
+                this.align
         };
 
+        // Only configure an explicit
+        // word-wrap width here.
         if (this.wordWrapWidth !== undefined) {
+
             style.wordWrap = {
-                width: this.wordWrapWidth
+                width:
+                    this.wordWrapWidth
             };
         }
 
@@ -43,118 +81,313 @@ export default class Text extends Component {
                 this.textValue,
                 style
             )
-            .setOrigin(0);
+            .setOrigin(
+                this.originX,
+                this.originY
+            );
 
         this.container.add(
             this.text
         );
-        
+
         this.updateSize();
     }
 
+
+    ////////////////////////////////////////
+    // UPDATE SIZE
+    ////////////////////////////////////////
+
     updateSize() {
-        // Wordwrap exception
-        if (this.wordWrapWidth !== undefined) {
-            if (this.widthAuto) {
+        const wrapMode =
+            this.getWrapMode();
+    
+        ////////////////////////////////////////
+        // WIDTH
+        ////////////////////////////////////////
+    
+        if (this.widthAuto) {
+    
+            if (wrapMode === 'explicit') {
+    
                 this.width =
                     this.wordWrapWidth;
-            }
-        } else {
-            if (this.widthAuto) {
+    
+            } else if (wrapMode === 'auto') {
+    
+                this.width =
+                    this.layoutWidth;
+    
+            } else {
+    
                 this.width =
                     this.text.width;
             }
         }
+    
+        ////////////////////////////////////////
+        // HEIGHT
+        ////////////////////////////////////////
+    
         if (this.heightAuto) {
+    
             this.height =
                 this.text.height;
         }
-
-        return this;
-    }
-
-    setText(text) {
-        this.textValue = text;
-        this.text.setText(text);
-        this.updateSize();
-        this.requestLayout();
+    
+        Debug.updateBounds(this);
     
         return this;
     }
 
-    setColor(color) {
-        this.color = color;
-        this.text.setColor(color);
+    ////////////////////////////////////////
+    // LAYOUT
+    ////////////////////////////////////////
+
+    layout() {
+        const wrapMode =
+            this.getWrapMode();
+    
+        ////////////////////////////////////////
+        // APPLY WRAP
+        ////////////////////////////////////////
+    
+        if (wrapMode === 'explicit') {
+    
+            this.text.setWordWrapWidth(
+                this.wordWrapWidth
+            );
+    
+        } else if (wrapMode === 'auto') {
+    
+            this.text.setWordWrapWidth(
+                this.layoutWidth
+            );
+    
+        } else {
+    
+            this.text.setWordWrapWidth(0);
+        }
+    
+        ////////////////////////////////////////
+        // MEASURE FINAL TEXT
+        ////////////////////////////////////////
+    
+        this.updateSize(); // includes Debug
+    
+        this.layoutDirty = false;
+    
+        return this;
+    }
+
+    ////////////////////////////////////////
+    // TEXT
+    ////////////////////////////////////////
+
+    setText(text) {
+
+        this.textValue =
+            text;
+
+        this.text.setText(
+            text
+        );
+
         this.updateSize();
+
+        this.requestLayout();
 
         return this;
     }
+
+    ////////////////////////////////////////
+    // WRAP MODES
+    ////////////////////////////////////////
+
+    getWrapMode() {
+    
+        if (this.wordWrapWidth !== undefined) {
+            return 'explicit';
+        }
+    
+        if (this.layoutWidth !== null) {
+            return 'auto';
+        }
+    
+        return 'none';
+    }
+
+    ////////////////////////////////////////
+    // COLOR
+    ////////////////////////////////////////
+
+    setColor(color) {
+
+        this.color =
+            color;
+
+        this.text.setColor(
+            color
+        );
+
+        return this;
+    }
+
+
+    ////////////////////////////////////////
+    // FONT SIZE
+    ////////////////////////////////////////
 
     setFontSize(fontSize) {
-        this.fontSize = fontSize;
-        this.text.setFontSize(fontSize);
+
+        this.fontSize =
+            fontSize;
+
+        this.text.setFontSize(
+            fontSize
+        );
+
         this.updateSize();
+
         this.requestLayout();
 
         return this;
     }
+
+
+    ////////////////////////////////////////
+    // FONT FAMILY
+    ////////////////////////////////////////
 
     setFontFamily(fontFamily) {
-        this.fontFamily = fontFamily;
-        this.text.setFontFamily(fontFamily);
+
+        this.fontFamily =
+            fontFamily;
+
+        this.text.setFontFamily(
+            fontFamily
+        );
+
         this.updateSize();
+
         this.requestLayout();
 
         return this;
     }
+
+
+    ////////////////////////////////////////
+    // FONT STYLE
+    ////////////////////////////////////////
 
     setFontStyle(fontStyle) {
-        this.fontStyle = fontStyle;
-        this.text.setFontStyle(fontStyle);
+
+        this.fontStyle =
+            fontStyle;
+
+        this.text.setFontStyle(
+            fontStyle
+        );
+
         this.updateSize();
+
         this.requestLayout();
 
         return this;
     }
+
+
+    ////////////////////////////////////////
+    // ALIGN
+    ////////////////////////////////////////
 
     setAlign(align) {
-        this.align = align;
-        this.text.setAlign(align);
-        this.updateSize();
+
+        this.align =
+            align;
+
+        this.text.setAlign(
+            align
+        );
 
         return this;
     }
+
+
+    ////////////////////////////////////////
+    // ORIGIN
+    ////////////////////////////////////////
 
     setOrigin(x, y = x) {
-        this.originX = x;
-        this.originY = y;
-        this.text.setOrigin(x, y);
+
+        this.originX =
+            x;
+
+        this.originY =
+            y;
+
+        this.text.setOrigin(
+            x,
+            y
+        );
 
         return this;
     }
 
+
+    ////////////////////////////////////////
+    // WORD WRAP
+    ////////////////////////////////////////
+
     setWordWrapWidth(width) {
-        this.wordWrapWidth = width;
-        this.text.setWordWrapWidth(width);
+
+        this.wordWrapWidth =
+            width;
+
+        this.text.setWordWrapWidth(
+            width
+        );
+
         this.updateSize();
+
         this.requestLayout();
 
         return this;
     }
 
+
+    ////////////////////////////////////////
+    // AUTOMATIC WORD WRAP
+    ////////////////////////////////////////
+
+    clearWordWrapWidth() {
+
+        this.wordWrapWidth =
+            undefined;
+
+        /*
+         * Remove the explicit override.
+         * A subsequent layout pass will apply
+         * the parent's allocated width.
+         */
+        this.text.setWordWrapWidth(
+            0
+        );
+
+        this.updateSize();
+
+        this.requestLayout();
+
+        return this;
+    }
+
+
+    ////////////////////////////////////////
+    // GET TEXT
+    ////////////////////////////////////////
+
     getText() {
+
         return this.text.text;
     }
 }
-
-/*
-const title = new Text(this, {
-    x: 100,
-    y: 100,
-    text: 'Bible Drills Practice',
-    fontSize: '32px',
-    color: '#ffffff',
-    fontFamily: 'Arial',
-    fontStyle: 'bold'
-});
-*/
