@@ -107,8 +107,6 @@ export default class Column extends Container {
                 this.padding.bottom;
         }
     
-        Debug.updateBounds(this);
-    
         return this;
     }
 
@@ -333,17 +331,19 @@ export default class Column extends Container {
             ////////////////////////////////////////
             // APPLY LAYOUT SIZE
             ////////////////////////////////////////
-    
+
             const layoutSizeChanged =
-                child.setLayoutSize(
+                this.applyChildLayout(
+                    child,
+                    options,
                     childWidth,
                     childHeight
                 );
-    
+            
             if (layoutSizeChanged) {
                 child.layout();
             }
-    
+
             ////////////////////////////////////////
             // VERTICAL POSITION
             ////////////////////////////////////////
@@ -445,7 +445,9 @@ export default class Column extends Container {
         }
     
         this.layoutDirty = false;
-    
+        
+        Debug.updateBounds(this);
+
         return this;
     }
 }

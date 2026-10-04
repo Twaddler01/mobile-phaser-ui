@@ -354,6 +354,66 @@ export default class Container extends Component {
         };
     }
 
+    getChildLayoutWidth(
+        child,
+        options,
+        resolvedWidth
+    ) {
+    
+        if (
+            options.width !== null ||
+            this.isFillWidth(options)
+        ) {
+            return resolvedWidth;
+        }
+    
+        return null;
+    }
+    
+    
+    getChildLayoutHeight(
+        child,
+        options,
+        resolvedHeight
+    ) {
+    
+        if (
+            options.height !== null ||
+            this.isFillHeight(options)
+        ) {
+            return resolvedHeight;
+        }
+    
+        return null;
+    }
+
+    applyChildLayout(
+        child,
+        options,
+        width,
+        height
+    ) {
+    
+        const layoutWidth =
+            this.getChildLayoutWidth(
+                child,
+                options,
+                width
+            );
+    
+        const layoutHeight =
+            this.getChildLayoutHeight(
+                child,
+                options,
+                height
+            );
+    
+        return child.setLayoutSize(
+            layoutWidth,
+            layoutHeight
+        );
+    }
+
     //////////////////////////////////////////
     // CHILD OPTIONS DEFAULTS
     //////////////////////////////////////////

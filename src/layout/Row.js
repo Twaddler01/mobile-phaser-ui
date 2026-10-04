@@ -103,10 +103,7 @@ export default class Row extends Container {
                 contentHeight +
                 this.padding.bottom;
         }
-    
-        // DEBUG
-        Debug.updateBounds(this);
-    
+
         return this;
     }
 
@@ -317,11 +314,13 @@ export default class Row extends Container {
             ////////////////////////////////////////
         
             const layoutSizeChanged =
-                child.setLayoutSize(
+                this.applyChildLayout(
+                    child,
+                    options,
                     childWidth,
                     childHeight
                 );
-        
+            
             if (layoutSizeChanged) {
                 child.layout();
             }
@@ -420,7 +419,9 @@ export default class Row extends Container {
         }
 
         this.layoutDirty = false;
-        
+
+        Debug.updateBounds(this);
+
         return this;
     }
 }
