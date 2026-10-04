@@ -305,16 +305,8 @@ console.log('SET LAYOUT SIZE', {
         return this.layoutHeight ?? this.height;
     }
 
-    // Resolves immediately (pre-dirty system)
     requestLayout() {
-    
-        let root = this;
-    
-        while (root.layoutParent) {
-            root = root.layoutParent;
-        }
-    
-        root.layout();
+        this.markLayoutDirty();
     
         return this;
     }

@@ -19,6 +19,8 @@ export default class Column extends Container {
         this.justify =
             config.justify ?? 'start';
 
+        this.logDetails = true;
+
     }
 
     updateSize() {
@@ -111,56 +113,225 @@ export default class Column extends Container {
     }
 
     layout() {
-
+    
         Debug.clearLayoutBounds(this);
-        
-        // Resolve child layouts first.
-        for (const child of this.children) {
     
-            if (
-                child.layoutDirty &&
-                typeof child.layout === 'function'
-            ) {
-                child.layout();
-            }
-        }
-    
-        this.updateSize();
+        ////////////////////////////////////////
+        // 1. ESTABLISH CONSTRAINTS
+        //
+        // Determine the dimensions this Column
+        // already knows from itself / its parent.
+        ////////////////////////////////////////
     
         const layoutWidth =
             this.getLayoutWidth();
-        
+    
         const layoutHeight =
             this.getLayoutHeight();
-        
+    
         const availableWidth =
             layoutWidth -
             this.padding.left -
             this.padding.right;
-        
+    
         const availableHeight =
             layoutHeight -
             this.padding.top -
             this.padding.bottom;
-
+    
         ////////////////////////////////////////
-        // VERTICAL ALLOCATION
+        // 2. ALLOCATE CHILD CONSTRAINTS
         //
-        // Vertical fill children share the
-        // remaining main-axis space equally.
+        // Calculate the width/height each child
+        // should receive from this Column.
         ////////////////////////////////////////
     
-        // Resolve the shared height for fill children.
-        const {
-            fillHeight
-        } = this.getVerticalFillAllocation(
-            availableHeight
-        );
-
+        // VERTICAL ALLOCATION
+        const { fillHeight } =
+            this.getVerticalFillAllocation(
+                availableHeight
+            );
+    
         ////////////////////////////////////////
-        // RESOLVED CHILDREN HEIGHT
+        // 3. RESOLVE CHILDREN
         //
-        // Needed for justify calculations.
+        // Apply newly assigned constraints.
+        //
+        // If a child's constraint changes, resolve
+        // that child immediately so its final measured
+        // size is available to this Column.
+        ////////////////////////////////////////
+    
+        for (const child of this.children) {
+    
+            const options =
+                this.childLayoutOptions.get(child);
+    
+            if (!options) continue;
+    
+            const childWidth =
+                this.resolveChildWidth(
+                    child,
+                    options,
+                    availableWidth
+                );
+    
+            const childHeight =
+                this.resolveChildHeight(
+                    child,
+                    options,
+                    availableHeight,
+                    fillHeight
+                );
+    
+            ////////////////////////////////////////
+            // DEBUG
+            ////////////////////////////////////////
+    
+            if (this.logDetails) {
+    
+                console.log(
+                    '[Column] CHILD BEFORE CONSTRAINT',
+                    child.id,
+                    {
+                        width: child.width,
+                        height: child.height,
+                        layoutWidth: child.layoutWidth,
+                        layoutHeight: child.layoutHeight,
+                        dirty: child.layoutDirty,
+                        allocatedWidth: childWidth,
+                        allocatedHeight: childHeight
+                    }
+                );
+            }
+    
+            ////////////////////////////////////////
+            // APPLY LAYOUT SIZE
+            ////////////////////////////////////////
+    
+            const layoutSizeChanged =
+                this.applyChildLayout(
+                    child,
+                    options,
+                    childWidth,
+                    childHeight
+                );
+    
+            if (this.logDetails) {
+    
+                console.log(
+                    '[Column] CHILD AFTER CONSTRAINT',
+                    child.id,
+                    {
+                        width: child.width,
+                        height: child.height,
+                        layoutWidth: child.layoutWidth,
+                        layoutHeight: child.layoutHeight,
+                        dirty: child.layoutDirty,
+                        layoutSizeChanged
+                    }
+                );
+            }
+    
+            ////////////////////////////////////////
+            // RESOLVE NEW CONSTRAINT
+            ////////////////////////////////////////
+    
+            if (layoutSizeChanged) {
+                child.layout();
+            }
+    
+            if (this.logDetails) {
+    
+                console.log(
+                    '[Column] CHILD AFTER RESOLVE',
+                    child.id,
+                    {
+                        width: child.width,
+                        height: child.height,
+                        layoutWidth: child.layoutWidth,
+                        layoutHeight: child.layoutHeight,
+                        dirty: child.layoutDirty
+                    }
+                );
+            }
+        }
+    
+        ////////////////////////////////////////
+        // 4. MEASURE FINAL SIZE
+        //
+        // All children have now responded to their
+        // constraints, so Column can measure itself
+        // using their final dimensions.
+        ////////////////////////////////////////
+    
+        if (this.logDetails) {
+    
+            console.log(
+                '[Column] BEFORE FINAL updateSize',
+                this.id,
+                {
+                    width: this.width,
+                    height: this.height,
+                    layoutWidth: this.layoutWidth,
+                    layoutHeight: this.layoutHeight
+                }
+            );
+        }
+    
+        this.updateSize();
+    
+        if (this.logDetails) {
+    
+            console.log(
+                '[Column] AFTER FINAL updateSize',
+                this.id,
+                {
+                    width: this.width,
+                    height: this.height,
+                    layoutWidth: this.layoutWidth,
+                    layoutHeight: this.layoutHeight
+                }
+            );
+        }
+    
+        ////////////////////////////////////////
+        // RE-ESTABLISH FINAL DIMENSIONS
+        //
+        // updateSize() may have changed this Column's
+        // intrinsic width/height.
+        ////////////////////////////////////////
+    
+        const finalLayoutWidth =
+            this.getLayoutWidth();
+    
+        const finalLayoutHeight =
+            this.getLayoutHeight();
+    
+        const finalAvailableWidth =
+            finalLayoutWidth -
+            this.padding.left -
+            this.padding.right;
+    
+        const finalAvailableHeight =
+            finalLayoutHeight -
+            this.padding.top -
+            this.padding.bottom;
+    
+        ////////////////////////////////////////
+        // FINAL VERTICAL ALLOCATION
+        ////////////////////////////////////////
+    
+        const { fillHeight: finalFillHeight } =
+            this.getVerticalFillAllocation(
+                finalAvailableHeight
+            );
+    
+        ////////////////////////////////////////
+        // FINAL CHILD HEIGHTS
+        //
+        // Now that children have resolved, calculate
+        // the actual total content height.
         ////////////////////////////////////////
     
         const childrenHeight =
@@ -170,20 +341,16 @@ export default class Column extends Container {
                     const options =
                         this.childLayoutOptions.get(child);
     
-                    if (!options) {
-                        return total;
-                    }
+                    if (!options) return total;
     
-                    const {
-                        margin
-                    } = options;
-                    
+                    const { margin } = options;
+    
                     const childHeight =
                         this.resolveChildHeight(
                             child,
                             options,
-                            availableHeight,
-                            fillHeight
+                            finalAvailableHeight,
+                            finalFillHeight
                         );
     
                     return (
@@ -200,16 +367,21 @@ export default class Column extends Container {
                 this.children.length - 1
             ) * this.gap;
     
+        ////////////////////////////////////////
+        // REMAINING VERTICAL SPACE
+        ////////////////////////////////////////
+    
         const remainingHeight =
             Math.max(
                 0,
-                availableHeight -
+                finalAvailableHeight -
                 childrenHeight
             );
     
         ////////////////////////////////////////
-        // DETERMINE VERTICAL STARTING POSITION
-        // AND SPACING BETWEEN CHILDREN.
+        // 5. POSITION CHILDREN
+        //
+        // Alignment, justification, gap, margins.
         ////////////////////////////////////////
     
         let y;
@@ -235,8 +407,7 @@ export default class Column extends Container {
     
             case 'space-between':
     
-                y =
-                    this.padding.top;
+                y = this.padding.top;
     
                 if (this.children.length > 1) {
     
@@ -261,8 +432,7 @@ export default class Column extends Container {
     
                 } else {
     
-                    y =
-                        this.padding.top;
+                    y = this.padding.top;
                 }
     
                 break;
@@ -281,8 +451,7 @@ export default class Column extends Container {
     
                 } else {
     
-                    y =
-                        this.padding.top;
+                    y = this.padding.top;
                 }
     
                 break;
@@ -290,14 +459,13 @@ export default class Column extends Container {
             case 'start':
             default:
     
-                y =
-                    this.padding.top;
+                y = this.padding.top;
     
                 break;
         }
     
         ////////////////////////////////////////
-        // POSITION CHILDREN
+        // POSITION EACH CHILD
         ////////////////////////////////////////
     
         for (const child of this.children) {
@@ -305,52 +473,31 @@ export default class Column extends Container {
             const options =
                 this.childLayoutOptions.get(child);
     
-            if (!options) {
-                continue;
-            }
+            if (!options) continue;
     
-            const {
-                margin
-            } = options;
+            const { margin } = options;
     
-            let childWidth =
+            const childWidth =
                 this.resolveChildWidth(
                     child,
                     options,
-                    availableWidth
+                    finalAvailableWidth
                 );
-            
-            let childHeight =
+    
+            const childHeight =
                 this.resolveChildHeight(
                     child,
                     options,
-                    availableHeight,
-                    fillHeight
+                    finalAvailableHeight,
+                    finalFillHeight
                 );
-
-            ////////////////////////////////////////
-            // APPLY LAYOUT SIZE
-            ////////////////////////////////////////
-
-            const layoutSizeChanged =
-                this.applyChildLayout(
-                    child,
-                    options,
-                    childWidth,
-                    childHeight
-                );
-            
-            if (layoutSizeChanged) {
-                child.layout();
-            }
-
+    
             ////////////////////////////////////////
             // VERTICAL POSITION
             ////////////////////////////////////////
     
             const childY =
-                y +
-                margin.top;
+                y + margin.top;
     
             ////////////////////////////////////////
             // HORIZONTAL ALIGNMENT
@@ -370,7 +517,7 @@ export default class Column extends Container {
                     outerX =
                         this.padding.left +
                         (
-                            availableWidth -
+                            finalAvailableWidth -
                             outerWidth
                         ) / 2;
     
@@ -379,7 +526,7 @@ export default class Column extends Container {
                 case 'end':
     
                     outerX =
-                        layoutWidth -
+                        finalLayoutWidth -
                         this.padding.right -
                         outerWidth;
     
@@ -395,38 +542,37 @@ export default class Column extends Container {
             }
     
             const childX =
-                outerX +
-                margin.left;
-
+                outerX + margin.left;
+    
             ////////////////////////////////////////
             // DEBUG
             ////////////////////////////////////////
-
+    
             const outerHeight =
                 margin.top +
                 childHeight +
                 margin.bottom;
-
+    
             Debug.drawLayoutBounds(
-                    this,
-                    outerX,
-                    y,
-                    outerWidth,
-                    outerHeight,
-                    Debug.layout.row.borderColor
-                );
-
+                this,
+                outerX,
+                y,
+                outerWidth,
+                outerHeight,
+                Debug.layout.row.borderColor
+            );
+    
             ////////////////////////////////////////
-            // REPOSITION CHILD
+            // REPOSITION
             ////////////////////////////////////////
-
+    
             child.setPosition(
                 childX,
                 childY
             );
-
+    
             ////////////////////////////////////////
-            // ADVANCE TO NEXT CHILD
+            // ADVANCE
             ////////////////////////////////////////
     
             y +=
@@ -444,12 +590,18 @@ export default class Column extends Container {
                 );
         }
     
+        ////////////////////////////////////////
+        // 6. FINALIZE
+        ////////////////////////////////////////
+    
         this.layoutDirty = false;
-        
+    
         Debug.updateBounds(this);
-
+    
         return this;
     }
+
+    ////
 }
 
 /*
