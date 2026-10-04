@@ -138,30 +138,76 @@ class Debug {
         // TREE
         ////////////////////////////////////////
 
-        this.tree = {
-
+        this.treeConfig = {
+        
             enabled:
-                options.tree?.enabled ?? true
+                options.tree?.enabled ?? true,
+        
+            showId:
+                options.tree?.showId ?? true,
+        
+            showType:
+                options.tree?.showType ?? true,
+        
+            showPosition:
+                options.tree?.showPosition ?? true,
+        
+            showSize:
+                options.tree?.showSize ?? true,
+        
+            showLayoutSize:
+                options.tree?.showLayoutSize ?? true,
+        
+            showDirty:
+                options.tree?.showDirty ?? false,
+        
+            showParent:
+                options.tree?.showParent ?? false
         };
 
         ////////////////////////////////////////
         // STATS
         ////////////////////////////////////////
-
-        this.stats = {
-
+        
+        this.statsConfig = {
+        
             enabled:
                 options.stats?.enabled ?? true
         };
 
         ////////////////////////////////////////
+        // INSPECT
+        ////////////////////////////////////////
+        
+        this.inspectConfig = {
+        
+            enabled:
+                options.inspect?.enabled ?? true,
+        
+            stats:
+                options.inspect?.stats ?? true,
+        
+            tree:
+                options.inspect?.tree ?? false
+        };
+
+        ////////////////////////////////////////
         // TRACE
         ////////////////////////////////////////
-
-        this.trace = {
-
+        
+        this.traceConfig = {
+        
             enabled:
-                options.trace?.enabled ?? true
+                options.trace?.enabled ?? true,
+        
+            log:
+                options.trace?.log ?? true,
+        
+            warn:
+                options.trace?.warn ?? true,
+        
+            group:
+                options.trace?.group ?? false
         };
     }
 
@@ -412,16 +458,247 @@ class Debug {
     }
 
     ////////////////////////////////////////
-    // DEBUG INFO
+    // TRACE
     ////////////////////////////////////////
+    
+    trace(message, ...args) {
+    
+        if (
+            !this.enabled ||
+            !this.traceConfig.enabled ||
+            !this.traceConfig.log
+        ) {
+            return this;
+        }
+    
+        console.log(
+            `[DEBUG] ${message}`,
+            ...args
+        );
+    
+        return this;
+    }
 
-    getInfo(component) {
+    /*
+    Debug.trace(
+        'LAYOUT CHILD',
+        child.constructor.name,
+        child.id,
+        child.getLayoutWidth(),
+        child.getLayoutHeight()
+    );
+    */
+
+    getLabel(component) {
     
         if (!component) {
+            return '<null>';
+        }
+    
+        const type =
+            component.constructor.name;
+    
+        if (component.id) {
+            return `${component.id}<${type}>`;
+        }
+    
+        return `<${type}>`;
+    }
+    
+    traceComponent(message, component, ...args) {
+    
+        if (
+            !this.enabled ||
+            !this.traceConfig.enabled ||
+            !this.traceConfig.log
+        ) {
+            return this;
+        }
+    
+        console.log(
+            `[DEBUG] ${message}: ${this.getLabel(component)}`,
+            ...args
+        );
+    
+        return this;
+    }
+
+    traceWarn(message, ...args) {
+    
+        if (
+            !this.enabled ||
+            !this.traceConfig.enabled ||
+            !this.traceConfig.warn
+        ) {
+            return this;
+        }
+    
+        console.warn(
+            `[DEBUG] ${message}`,
+            ...args
+        );
+    
+        return this;
+    }
+
+    ////////////////////////////////////////
+    // TREE
+    ////////////////////////////////////////
+    
+    tree(component, options = {}) {
+    
+        if (
+            !this.enabled ||
+            !this.treeConfig.enabled ||
+            !component
+        ) {
+            return this;
+        }
+    
+        const settings = {
+            ...this.treeConfig,
+            ...options
+        };
+    
+        const lines = [];
+    
+        const getLabel = node => {
+    
+            const type =
+                node.constructor.name;
+    
+            let label = '';
+    
+            if (settings.showId && node.id) {
+                label += node.id;
+            }
+    
+            if (settings.showType) {
+                label += `<${type}>`;
+            }
+    
+            const details = [];
+    
+            if (settings.showPosition) {
+    
+                details.push(
+                    `pos:${node.x},${node.y}`
+                );
+            }
+    
+            if (settings.showSize) {
+    
+                details.push(
+                    `size:${node.width}×${node.height}`
+                );
+            }
+    
+            if (settings.showLayoutSize) {
+    
+                details.push(
+                    `layout:${node.getLayoutWidth()}×${node.getLayoutHeight()}`
+                );
+            }
+    
+            if (settings.showDirty) {
+    
+                details.push(
+                    `dirty:${node.layoutDirty}`
+                );
+            }
+    
+            if (details.length) {
+    
+                label +=
+                    ` [${details.join(' | ')}]`;
+            }
+    
+            return label;
+        };
+    
+        const walk = (
+            node,
+            prefix = '',
+            isLast = true,
+            isRoot = false
+        ) => {
+    
+            const branch =
+                isRoot
+                    ? ''
+                    : isLast
+                        ? '└── '
+                        : '├── ';
+    
+            lines.push(
+                prefix +
+                branch +
+                getLabel(node)
+            );
+    
+            const children =
+                node.children ?? [];
+    
+            children.forEach(
+                (child, index) => {
+    
+                    const last =
+                        index === children.length - 1;
+    
+                    const childPrefix =
+                        isRoot
+                            ? ''
+                            : prefix +
+                                (
+                                    isLast
+                                        ? '    '
+                                        : '│   '
+                                );
+    
+                    walk(
+                        child,
+                        childPrefix,
+                        last,
+                        false
+                    );
+                }
+            );
+        };
+    
+        walk(
+            component,
+            '',
+            true,
+            true
+        );
+    
+        console.log(
+            `[DEBUG TREE]\n${lines.join('\n')}`
+        );
+    
+        return this;
+    }
+
+    ////////////////////////////////////////
+    // STATS
+    ////////////////////////////////////////
+    
+    stats(component) {
+    
+        if (
+            !this.enabled ||
+            !this.statsConfig.enabled ||
+            !component
+        ) {
             return null;
         }
     
         return {
+    
+            ////////////////////////////////////////
+            // IDENTITY
+            ////////////////////////////////////////
+    
             type:
                 component.constructor.name,
     
@@ -430,6 +707,10 @@ class Debug {
     
             name:
                 component.name,
+    
+            ////////////////////////////////////////
+            // POSITION
+            ////////////////////////////////////////
     
             x:
                 component.x,
@@ -443,11 +724,19 @@ class Debug {
             worldY:
                 component.getWorldY(),
     
+            ////////////////////////////////////////
+            // INTRINSIC SIZE
+            ////////////////////////////////////////
+    
             width:
                 component.width,
     
             height:
                 component.height,
+    
+            ////////////////////////////////////////
+            // PARENT ALLOCATION
+            ////////////////////////////////////////
     
             layoutWidth:
                 component.layoutWidth,
@@ -455,14 +744,35 @@ class Debug {
             layoutHeight:
                 component.layoutHeight,
     
+            ////////////////////////////////////////
+            // RESOLVED SIZE
+            ////////////////////////////////////////
+    
+            actualWidth:
+                component.getLayoutWidth(),
+    
+            actualHeight:
+                component.getLayoutHeight(),
+    
+            ////////////////////////////////////////
+            // SIZING
+            ////////////////////////////////////////
+    
             widthAuto:
                 component.widthAuto,
     
             heightAuto:
                 component.heightAuto,
     
+            ////////////////////////////////////////
+            // LAYOUT STATE
+            ////////////////////////////////////////
+    
             layoutDirty:
                 component.layoutDirty,
+    
+            layoutScheduled:
+                component.layoutScheduled,
     
             parent:
                 component.layoutParent?.id ?? null,
@@ -470,6 +780,49 @@ class Debug {
             childCount:
                 component.children?.length ?? 0
         };
+    }
+
+    ////////////////////////////////////////
+    // INSPECT
+    ////////////////////////////////////////
+    
+    inspect(component, options = {}) {
+    
+        if (
+            !this.enabled ||
+            !this.inspectConfig.enabled ||
+            !component
+        ) {
+            return this;
+        }
+    
+        const settings = {
+    
+            ...this.inspectConfig,
+    
+            ...options
+        };
+    
+        const stats =
+            settings.stats
+                ? this.stats(component)
+                : null;
+    
+        console.group(
+            `[DEBUG INSPECT] ${this.getLabel(component)}`
+        );
+    
+        if (stats) {
+            console.table(stats);
+        }
+    
+        if (settings.tree) {
+            this.tree(component);
+        }
+    
+        console.groupEnd();
+    
+        return this;
     }
 
     ////////////////////////////////////////

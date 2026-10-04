@@ -8,6 +8,7 @@ import Button from '../components/Button.js';
 import ScrollView from '../layout/ScrollView.js';
 import Grid from '../layout/Grid.js';
 import Section from '../layout/Section.js';
+import Debug from '../core/Debug.js';
 
 export default class DebugButtons {
 
@@ -292,10 +293,9 @@ console.log(
     stack.add(card);
 
     const spacer = new Spacer(this.scene, {
-        height: 30,
-        width: 180
+        height: 30
     });
-    parent.add(spacer);
+    parent.add(spacer, { fill: true });
 
     const card2 = new Card(this.scene, {
         height: 100,
@@ -308,6 +308,11 @@ console.log(
     parent.add(stack);
 
     this.addTest(parent);
+
+    Debug.inspect(stack, {
+        stats: true,
+        tree: true
+    });
 
 },
 () => {

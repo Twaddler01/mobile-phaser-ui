@@ -129,9 +129,9 @@ export default class Component {
             if (child.id === id) {
     
                 if (trace) {
-    
-                    console.log(
-                        'FOUND:',
+                
+                    Debug.trace(
+                        'FOUND',
                         currentPath.join(' → ')
                     );
                 }
@@ -151,8 +151,8 @@ export default class Component {
         }
     
         if (trace && !path.length) {
-    
-            console.warn(
+        
+            Debug.traceWarn(
                 `Component not found: ${id}`
             );
         }
