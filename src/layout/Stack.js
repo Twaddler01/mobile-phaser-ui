@@ -29,7 +29,8 @@ export default class Stack extends Container {
                         }
 
                         const childWidth =
-                            options.width ?? child.width;
+                            options.width ??
+                            child.getLayoutWidth();
 
                         const { margin } =
                             options;
@@ -65,7 +66,8 @@ export default class Stack extends Container {
                         }
 
                         const childHeight =
-                            options.height ?? child.height;
+                            options.height ??
+                            child.getLayoutHeight();
 
                         const { margin } =
                             options;
@@ -85,8 +87,6 @@ export default class Stack extends Container {
                 contentHeight +
                 this.padding.bottom;
         }
-
-        Debug.updateBounds(this);
 
         return this;
     }
@@ -178,11 +178,13 @@ export default class Stack extends Container {
             ////////////////////////////////////////
 
             const layoutSizeChanged =
-                child.setLayoutSize(
+                this.applyChildLayout(
+                    child,
+                    options,
                     childWidth,
                     childHeight
                 );
-
+            
             if (layoutSizeChanged) {
                 child.layout();
             }
@@ -296,6 +298,8 @@ export default class Stack extends Container {
         }
 
         this.layoutDirty = false;
+
+        Debug.updateBounds(this);
 
         return this;
     }

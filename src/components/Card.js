@@ -42,7 +42,6 @@ export default class Card extends Container {
 
     updateVisuals() {
         this.updateBackground();
-        Debug.updateBounds(this);
     
         return this;
     }
@@ -166,7 +165,11 @@ export default class Card extends Container {
     }
 
     layout() {
-        // Resolve child layouts first.
+    
+        ////////////////////////////////////////
+        // RESOLVE CHILD LAYOUTS
+        ////////////////////////////////////////
+    
         for (const child of this.children) {
     
             if (
@@ -177,14 +180,22 @@ export default class Card extends Container {
             }
         }
     
-        // Resolve Card dimensions.
+        ////////////////////////////////////////
+        // INITIAL CARD SIZE
+        ////////////////////////////////////////
+    
         this.updateSize();
     
-        // Update anything that depends on
-        // the final Card dimensions.
-        this.updateVisuals();
+        ////////////////////////////////////////
+        // APPLY CHILD CONSTRAINTS
+        ////////////////////////////////////////
     
-        // Position children.
+        const layoutWidth =
+            this.getLayoutWidth();
+    
+        const layoutHeight =
+            this.getLayoutHeight();
+    
         for (const child of this.children) {
     
             const options =
@@ -193,82 +204,145 @@ export default class Card extends Container {
             if (!options) {
                 continue;
             }
-
+    
             const {
-                margin,
-                horizontalAlign,
-                verticalAlign,
-                fill
+                margin
             } = options;
-            
+    
             ////////////////////////////////////////
             // AVAILABLE AREA
             ////////////////////////////////////////
-            
-            const layoutWidth =
-                this.getLayoutWidth();
-            
-            const layoutHeight =
-                this.getLayoutHeight();
-            
+    
             const availableWidth =
-                layoutWidth -
-                this.padding.left -
-                this.padding.right -
-                margin.left -
-                margin.right;
-            
+                Math.max(
+                    0,
+                    layoutWidth -
+                    this.padding.left -
+                    this.padding.right -
+                    margin.left -
+                    margin.right
+                );
+    
             const availableHeight =
-                layoutHeight -
-                this.padding.top -
-                this.padding.bottom -
-                margin.top -
-                margin.bottom;
-
+                Math.max(
+                    0,
+                    layoutHeight -
+                    this.padding.top -
+                    this.padding.bottom -
+                    margin.top -
+                    margin.bottom
+                );
+    
             ////////////////////////////////////////
             // CHILD SIZE
             ////////////////////////////////////////
-            
-            let childWidth =
-                options.width ?? child.getLayoutWidth();
-            
-            let childHeight =
-                options.height ?? child.getLayoutHeight();
-
-            ////////////////////////////////////////
-            // FILL
-            ////////////////////////////////////////
-            
-            if (
-                options.width === null &&
-                (fill === true || fill === 'horizontal')
-            ) {
-                childWidth =
-                    Math.max(0, availableWidth);
-            }
-            
-            if (
-                options.height === null &&
-                (fill === true || fill === 'vertical')
-            ) {
-                childHeight =
-                    Math.max(0, availableHeight);
-            }
-
+    
+            const childWidth =
+                this.resolveChildWidth(
+                    child,
+                    options,
+                    availableWidth
+                );
+    
+            const childHeight =
+                this.resolveChildHeight(
+                    child,
+                    options,
+                    availableHeight
+                );
+    
             ////////////////////////////////////////
             // APPLY LAYOUT SIZE
             ////////////////////////////////////////
-            
+    
             const layoutSizeChanged =
-                child.setLayoutSize(
+                this.applyChildLayout(
+                    child,
+                    options,
                     childWidth,
                     childHeight
                 );
-            
+    
             if (layoutSizeChanged) {
                 child.layout();
             }
-
+        }
+    
+        ////////////////////////////////////////
+        // FINAL CARD SIZE
+        ////////////////////////////////////////
+    
+        this.updateSize();
+    
+        ////////////////////////////////////////
+        // UPDATE VISUALS
+        ////////////////////////////////////////
+    
+        this.updateVisuals();
+    
+        ////////////////////////////////////////
+        // POSITION CHILDREN
+        ////////////////////////////////////////
+    
+        const finalWidth =
+            this.getLayoutWidth();
+    
+        const finalHeight =
+            this.getLayoutHeight();
+    
+        for (const child of this.children) {
+    
+            const options =
+                this.childLayoutOptions.get(child);
+    
+            if (!options) {
+                continue;
+            }
+    
+            const {
+                margin,
+                horizontalAlign,
+                verticalAlign
+            } = options;
+    
+            ////////////////////////////////////////
+            // AVAILABLE AREA
+            ////////////////////////////////////////
+    
+            const availableWidth =
+                Math.max(
+                    0,
+                    finalWidth -
+                    this.padding.left -
+                    this.padding.right -
+                    margin.left -
+                    margin.right
+                );
+    
+            const availableHeight =
+                Math.max(
+                    0,
+                    finalHeight -
+                    this.padding.top -
+                    this.padding.bottom -
+                    margin.top -
+                    margin.bottom
+                );
+    
+            ////////////////////////////////////////
+            // CHILD SIZE
+            ////////////////////////////////////////
+    
+            const childWidth =
+                child.getLayoutWidth();
+    
+            const childHeight =
+                child.getLayoutHeight();
+    
+            ////////////////////////////////////////
+            // HORIZONTAL POSITION
+            ////////////////////////////////////////
+    
             let x;
     
             switch (horizontalAlign) {
@@ -288,7 +362,7 @@ export default class Card extends Container {
                 case 'end':
     
                     x =
-                        layoutWidth -
+                        finalWidth -
                         this.padding.right -
                         margin.right -
                         childWidth;
@@ -328,7 +402,7 @@ export default class Card extends Container {
                 case 'end':
     
                     y =
-                        layoutHeight -
+                        finalHeight -
                         this.padding.bottom -
                         margin.bottom -
                         childHeight;
@@ -345,10 +419,19 @@ export default class Card extends Container {
                     break;
             }
     
-            child.setPosition(x, y);
+            child.setPosition(
+                x,
+                y
+            );
         }
     
+        ////////////////////////////////////////
+        // COMPLETE
+        ////////////////////////////////////////
+    
         this.layoutDirty = false;
+    
+        Debug.updateBounds(this);
     
         return this;
     }

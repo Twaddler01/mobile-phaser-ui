@@ -552,8 +552,6 @@ console.log('GRID getColumnWidths: ', columnWidths);
 
         this.updateSize();
 
-        Debug.updateBounds(this);
-
         const columns = this.getColumnCount();
         const rows = this.getRowCount();
         
@@ -626,8 +624,7 @@ console.log('GRID getColumnWidths: ', columnWidths);
                 const {
                     margin,
                     horizontalAlign,
-                    verticalAlign,
-                    fill
+                    verticalAlign
                 } = options;
 
                 ////////////////////////////////////////
@@ -737,49 +734,29 @@ console.log('GRID getColumnWidths: ', columnWidths);
                 ////////////////////////////////////////
                 // CHILD SIZE
                 ////////////////////////////////////////
-
-                let childWidth =
-                    options.width ??
-                    child.getLayoutWidth();
-
-                let childHeight =
-                    options.height ??
-                    child.getLayoutHeight();
-
+                
+                const childWidth =
+                    this.resolveChildWidth(
+                        child,
+                        options,
+                        availableWidth
+                    );
+                
+                const childHeight =
+                    this.resolveChildHeight(
+                        child,
+                        options,
+                        availableHeight
+                    );
+                
                 ////////////////////////////////////////
-                // FILL
+                // APPLY LAYOUT SIZE
                 ////////////////////////////////////////
-
-                if (
-                    options.width === null &&
-                    (
-                        fill === true ||
-                        fill === 'horizontal'
-                    )
-                ) {
-
-                    childWidth =
-                        availableWidth;
-                }
-
-                if (
-                    options.height === null &&
-                    (
-                        fill === true ||
-                        fill === 'vertical'
-                    )
-                ) {
-
-                    childHeight =
-                        availableHeight;
-                }
-
-                ////////////////////////////////////////
-                // APPLY SIZE
-                ////////////////////////////////////////
-
+                
                 const layoutSizeChanged =
-                    child.setLayoutSize(
+                    this.applyChildLayout(
+                        child,
+                        options,
                         childWidth,
                         childHeight
                     );
@@ -876,6 +853,8 @@ console.log('GRID getColumnWidths: ', columnWidths);
         );
 
         this.layoutDirty = false;
+
+        Debug.updateBounds(this);
 
         return this;
     }
