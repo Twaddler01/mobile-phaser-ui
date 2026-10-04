@@ -1,6 +1,6 @@
 # Mobile Phaser UI
 
-A reusable, mobile-first UI component and layout library for "Phaser 3" (https://phaser.io/).
+A reusable, mobile-first UI component and layout library for "Phaser 4" (https://phaser.io/).
 
 "mobile-phaser-ui" is designed to make building responsive, nested game interfaces in Phaser feel more like working with a modern UI framework while remaining lightweight and Phaser-native.
 
