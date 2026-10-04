@@ -99,6 +99,107 @@ this.addCycle =
 
 
 
+
+() => {
+
+    this.destroyTest();
+
+    console.log(
+        'TEXT — INTRINSIC'
+    );
+
+    console.log(
+        'Text with no width constraint or explicit wrapping.'
+    );
+
+    const parent = new Column(this.scene, {
+        x: 100,
+        y: 100,
+        width: 500,
+        gap: 20,
+        padding: 20
+    });
+
+    const text = new Text(this.scene, {
+        id: 'intrinsicText',
+        text:
+            'This is a deliberately long piece of text with no width constraint. It should remain on one line and determine its own natural width.'
+    });
+
+    parent.add(text);
+
+    this.addTest(parent);
+
+},
+
+() => {
+
+    this.destroyTest();
+
+    console.log(
+        'TEXT — EXPLICIT WRAP'
+    );
+
+    console.log(
+        'Text using an explicit wordWrapWidth.'
+    );
+
+    const parent = new Column(this.scene, {
+        x: 100,
+        y: 100,
+        width: 600,
+        gap: 20,
+        padding: 20
+    });
+
+    const text = new Text(this.scene, {
+        id: 'explicitWrapText',
+        wordWrapWidth: 350,
+        text:
+            'This is a deliberately long piece of text with an explicitly assigned wrapping width. The parent does not determine how wide the text wraps.'
+    });
+
+    parent.add(text);
+
+    this.addTest(parent);
+
+},
+
+() => {
+
+    this.destroyTest();
+
+    console.log(
+        'TEXT — AUTO WRAP'
+    );
+
+    console.log(
+        'Text automatically wraps from its parent width constraint.'
+    );
+
+    const parent = new Column(this.scene, {
+        x: 100,
+        y: 100,
+        width: 400,
+        gap: 20,
+        padding: 20
+    });
+
+    const text = new Text(this.scene, {
+        id: 'autoWrapText',
+        text:
+            'This is a deliberately long piece of text that should automatically wrap when the parent gives the Text component a smaller width.'
+    });
+
+    parent.add(text, {
+        fill: 'horizontal'
+    });
+
+    this.addTest(parent);
+
+},
+
+
 // ==================================
 // 1. SECTION
 // ==================================
@@ -1653,6 +1754,46 @@ this.addButton('INSPECT', () => {
     }
 
     root.layout();
+
+    Debug.inspect(root, {
+        stats: true,
+        tree: true,
+        recursive: true
+    });
+
+});
+
+this.addButton('INSPECT [LOG]', () => {
+
+    const root =
+        this.testComponents[0];
+
+    if (!root) {
+        console.warn(
+            'No test component to inspect.'
+        );
+        return;
+    }
+
+    console.log(
+        '========== BEFORE MANUAL LAYOUT =========='
+    );
+
+    Debug.inspect(root, {
+        stats: true,
+        tree: true,
+        recursive: true
+    });
+
+    console.log(
+        '========== MANUAL LAYOUT =========='
+    );
+
+    root.layout();
+
+    console.log(
+        '========== AFTER MANUAL LAYOUT =========='
+    );
 
     Debug.inspect(root, {
         stats: true,

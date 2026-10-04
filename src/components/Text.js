@@ -164,9 +164,6 @@ export default class Text extends Component {
                 this.layoutWidth
             );
     
-        } else {
-    
-            this.text.setWordWrapWidth(0);
         }
     
         ////////////////////////////////////////
@@ -371,7 +368,7 @@ export default class Text extends Component {
          * the parent's allocated width.
          */
         this.text.setWordWrapWidth(
-            0
+            null
         );
 
         this.updateSize();
