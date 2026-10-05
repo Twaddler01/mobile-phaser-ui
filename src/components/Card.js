@@ -180,129 +180,52 @@ export default class Card extends Container {
 
     layout() {
     
-        ////////////////////////////////////////
-        // RESOLVE CHILD LAYOUTS
-        ////////////////////////////////////////
-    
-        for (const child of this.children) {
-    
-            if (
-                child.layoutDirty &&
-                typeof child.layout === 'function'
-            ) {
-                child.layout();
-            }
-        }
+        this.beginLayout();
     
         ////////////////////////////////////////
-        // INITIAL CARD SIZE
+        // 1. GET CONSTRAINTS
         ////////////////////////////////////////
     
-        this.updateSize();
+        const constraints =
+            this.getLayoutConstraints();
+    
+        const {
+            contentWidth,
+            contentHeight
+        } = constraints;
     
         ////////////////////////////////////////
-        // APPLY CHILD CONSTRAINTS
+        // 2–3. ALLOCATE + RESOLVE CHILDREN
         ////////////////////////////////////////
-    
-        const layoutWidth =
-            this.getLayoutWidth();
-    
-        const layoutHeight =
-            this.getLayoutHeight();
-    
-        for (const child of this.children) {
-    
-            const options =
-                this.childLayoutOptions.get(child);
-    
-            if (!options) {
-                continue;
-            }
-    
-            const {
-                margin
-            } = options;
-    
-            ////////////////////////////////////////
-            // AVAILABLE AREA
-            ////////////////////////////////////////
-    
-            const availableWidth =
-                Math.max(
-                    0,
-                    layoutWidth -
-                    this.padding.left -
-                    this.padding.right -
-                    margin.left -
-                    margin.right
-                );
-    
-            const availableHeight =
-                Math.max(
-                    0,
-                    layoutHeight -
-                    this.padding.top -
-                    this.padding.bottom -
-                    margin.top -
-                    margin.bottom
-                );
-    
-            ////////////////////////////////////////
-            // CHILD SIZE
-            ////////////////////////////////////////
-    
-            const childWidth =
-                this.resolveChildWidth(
-                    child,
-                    options,
-                    availableWidth
-                );
-    
-            const childHeight =
-                this.resolveChildHeight(
-                    child,
-                    options,
-                    availableHeight
-                );
-    
-            ////////////////////////////////////////
-            // APPLY LAYOUT SIZE
-            ////////////////////////////////////////
-    
-            const layoutSizeChanged =
-                this.applyChildLayout(
-                    child,
-                    options,
-                    childWidth,
-                    childHeight
-                );
-    
-            if (layoutSizeChanged) {
-                child.layout();
-            }
-        }
-    
+
+        this.resolveChildren(
+            contentWidth,
+            contentHeight
+        );
+
         ////////////////////////////////////////
-        // FINAL CARD SIZE
+        // 4. MEASURE FINAL SIZE
         ////////////////////////////////////////
     
         this.updateSize();
     
         ////////////////////////////////////////
-        // UPDATE VISUALS
+        // RE-CAPTURE FINAL DIMENSIONS
         ////////////////////////////////////////
     
-        this.updateVisuals();
+        const finalConstraints =
+            this.getLayoutConstraints();
+    
+        const {
+            width: finalLayoutWidth,
+            height: finalLayoutHeight,
+            contentWidth: finalContentWidth,
+            contentHeight: finalContentHeight
+        } = finalConstraints;
     
         ////////////////////////////////////////
-        // POSITION CHILDREN
+        // 5. POSITION CHILDREN
         ////////////////////////////////////////
-    
-        const finalWidth =
-            this.getLayoutWidth();
-    
-        const finalHeight =
-            this.getLayoutHeight();
     
         for (const child of this.children) {
     
@@ -320,30 +243,6 @@ export default class Card extends Container {
             } = options;
     
             ////////////////////////////////////////
-            // AVAILABLE AREA
-            ////////////////////////////////////////
-    
-            const availableWidth =
-                Math.max(
-                    0,
-                    finalWidth -
-                    this.padding.left -
-                    this.padding.right -
-                    margin.left -
-                    margin.right
-                );
-    
-            const availableHeight =
-                Math.max(
-                    0,
-                    finalHeight -
-                    this.padding.top -
-                    this.padding.bottom -
-                    margin.top -
-                    margin.bottom
-                );
-    
-            ////////////////////////////////////////
             // CHILD SIZE
             ////////////////////////////////////////
     
@@ -352,6 +251,20 @@ export default class Card extends Container {
     
             const childHeight =
                 child.getLayoutHeight();
+    
+            ////////////////////////////////////////
+            // OUTER CHILD AREA
+            ////////////////////////////////////////
+    
+            const outerWidth =
+                margin.left +
+                childWidth +
+                margin.right;
+    
+            const outerHeight =
+                margin.top +
+                childHeight +
+                margin.bottom;
     
             ////////////////////////////////////////
             // HORIZONTAL POSITION
@@ -365,21 +278,21 @@ export default class Card extends Container {
     
                     x =
                         this.padding.left +
-                        margin.left +
                         (
-                            availableWidth -
-                            childWidth
-                        ) / 2;
+                            finalContentWidth -
+                            outerWidth
+                        ) / 2 +
+                        margin.left;
     
                     break;
     
                 case 'end':
     
                     x =
-                        finalWidth -
+                        finalLayoutWidth -
                         this.padding.right -
-                        margin.right -
-                        childWidth;
+                        outerWidth +
+                        margin.left;
     
                     break;
     
@@ -405,21 +318,21 @@ export default class Card extends Container {
     
                     y =
                         this.padding.top +
-                        margin.top +
                         (
-                            availableHeight -
-                            childHeight
-                        ) / 2;
+                            finalContentHeight -
+                            outerHeight
+                        ) / 2 +
+                        margin.top;
     
                     break;
     
                 case 'end':
     
                     y =
-                        finalHeight -
+                        finalLayoutHeight -
                         this.padding.bottom -
-                        margin.bottom -
-                        childHeight;
+                        outerHeight +
+                        margin.top;
     
                     break;
     
@@ -440,12 +353,16 @@ export default class Card extends Container {
         }
     
         ////////////////////////////////////////
-        // COMPLETE
+        // UPDATE VISUALS
         ////////////////////////////////////////
     
-        this.layoutDirty = false;
+        this.updateVisuals();
     
-        Debug.updateBounds(this);
+        ////////////////////////////////////////
+        // 6. FINALIZE
+        ////////////////////////////////////////
+    
+        this.finishLayout();
     
         return this;
     }
