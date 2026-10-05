@@ -359,15 +359,12 @@ export default class Grid extends Container {
         const rowHeights =
             new Array(rows).fill(0);
     
-        for (const child of this.children) {
+        this.children.forEach((child, index) => {
     
             const options =
                 this.childLayoutOptions.get(child);
     
-            if (!options) continue;
-    
-            const index =
-                this.children.indexOf(child);
+            if (!options) return;
     
             const column =
                 options.column ??
@@ -383,7 +380,7 @@ export default class Grid extends Container {
                 column < 0 ||
                 column >= columns
             ) {
-                continue;
+                return;
             }
     
             const childHeight =
@@ -403,9 +400,8 @@ export default class Grid extends Container {
                     rowHeights[row],
                     outerHeight
                 );
-        }
+        });
 
-console.log('GRID getRowHeights: ', rowHeights);
         return rowHeights;
     }
 
@@ -421,18 +417,15 @@ console.log('GRID getRowHeights: ', rowHeights);
         const columnWidths =
             new Array(columns).fill(0);
     
-        for (const child of this.children) {
+        this.children.forEach((child, index) => {
     
             const options =
                 this.childLayoutOptions.get(child);
     
             if (!options) {
-                continue;
+                return;
             }
-    
-            const index =
-                this.children.indexOf(child);
-    
+
             const column =
                 options.column ??
                 (index % columns);
@@ -447,7 +440,7 @@ console.log('GRID getRowHeights: ', rowHeights);
                 row < 0 ||
                 row >= this.getRowCount()
             ) {
-                continue;
+                return;
             }
     
             const childWidth =
@@ -467,8 +460,8 @@ console.log('GRID getRowHeights: ', rowHeights);
                     columnWidths[column],
                     outerWidth
                 );
-        }
-console.log('GRID getColumnWidths: ', columnWidths);
+        });
+
         return columnWidths;
     }
 
@@ -529,22 +522,7 @@ console.log('GRID getColumnWidths: ', columnWidths);
 
     layout() {
 
-        Debug.clearLayoutBounds(this);
-
-        ////////////////////////////////////////
-        // RESOLVE CHILD LAYOUTS
-        ////////////////////////////////////////
-
-        for (const child of this.children) {
-
-            if (
-                child.layoutDirty &&
-                typeof child.layout === 'function'
-            ) {
-
-                child.layout();
-            }
-        }
+        this.beginLayout();
 
         ////////////////////////////////////////
         // RESOLVE GRID SIZE
@@ -567,7 +545,10 @@ console.log('GRID getColumnWidths: ', columnWidths);
         const rowOffsets =
             this.getRowOffsets(rowHeights);
 
+        ////////////////////////////////////////
         // DEBUG GRID CELLS
+        ////////////////////////////////////////
+
         for (let row = 0; row < rows; row++) {
         
             for (let column = 0; column < columns; column++) {
@@ -606,257 +587,295 @@ console.log('GRID getColumnWidths: ', columnWidths);
         }
 
         ////////////////////////////////////////
-        // POSITION CHILDREN
+        // ALLOCATE + RESOLVE CHILDREN
         ////////////////////////////////////////
 
-        this.children.forEach(
-            (child, index) => {
+        const childCells = new Map();
+        let autoIndex = 0;
 
-                const options =
-                    this.childLayoutOptions.get(
-                        child
-                    );
+        this.children.forEach(child => {
 
-                if (!options) {
-                    return;
-                }
-
-                const {
-                    margin,
-                    horizontalAlign,
-                    verticalAlign
-                } = options;
-
-                ////////////////////////////////////////
-                // GRID POSITION
-                ////////////////////////////////////////
-
-                let autoIndex = 0;
-                
-                let column;
-                let row;
-                
-                const hasExplicitPosition =
-                    options.column !== null &&
-                    options.column !== undefined &&
-                    options.row !== null &&
-                    options.row !== undefined;
-                
-                if (hasExplicitPosition) {
-                
-                    column = options.column;
-                    row = options.row;
-                
-                } else {
-                
-                    // Find next unoccupied cell
-                    while (autoIndex < columns * rows) {
-                
-                        column =
-                            autoIndex % columns;
-                
-                        row =
-                            Math.floor(
-                                autoIndex / columns
-                            );
-                
-                        autoIndex++;
-                
-                        if (
-                            !occupiedCells.has(
-                                `${column},${row}`
-                            )
-                        ) {
-                            break;
-                        }
-                    }
-                }
-                
-                occupiedCells.add(
-                    `${column},${row}`
+            const options =
+                this.childLayoutOptions.get(
+                    child
                 );
 
-                if (
-                    column < 0 ||
-                    column >= columns ||
-                    row < 0 ||
-                    row >= rows
-                ) {
-                
-                    if (Debug.enabled) {
-                        console.warn(
-                            `Grid: child "${child.id ?? 'unknown'}" ` +
-                            `is outside the grid bounds.`,
-                            {
-                                column,
-                                row,
-                                columns,
-                                rows
-                            }
-                        );
-                    }
-                
-                    return;
-                }
-
-                const cellX =
-                    columnOffsets[column];
-                
-                const cellY =
-                    rowOffsets[row];
-                
-                const cellWidth =
-                    columnWidths[column];
-                
-                const cellHeight =
-                    rowHeights[row];
-
-                ////////////////////////////////////////
-                // AVAILABLE AREA
-                ////////////////////////////////////////
-
-                const availableWidth =
-                    Math.max(
-                        0,
-                        cellWidth -
-                        margin.left -
-                        margin.right
-                    );
-
-                const availableHeight =
-                    Math.max(
-                        0,
-                        cellHeight -
-                        margin.top -
-                        margin.bottom
-                    );
-
-                ////////////////////////////////////////
-                // CHILD SIZE
-                ////////////////////////////////////////
-                
-                const childWidth =
-                    this.resolveChildWidth(
-                        child,
-                        options,
-                        availableWidth
-                    );
-                
-                const childHeight =
-                    this.resolveChildHeight(
-                        child,
-                        options,
-                        availableHeight
-                    );
-                
-                ////////////////////////////////////////
-                // APPLY LAYOUT SIZE
-                ////////////////////////////////////////
-                
-                const layoutSizeChanged =
-                    this.applyChildLayout(
-                        child,
-                        options,
-                        childWidth,
-                        childHeight
-                    );
-
-                if (layoutSizeChanged) {
-                    child.layout();
-                }
-
-                ////////////////////////////////////////
-                // HORIZONTAL POSITION
-                ////////////////////////////////////////
-
-                let x;
-
-                switch (horizontalAlign) {
-
-                    case 'center':
-
-                        x =
-                            cellX +
-                            margin.left +
-                            (
-                                availableWidth -
-                                childWidth
-                            ) / 2;
-
-                        break;
-
-                    case 'end':
-
-                        x =
-                            cellX +
-                            cellWidth -
-                            margin.right -
-                            childWidth;
-
-                        break;
-
-                    case 'start':
-                    default:
-
-                        x =
-                            cellX +
-                            margin.left;
-
-                        break;
-                }
-
-                ////////////////////////////////////////
-                // VERTICAL POSITION
-                ////////////////////////////////////////
-
-                let y;
-
-                switch (verticalAlign) {
-
-                    case 'center':
-
-                        y =
-                            cellY +
-                            margin.top +
-                            (
-                                availableHeight -
-                                childHeight
-                            ) / 2;
-
-                        break;
-
-                    case 'end':
-
-                        y =
-                            cellY +
-                            cellHeight -
-                            margin.bottom -
-                            childHeight;
-
-                        break;
-
-                    case 'start':
-                    default:
-
-                        y =
-                            cellY +
-                            margin.top;
-
-                        break;
-                }
-
-                child.setPosition(
-                    x,
-                    y
-                );
+            if (!options) {
+                return;
             }
-        );
 
-        this.layoutDirty = false;
+            const {
+                margin
+            } = options;
 
-        Debug.updateBounds(this);
+            // GRID POSITION
 
-        return this;
+            let column;
+            let row;
+            
+            const hasExplicitPosition =
+                options.column !== null &&
+                options.column !== undefined &&
+                options.row !== null &&
+                options.row !== undefined;
+            
+            if (hasExplicitPosition) {
+            
+                column = options.column;
+                row = options.row;
+            
+            } else {
+            
+                // Find next unoccupied cell
+                while (autoIndex < columns * rows) {
+            
+                    column =
+                        autoIndex % columns;
+            
+                    row =
+                        Math.floor(
+                            autoIndex / columns
+                        );
+            
+                    autoIndex++;
+            
+                    if (
+                        !occupiedCells.has(
+                            `${column},${row}`
+                        )
+                    ) {
+                        break;
+                    }
+                }
+            }
+
+            if (
+                column < 0 ||
+                column >= columns ||
+                row < 0 ||
+                row >= rows
+            ) {
+            
+                if (Debug.enabled) {
+                    console.warn(
+                        `Grid: child "${child.id ?? 'unknown'}" ` +
+                        `is outside the grid bounds.`,
+                        {
+                            column,
+                            row,
+                            columns,
+                            rows
+                        }
+                    );
+                }
+            
+                return;
+            }
+
+            childCells.set(child, {
+                column,
+                row
+            });
+
+            occupiedCells.add(
+                `${column},${row}`
+            );
+
+            const availableWidth =
+                Math.max(
+                    0,
+                    columnWidths[column] -
+                    margin.left -
+                    margin.right
+                );
+        
+            const availableHeight =
+                Math.max(
+                    0,
+                    rowHeights[row] -
+                    margin.top -
+                    margin.bottom
+                );
+        
+            const childWidth =
+                this.resolveChildWidth(
+                    child,
+                    options,
+                    availableWidth
+                );
+        
+            const childHeight =
+                this.resolveChildHeight(
+                    child,
+                    options,
+                    availableHeight
+                );
+        
+            const layoutSizeChanged =
+                this.applyChildLayout(
+                    child,
+                    options,
+                    childWidth,
+                    childHeight
+                );
+        
+            if (layoutSizeChanged) {
+                child.layout();
+            }
+        });
+
+        ////////////////////////////////////////
+        // POSITION CHILDREN
+        ////////////////////////////////////////
+        
+        for (const child of this.children) {
+        
+            const options =
+                this.childLayoutOptions.get(child);
+        
+            if (!options) {
+                continue;
+            }
+        
+            const cell =
+                childCells.get(child);
+        
+            if (!cell) {
+                continue;
+            }
+        
+            const {
+                column,
+                row
+            } = cell;
+        
+            const {
+                margin,
+                horizontalAlign,
+                verticalAlign
+            } = options;
+        
+            const cellX =
+                columnOffsets[column];
+        
+            const cellY =
+                rowOffsets[row];
+        
+            const cellWidth =
+                columnWidths[column];
+        
+            const cellHeight =
+                rowHeights[row];
+        
+            const childWidth =
+                child.getLayoutWidth();
+        
+            const childHeight =
+                child.getLayoutHeight();
+        
+            const availableWidth =
+                Math.max(
+                    0,
+                    cellWidth -
+                    margin.left -
+                    margin.right
+                );
+        
+            const availableHeight =
+                Math.max(
+                    0,
+                    cellHeight -
+                    margin.top -
+                    margin.bottom
+                );
+        
+            ////////////////////////////////////////
+            // HORIZONTAL POSITION
+            ////////////////////////////////////////
+        
+            let x;
+        
+            switch (horizontalAlign) {
+        
+                case 'center':
+        
+                    x =
+                        cellX +
+                        margin.left +
+                        (
+                            availableWidth -
+                            childWidth
+                        ) / 2;
+        
+                    break;
+        
+                case 'end':
+        
+                    x =
+                        cellX +
+                        cellWidth -
+                        margin.right -
+                        childWidth;
+        
+                    break;
+        
+                case 'start':
+                default:
+        
+                    x =
+                        cellX +
+                        margin.left;
+        
+                    break;
+            }
+        
+            ////////////////////////////////////////
+            // VERTICAL POSITION
+            ////////////////////////////////////////
+        
+            let y;
+        
+            switch (verticalAlign) {
+        
+                case 'center':
+        
+                    y =
+                        cellY +
+                        margin.top +
+                        (
+                            availableHeight -
+                            childHeight
+                        ) / 2;
+        
+                    break;
+        
+                case 'end':
+        
+                    y =
+                        cellY +
+                        cellHeight -
+                        margin.bottom -
+                        childHeight;
+        
+                    break;
+        
+                case 'start':
+                default:
+        
+                    y =
+                        cellY +
+                        margin.top;
+        
+                    break;
+            }
+        
+            child.setPosition(
+                x,
+                y
+            );
+        }
+
+        this.finishLayout();
     }
 
     ////////////////////////////////////////

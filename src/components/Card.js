@@ -363,8 +363,6 @@ export default class Card extends Container {
         ////////////////////////////////////////
     
         this.finishLayout();
-    
-        return this;
     }
 
     setPadding(padding = 0) {
