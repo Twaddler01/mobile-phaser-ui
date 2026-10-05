@@ -496,6 +496,72 @@ this.newCycle =
     this.destroyTest();
 
     console.log(
+        '11 — AUTO WIDTH CASCADE'
+    );
+
+    const root =
+        new Row(this.scene, {
+            x: 100,
+            y: 100,
+            height: 300,
+            padding: 20,
+            gap: 20
+        });
+
+    const card =
+        new Card(this.scene, {
+            width: 400,
+            padding: 20,
+            style: {
+                backgroundColor: 0x333333,
+                radius: 12,
+                stroke: 2,
+                strokeColor: 0xffffff
+            }
+        });
+
+    const content =
+        new Row(this.scene, {
+            padding: 10,
+            gap: 10
+        });
+
+    const title =
+        new Text(this.scene, {
+            text: 'A short title',
+            fontSize: 28
+        });
+
+    const body =
+        new Text(this.scene, {
+            text:
+                'This is deliberately long text. ' +
+                'It should wrap because the Card ultimately ' +
+                'constrains the available width.'
+        });
+
+    content.add(title);
+
+    content.add(body, {
+        fill: 'horizontal'
+    });
+
+    card.add(content, {
+        fill: 'horizontal'
+    });
+
+    root.add(card, {
+        fill: 'vertical'
+    });
+
+    this.addTest(root);
+},
+
+() => {
+
+    this.destroyTest();
+
+    console.log(
         '12 — AUTO WIDTH CASCADE'
     );
 

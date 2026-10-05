@@ -86,40 +86,36 @@ export default class Card extends Container {
         return this;
     }
 
-updateSize() {
+    updateSize() {
 
-    ////////////////////////////////////////
-    // WIDTH
-    ////////////////////////////////////////
-
-    if (this.widthAuto) {
-
-        // Parent supplied a width constraint.
+        ////////////////////////////////////////
+        // WIDTH
+        ////////////////////////////////////////
+    
         if (this.layoutWidth !== null) {
-
+        
             this.width =
                 this.layoutWidth;
-
-        // No constraint: measure intrinsically.
-        } else {
-
+        
+        } else if (this.widthAuto) {
+        
             let contentWidth = 0;
-
+        
             for (const child of this.children) {
-
+        
                 const options =
                     this.childLayoutOptions.get(child);
-
+        
                 if (!options) {
                     continue;
                 }
-
+        
                 const childWidth =
                     options.width ??
                     child.getLayoutWidth();
-
+        
                 const { margin } = options;
-
+        
                 contentWidth =
                     Math.max(
                         contentWidth,
@@ -128,46 +124,42 @@ updateSize() {
                         margin.right
                     );
             }
-
+        
             this.width =
                 this.padding.left +
                 contentWidth +
                 this.padding.right;
         }
-    }
-
-    ////////////////////////////////////////
-    // HEIGHT
-    ////////////////////////////////////////
-
-    if (this.heightAuto) {
-
-        // Parent supplied a height constraint.
+    
+        ////////////////////////////////////////
+        // HEIGHT
+        ////////////////////////////////////////
+    
         if (this.layoutHeight !== null) {
-
+        
             this.height =
                 this.layoutHeight;
-
-        // No constraint: measure intrinsically.
-        } else {
-
+        
+        } else if (this.heightAuto) {
+        
             let contentHeight = 0;
-
+        
             for (const child of this.children) {
-
+        
                 const options =
                     this.childLayoutOptions.get(child);
-
+        
                 if (!options) {
                     continue;
                 }
-
+        
                 const childHeight =
                     options.height ??
                     child.getLayoutHeight();
-
-                const { margin } = options;
-
+        
+                const { margin } =
+                    options;
+        
                 contentHeight =
                     Math.max(
                         contentHeight,
@@ -176,88 +168,7 @@ updateSize() {
                         margin.bottom
                     );
             }
-
-            this.height =
-                this.padding.top +
-                contentHeight +
-                this.padding.bottom;
-        }
-    }
-
-    return this;
-}
-
-
-/* bug?
-    updateSize() {
-        // AUTO WIDTH
-        if (
-            this.widthAuto &&
-            this.layoutWidth === null
-        ) {
-    
-            let contentWidth = 0;
-    
-            for (const child of this.children) {
-    
-                const options =
-                    this.childLayoutOptions.get(child);
-    
-                if (!options) {
-                    continue;
-                }
-                
-                const childWidth =
-                    options.width ?? child.getLayoutWidth();
-
-                const { margin } = options;
-    
-                contentWidth =
-                    Math.max(
-                        contentWidth,
-                        margin.left +
-                        childWidth +
-                        margin.right
-                    );
-            }
-    
-            this.width =
-                this.padding.left +
-                contentWidth +
-                this.padding.right;
-        }
-    
-        // AUTO HEIGHT
-        if (
-            this.heightAuto &&
-            this.layoutHeight === null
-        ) {
-    
-            let contentHeight = 0;
-    
-            for (const child of this.children) {
-    
-                const options =
-                    this.childLayoutOptions.get(child);
-    
-                if (!options) {
-                    continue;
-                }
-    
-                const childHeight =
-                    options.height ?? child.getLayoutHeight();
-
-                const { margin } = options;
-    
-                contentHeight =
-                    Math.max(
-                        contentHeight,
-                        margin.top +
-                        childHeight +
-                        margin.bottom
-                    );
-            }
-    
+        
             this.height =
                 this.padding.top +
                 contentHeight +
@@ -266,7 +177,7 @@ updateSize() {
     
         return this;
     }
-*/
+
     layout() {
     
         ////////////////////////////////////////

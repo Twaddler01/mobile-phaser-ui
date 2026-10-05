@@ -7,9 +7,6 @@ export default class Row extends Container {
 
         super(scene, config);
 
-        this.padding =
-            this.getPadding(config.padding);
-
         this.gap =
             config.gap ?? 0;
 
@@ -108,45 +105,79 @@ export default class Row extends Container {
     }
 
     layout() {
-        // Resolve child layouts first.
-        for (const child of this.children) {
+    
+        this.beginLayout();
+    
+        ////////////////////////////////////////
+        // 1. GET CONSTRAINTS
+        //
+        // Determine the dimensions this Row
+        // already knows from itself / its parent.
+        ////////////////////////////////////////
+    
+        const constraints =
+            this.getLayoutConstraints();
+    
+        const {
+            contentWidth,
+            contentHeight
+        } = constraints;
 
-            if (
-                child.layoutDirty &&
-                typeof child.layout === 'function'
-            ) {
-                child.layout();
-            }
-        }
+        ////////////////////////////////////////
+        // 2. ALLOCATE CHILD CONSTRAINTS
+        ////////////////////////////////////////
+        
+        const { fillWidth } =
+            this.getHorizontalFillAllocation(
+                contentWidth
+            );
+
+        ////////////////////////////////////////
+        // 3. RESOLVE CHILDREN
+        ////////////////////////////////////////
+        
+        this.resolveChildren(
+            contentWidth,
+            contentHeight,
+            fillWidth,
+            null
+        );
+
+        ////////////////////////////////////////
+        // 4. MEASURE FINAL SIZE
+        //
+        // All children have now responded to their
+        // constraints, so Row can measure itself
+        // using their final dimensions.
+        ////////////////////////////////////////
 
         this.updateSize();
 
-        // DEBUG
-        Debug.clearLayoutBounds(this);
-
-        const layoutWidth =
-            this.getLayoutWidth();
-        
-        const layoutHeight =
-            this.getLayoutHeight();
-        
-        const availableWidth =
-            layoutWidth -
-            this.padding.left -
-            this.padding.right;
-
         ////////////////////////////////////////
-        // HORIZONTAL ALLOCATION
-        // Horizontal fill children share the remaining
-        // main-axis space equally.
+        // RE-CAPTURE FINAL DIMENSIONS
+        //
+        // updateSize() may have changed this Column's
+        // intrinsic width/height.
         ////////////////////////////////////////
+
+        const finalConstraints =
+            this.getLayoutConstraints();
         
-        // Resolve the shared width for fill children.
         const {
-            fillWidth
-        } = this.getHorizontalFillAllocation(
-            availableWidth
-        );
+            width: finalLayoutWidth,
+            height: finalLayoutHeight,
+            contentWidth: finalContentWidth,
+            contentHeight: finalContentHeight
+        } = finalConstraints;
+
+        ////////////////////////////////////////
+        // FINAL HORIZONTAL ALLOCATION
+        ////////////////////////////////////////
+        
+        const { fillWidth: finalFillWidth } =
+            this.getHorizontalFillAllocation(
+                finalContentWidth
+            );
 
         ////////////////////////////////////////
         // RESOLVED CHILDREN WIDTH
@@ -163,16 +194,15 @@ export default class Row extends Container {
                         return total;
                     }
         
-                    const {
-                        margin
-                    } = options;
+                    const { margin } =
+                        options;
         
                     const childWidth =
                         this.resolveChildWidth(
                             child,
                             options,
-                            availableWidth,
-                            fillWidth
+                            finalContentWidth,
+                            finalFillWidth
                         );
         
                     return (
@@ -188,11 +218,13 @@ export default class Row extends Container {
                 0,
                 this.children.length - 1
             ) * this.gap;
-
+            
+        
         const remainingWidth =
             Math.max(
                 0,
-                availableWidth - childrenWidth
+                finalContentWidth -
+                childrenWidth
             );
 
         // Determine horizontal starting position
@@ -277,36 +309,25 @@ export default class Row extends Container {
             } = options;
         
             ////////////////////////////////////////
-            // AVAILABLE AREA
-            ////////////////////////////////////////
-
-            const availableHeight =
-                layoutHeight -
-                this.padding.top -
-                this.padding.bottom -
-                margin.top -
-                margin.bottom;
-        
-            ////////////////////////////////////////
             // CHILD SIZE
             ////////////////////////////////////////
             // fill consumes available main-axis
             // space first; justify distributes 
             // whatever remains.
 
-            let childWidth =
+            const childWidth =
                 this.resolveChildWidth(
                     child,
                     options,
-                    availableWidth,
-                    fillWidth
+                    finalContentWidth,
+                    finalFillWidth
                 );
             
-            let childHeight =
+            const childHeight =
                 this.resolveChildHeight(
                     child,
                     options,
-                    availableHeight
+                    finalContentHeight
                 );
 
             ////////////////////////////////////////
@@ -330,11 +351,6 @@ export default class Row extends Container {
             const childX =
                 x +
                 margin.left;
-        
-            const contentHeight =
-                layoutHeight -
-                this.padding.top -
-                this.padding.bottom;
             
             const outerHeight =
                 margin.top +
@@ -349,14 +365,14 @@ export default class Row extends Container {
                     outerY =
                         this.padding.top +
                         (
-                            contentHeight -
+                            finalContentHeight -
                             outerHeight
                         ) / 2;
                     break;
             
                 case 'end':
                     outerY =
-                        layoutHeight -
+                        finalLayoutHeight -
                         this.padding.bottom -
                         outerHeight;
                     break;
@@ -418,11 +434,7 @@ export default class Row extends Container {
                 );
         }
 
-        this.layoutDirty = false;
-
-        Debug.updateBounds(this);
-
-        return this;
+        this.finishLayout();
     }
 }
 
