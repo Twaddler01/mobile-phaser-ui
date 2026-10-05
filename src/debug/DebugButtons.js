@@ -576,7 +576,7 @@ this.newCycle =
         new Row(this.scene, {
             x: 100,
             y: 100,
-            height: 300,
+            //height: 300,
             padding: 20,
             gap: 20
         });
@@ -610,6 +610,12 @@ this.newCycle =
             text:
                 'This is deliberately long text. ' +
                 'It should wrap because the Card ultimately ' +
+                'constrains the available width.' +
+                'This is deliberately long text. ' +
+                'It should wrap because the Card ultimately ' +
+                'constrains the available width.' +
+                'This is deliberately long text. ' +
+                'It should wrap because the Card ultimately ' +
                 'constrains the available width.'
         });
 
@@ -623,9 +629,7 @@ this.newCycle =
         fill: 'horizontal'
     });
 
-    root.add(card, {
-        fill: 'vertical'
-    });
+    root.add(card);
 
     this.addTest(root);
 },
