@@ -5,13 +5,18 @@ import Component from './Component.js';
 export default class Container extends Component {
 
     constructor(scene, config = {}) {
-
+    
         super(scene, config);
-
+    
         this.children = [];
-
+    
         this.childLayoutOptions =
             new Map();
+    
+        this.padding =
+            this.getPadding(
+                config.padding
+            );
     }
 
     getLayoutConstraints() {
@@ -25,8 +30,7 @@ export default class Container extends Component {
                 this.getLayoutHeight(),
     
             padding:
-                this.padding ??
-                this.getPadding()
+                this.padding
         });
     }
 

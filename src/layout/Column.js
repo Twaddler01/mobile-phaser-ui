@@ -19,8 +19,6 @@ export default class Column extends Container {
         this.justify =
             config.justify ?? 'start';
 
-        this.logDetails = true;
-
     }
 
     updateSize() {
@@ -156,101 +154,13 @@ export default class Column extends Container {
         // size is available to this Column.
         ////////////////////////////////////////
     
-        for (const child of this.children) {
-    
-            const options =
-                this.childLayoutOptions.get(child);
-    
-            if (!options) continue;
-    
-            const childWidth =
-                this.resolveChildWidth(
-                    child,
-                    options,
-                    contentWidth
-                );
-    
-            const childHeight =
-                this.resolveChildHeight(
-                    child,
-                    options,
-                    contentHeight,
-                    fillHeight
-                );
-    
-            ////////////////////////////////////////
-            // DEBUG
-            ////////////////////////////////////////
-    
-            if (this.logDetails) {
-    
-                console.log(
-                    '[Column] CHILD BEFORE CONSTRAINT',
-                    child.id,
-                    {
-                        width: child.width,
-                        height: child.height,
-                        layoutWidth: child.layoutWidth,
-                        layoutHeight: child.layoutHeight,
-                        dirty: child.layoutDirty,
-                        allocatedWidth: childWidth,
-                        allocatedHeight: childHeight
-                    }
-                );
-            }
-    
-            ////////////////////////////////////////
-            // APPLY LAYOUT SIZE
-            ////////////////////////////////////////
-    
-            const layoutSizeChanged =
-                this.applyChildLayout(
-                    child,
-                    options,
-                    childWidth,
-                    childHeight
-                );
-    
-            if (this.logDetails) {
-    
-                console.log(
-                    '[Column] CHILD AFTER CONSTRAINT',
-                    child.id,
-                    {
-                        width: child.width,
-                        height: child.height,
-                        layoutWidth: child.layoutWidth,
-                        layoutHeight: child.layoutHeight,
-                        dirty: child.layoutDirty,
-                        layoutSizeChanged
-                    }
-                );
-            }
-    
-            ////////////////////////////////////////
-            // RESOLVE NEW CONSTRAINT
-            ////////////////////////////////////////
-    
-            if (layoutSizeChanged) {
-                child.layout();
-            }
-    
-            if (this.logDetails) {
-    
-                console.log(
-                    '[Column] CHILD AFTER RESOLVE',
-                    child.id,
-                    {
-                        width: child.width,
-                        height: child.height,
-                        layoutWidth: child.layoutWidth,
-                        layoutHeight: child.layoutHeight,
-                        dirty: child.layoutDirty
-                    }
-                );
-            }
-        }
-    
+        this.resolveChildren(
+            contentWidth,
+            contentHeight,
+            null,
+            fillHeight
+        );
+
         ////////////////////////////////////////
         // 4. MEASURE FINAL SIZE
         //
@@ -258,37 +168,9 @@ export default class Column extends Container {
         // constraints, so Column can measure itself
         // using their final dimensions.
         ////////////////////////////////////////
-    
-        if (this.logDetails) {
-    
-            console.log(
-                '[Column] BEFORE FINAL updateSize',
-                this.id,
-                {
-                    width: this.width,
-                    height: this.height,
-                    layoutWidth: this.layoutWidth,
-                    layoutHeight: this.layoutHeight
-                }
-            );
-        }
-    
+
         this.updateSize();
-    
-        if (this.logDetails) {
-    
-            console.log(
-                '[Column] AFTER FINAL updateSize',
-                this.id,
-                {
-                    width: this.width,
-                    height: this.height,
-                    layoutWidth: this.layoutWidth,
-                    layoutHeight: this.layoutHeight
-                }
-            );
-        }
-    
+
         ////////////////////////////////////////
         // RE-CAPTURE FINAL DIMENSIONS
         //
