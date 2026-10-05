@@ -91,13 +91,654 @@ return component;
 // CYCLE
 // ==========================================
 
-this.addCycle =
+
+
+
+/*
+this.destroyTest();
+
+console.log(
+    '17 — JUSTIFY EDGE CASES'
+);
+
+console.log(
+    'Expected: all justify modes position children correctly.'
+);
+
+this.modes = [
+    'start',
+    'center',
+    'end',
+    'space-between',
+    'space-around',
+    'space-evenly'
+];
+
+this.column =
+    new Column(this.scene, {
+        x: 100,
+        y: 100,
+
+        width: 500,
+        height: 600,
+
+        padding: 30,
+        gap: 15,
+
+        justify: this.modes[0]
+    });
+
+const createCard =
+    (label, height) => {
+
+        const card =
+            new Card(this.scene, {
+                width: null,
+                height,
+
+                style: {
+                    backgroundColor: 0x444444,
+                    radius: 8
+                }
+            });
+
+        card.add(
+            new Text(this.scene, {
+                text: label,
+                fontSize: '24px'
+            }),
+            {
+                horizontalAlign: 'center',
+                verticalAlign: 'center'
+            }
+        );
+
+        return card;
+    };
+
+this.column.add(
+    createCard('ONE', 60),
+    {
+        fill: 'horizontal'
+    }
+);
+
+this.column.add(
+    createCard('TWO', 80),
+    {
+        fill: 'horizontal'
+    }
+);
+
+this.column.add(
+    createCard('THREE', 100),
+    {
+        fill: 'horizontal'
+    }
+);
+
+this.addTest(this.column);
+
+this.modes = [
+    'start',
+    'center',
+    'end',
+    'space-between',
+    'space-around',
+    'space-evenly'
+];
+
+this.newCycleLoop =
+    this.createClickCycle(
+        this.modes.map(() => {
+
+            return (i) => {
+
+                const mode =
+                    this.modes[i];
+
+                console.log(
+                    'JUSTIFY:',
+                    mode
+                );
+
+                this.column.justify =
+                    mode;
+
+                this.column.requestLayout();
+            };
+        }),
+        {
+            loop: true
+        }
+    );
+*/
+
+
+
+this.newCycle = 
     this.createClickCycle([
 
+() => {
+
+    this.destroyTest();
+
+    console.log(
+        '19 — MIXED LAYOUT STRESS'
+    );
+
+    console.log(
+        'Expected: fixed, intrinsic, wrapping, margins, fill, ' +
+        'alignment, gap, and justify coexist correctly.'
+    );
+
+    const root =
+        new Column(this.scene, {
+
+            x: 80,
+            y: 80,
+
+            width: 700,
+            height: 800,
+
+            padding: 25,
+            gap: 20,
+
+            justify: 'space-between'
+        });
+
+    // ========================================
+    // 1. FIXED + FILL
+    // ========================================
+
+    const header =
+        new Card(this.scene, {
+
+            height: 70,
+
+            style: {
+                backgroundColor: 0x444444,
+                radius: 10
+            }
+        });
+
+    header.add(
+        new Text(this.scene, {
+            text: 'FIXED + FILL',
+            fontSize: '24px'
+        }),
+        {
+            horizontalAlign: 'center',
+            verticalAlign: 'center'
+        }
+    );
+
+    root.add(header, {
+        fill: 'horizontal'
+    });
+
+    // ========================================
+    // 2. WRAPPING TEXT
+    // ========================================
+
+    const paragraph =
+        new Text(this.scene, {
+
+            text:
+                'This paragraph should automatically wrap based on ' +
+                'the width allocated by the parent Column. Its height ' +
+                'should then participate in the parent layout.'
+        });
+
+    root.add(paragraph, {
+        fill: 'horizontal',
+
+        margin: {
+            left: 20,
+            right: 40
+        }
+    });
+
+    // ========================================
+    // 3. INTRINSIC
+    // ========================================
+
+    const intrinsic =
+        new Card(this.scene, {
+
+            width: 260,
+            height: 90,
+
+            style: {
+                backgroundColor: 0x555555,
+                radius: 10
+            }
+        });
+
+    intrinsic.add(
+        new Text(this.scene, {
+            text: 'INTRINSIC',
+            fontSize: '22px'
+        }),
+        {
+            horizontalAlign: 'center',
+            verticalAlign: 'center'
+        }
+    );
+
+    root.add(intrinsic, {
+
+        horizontalAlign: 'center',
+
+        margin: {
+            top: 10,
+            bottom: 10
+        }
+    });
+
+    // ========================================
+    // 4. NESTED COLUMN
+    // ========================================
+
+    const nested =
+        new Column(this.scene, {
+
+            padding: 15,
+            gap: 10,
+
+            style: undefined
+        });
+
+    nested.add(
+        new Card(this.scene, {
+
+            height: 55,
+
+            style: {
+                backgroundColor: 0x666666,
+                radius: 8
+            }
+        }),
+        {
+            fill: 'horizontal'
+        }
+    );
+
+    nested.add(
+        new Text(this.scene, {
+
+            text:
+                'Nested text that should wrap inside the nested Column.'
+        }),
+        {
+            fill: 'horizontal'
+        }
+    );
+
+    root.add(nested, {
+        fill: 'horizontal',
+
+        margin: {
+            left: 15,
+            right: 15
+        }
+    });
+
+    // ========================================
+    // 5. BOTTOM FIXED
+    // ========================================
+
+    const footer =
+        new Card(this.scene, {
+
+            width: 300,
+            height: 80,
+
+            style: {
+                backgroundColor: 0x333333,
+                radius: 10
+            }
+        });
+
+    footer.add(
+        new Text(this.scene, {
+            text: 'CENTERED FOOTER',
+            fontSize: '20px'
+        }),
+        {
+            horizontalAlign: 'center',
+            verticalAlign: 'center'
+        }
+    );
+
+    root.add(footer, {
+        horizontalAlign: 'center'
+    });
+
+    this.addTest(root);
+},
 
 
 
+() => {
 
+    this.destroyTest();
+
+    console.log(
+        '11 — AUTO HEIGHT CASCADE'
+    );
+
+    console.log(
+        'Expected: Text reflow changes inner Column height, ' +
+        'which changes Card height, which changes outer Column height.'
+    );
+
+    const root =
+        new Column(this.scene, {
+            x: 100,
+            y: 100,
+            width: 500,
+            padding: 20,
+            gap: 20
+        });
+
+    const card =
+        new Card(this.scene, {
+            width: null,
+            padding: 20,
+            style: {
+                backgroundColor: 0x333333,
+                radius: 12,
+                stroke: 2,
+                strokeColor: 0xffffff
+            }
+        });
+
+    const content =
+        new Column(this.scene, {
+            padding: 10,
+            gap: 10
+        });
+
+    const title =
+        new Text(this.scene, {
+            text: 'A short title',
+            fontSize: 28
+        });
+
+    const body =
+        new Text(this.scene, {
+            text:
+                'This is deliberately long text. ' +
+                'It should wrap because the Card ultimately ' +
+                'constrains the available width.'
+        });
+
+    content.add(title);
+
+    content.add(body, {
+        fill: 'horizontal'
+    });
+
+    card.add(content, {
+        fill: 'horizontal'
+    });
+
+    root.add(card, {
+        fill: 'horizontal'
+    });
+
+    this.addTest(root);
+},
+
+() => {
+
+    this.destroyTest();
+
+    console.log(
+        '12 — AUTO WIDTH CASCADE'
+    );
+
+    console.log(
+        'Expected: intrinsic child width determines Column width.'
+    );
+
+    const root =
+        new Column(this.scene, {
+            x: 100,
+            y: 100,
+            padding: 20,
+            gap: 10
+        });
+
+    root.add(
+        new Text(this.scene, {
+            text:
+                'This child determines the natural width of the Column.'
+        })
+    );
+
+    root.add(
+        new Text(this.scene, {
+            text:
+                'This one is also intrinsic.'
+        })
+    );
+
+    this.addTest(root);
+},
+
+() => {
+
+    this.destroyTest();
+
+    console.log(
+        '13 — LIVE CONSTRAINT CHANGE'
+    );
+
+    console.log(
+        'Expected: changing parent width causes Text to reflow.'
+    );
+
+    const parent =
+        new Column(this.scene, {
+            x: 100,
+            y: 100,
+            width: 500,
+            padding: 20
+        });
+
+    const text =
+        new Text(this.scene, {
+            text:
+                'This text should reflow when the Column width changes.'
+        });
+
+    parent.add(text, {
+        fill: 'horizontal'
+    });
+
+    this.addTest(parent);
+
+    // Change after initial layout
+    parent.setLayoutSize(300, null);
+},
+
+() => {
+
+    this.destroyTest();
+
+    console.log(
+        '15 — MIXED CHILD DEPENDENCIES'
+    );
+
+    console.log(
+        'Expected: fixed, intrinsic, and wrapping children coexist correctly.'
+    );
+
+    const column =
+        new Column(this.scene, {
+            x: 100,
+            y: 100,
+            width: 500,
+            padding: 20,
+            gap: 15
+        });
+
+    column.add(
+        new Card(this.scene, {
+            width: null,
+            height: 60,
+            style: {
+                backgroundColor: 0x444444,
+                radius: 8
+            }
+        }),
+        {
+            fill: 'horizontal'
+        }
+    );
+
+    column.add(
+        new Text(this.scene, {
+            text:
+                'This paragraph should wrap because it receives the Column width.'
+        }),
+        {
+            fill: 'horizontal'
+        }
+    );
+
+    column.add(
+        new Text(this.scene, {
+            text: 'Intrinsic text.'
+        })
+    );
+
+    column.add(
+        new Card(this.scene, {
+            width: null,
+            height: 100,
+            style: {
+                backgroundColor: 0x555555,
+                radius: 8
+            }
+        }),
+        {
+            fill: 'horizontal'
+        }
+    );
+
+    column.add(
+        new Text(this.scene, {
+            text:
+                'Another wrapping paragraph that should affect the final Column height.'
+        }),
+        {
+            fill: 'horizontal'
+        }
+    );
+
+    this.addTest(column);
+},
+
+() => {
+
+    this.destroyTest();
+
+    console.log(
+        '16 — EMPTY CONTAINERS'
+    );
+
+    console.log(
+        'Expected: empty layouts have sensible dimensions and do not produce NaN.'
+    );
+
+    const root =
+        new Column(this.scene, {
+            x: 100,
+            y: 100,
+            padding: 20,
+            gap: 20
+        });
+
+    const column =
+        new Column(this.scene, {
+            padding: 10
+        });
+
+    const row =
+        new Row(this.scene, {
+            padding: 10
+        });
+
+    root.add(column);
+    root.add(row);
+
+    this.addTest(root);
+},
+
+() => {
+
+    this.destroyTest();
+
+    console.log(
+        '18 — MARGINS + FILL + ALIGNMENT'
+    );
+
+    const column =
+        new Column(this.scene, {
+            x: 100,
+            y: 100,
+            width: 600,
+            height: 500,
+            padding: 20,
+            gap: 20
+        });
+
+    column.add(
+        new Card(this.scene, {
+            height: 60
+        }),
+        {
+            fill: 'horizontal',
+            margin: 20
+        }
+    );
+
+    column.add(
+        new Card(this.scene, {
+            width: 150,
+            height: 70
+        }),
+        {
+            horizontalAlign: 'center',
+            margin: 10
+        }
+    );
+
+    column.add(
+        new Card(this.scene, {
+            width: 200,
+            height: 80
+        }),
+        {
+            horizontalAlign: 'end',
+            margin: 15
+        }
+    );
+
+    this.addTest(column);
+},
+
+
+
+]);
+
+
+
+this.addCycle =
+    this.createClickCycle([
 
 
 () => {
@@ -1702,8 +2343,8 @@ console.log(
 // FIRST RUN
 // ==========================================
 
-this.addCycle();
-
+//this.addCycle();
+//this.newCycle();
 
 
 
@@ -1737,7 +2378,13 @@ console.log(
 );
 });
 */
-this.addButton('ADD (cycle)', () => {
+this.addButton('clickCycle (newCycle)', () => {
+    //this.addCycle();
+    this.newCycle();
+    //this.newCycleLoop();
+});
+
+this.addButton('clickCycle (addCycle)', () => {
     this.addCycle();
 });
 
@@ -2054,16 +2701,30 @@ this.addButton('ENABLE BUTTON', () => {
         this.activeSelect = null;
     }
     
-    createClickCycle(calls) {
+    createClickCycle(calls, options = {}) {
+    
         let index = 0;
+    
+        const loop =
+            options.loop ?? false;
     
         return () => {
     
-            if (index >= calls.length) {
+            if (calls.length === 0) {
                 return;
             }
     
-            calls[index]();
+            if (
+                !loop &&
+                index >= calls.length
+            ) {
+                return;
+            }
+    
+            const currentIndex =
+                index % calls.length;
+    
+            calls[currentIndex](currentIndex);
     
             index++;
         };

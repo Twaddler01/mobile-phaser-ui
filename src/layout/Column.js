@@ -114,31 +114,25 @@ export default class Column extends Container {
 
     layout() {
     
-        Debug.clearLayoutBounds(this);
-    
+        this.beginLayout();
+
         ////////////////////////////////////////
-        // 1. ESTABLISH CONSTRAINTS
+        // 1. GET CONSTRAINTS
         //
         // Determine the dimensions this Column
         // already knows from itself / its parent.
         ////////////////////////////////////////
-    
-        const layoutWidth =
-            this.getLayoutWidth();
-    
-        const layoutHeight =
-            this.getLayoutHeight();
-    
-        const availableWidth =
-            layoutWidth -
-            this.padding.left -
-            this.padding.right;
-    
-        const availableHeight =
-            layoutHeight -
-            this.padding.top -
-            this.padding.bottom;
-    
+
+        const constraints =
+            this.getLayoutConstraints();
+        
+        const {
+            width: layoutWidth,
+            height: layoutHeight,
+            contentWidth,
+            contentHeight
+        } = constraints;
+
         ////////////////////////////////////////
         // 2. ALLOCATE CHILD CONSTRAINTS
         //
@@ -149,7 +143,7 @@ export default class Column extends Container {
         // VERTICAL ALLOCATION
         const { fillHeight } =
             this.getVerticalFillAllocation(
-                availableHeight
+                contentHeight
             );
     
         ////////////////////////////////////////
@@ -173,14 +167,14 @@ export default class Column extends Container {
                 this.resolveChildWidth(
                     child,
                     options,
-                    availableWidth
+                    contentWidth
                 );
     
             const childHeight =
                 this.resolveChildHeight(
                     child,
                     options,
-                    availableHeight,
+                    contentHeight,
                     fillHeight
                 );
     
@@ -296,35 +290,29 @@ export default class Column extends Container {
         }
     
         ////////////////////////////////////////
-        // RE-ESTABLISH FINAL DIMENSIONS
+        // RE-CAPTURE FINAL DIMENSIONS
         //
         // updateSize() may have changed this Column's
         // intrinsic width/height.
         ////////////////////////////////////////
     
-        const finalLayoutWidth =
-            this.getLayoutWidth();
-    
-        const finalLayoutHeight =
-            this.getLayoutHeight();
-    
-        const finalAvailableWidth =
-            finalLayoutWidth -
-            this.padding.left -
-            this.padding.right;
-    
-        const finalAvailableHeight =
-            finalLayoutHeight -
-            this.padding.top -
-            this.padding.bottom;
-    
+        const finalConstraints =
+            this.getLayoutConstraints();
+        
+        const {
+            width: finalLayoutWidth,
+            height: finalLayoutHeight,
+            contentWidth: finalContentWidth,
+            contentHeight: finalContentHeight
+        } = finalConstraints;
+
         ////////////////////////////////////////
         // FINAL VERTICAL ALLOCATION
         ////////////////////////////////////////
     
         const { fillHeight: finalFillHeight } =
             this.getVerticalFillAllocation(
-                finalAvailableHeight
+                finalContentHeight
             );
     
         ////////////////////////////////////////
@@ -349,7 +337,7 @@ export default class Column extends Container {
                         this.resolveChildHeight(
                             child,
                             options,
-                            finalAvailableHeight,
+                            finalContentHeight,
                             finalFillHeight
                         );
     
@@ -374,7 +362,7 @@ export default class Column extends Container {
         const remainingHeight =
             Math.max(
                 0,
-                finalAvailableHeight -
+                finalContentHeight -
                 childrenHeight
             );
     
@@ -481,14 +469,14 @@ export default class Column extends Container {
                 this.resolveChildWidth(
                     child,
                     options,
-                    finalAvailableWidth
+                    finalContentWidth
                 );
     
             const childHeight =
                 this.resolveChildHeight(
                     child,
                     options,
-                    finalAvailableHeight,
+                    finalContentHeight,
                     finalFillHeight
                 );
     
@@ -498,26 +486,30 @@ export default class Column extends Container {
     
             const childY =
                 y + margin.top;
-    
+
             ////////////////////////////////////////
             // HORIZONTAL ALIGNMENT
             ////////////////////////////////////////
-    
+            
+            const horizontalAlign =
+                options.horizontalAlign ??
+                this.align;
+            
             const outerWidth =
                 margin.left +
                 childWidth +
                 margin.right;
-    
+            
             let outerX;
-    
-            switch (this.align) {
-    
+            
+            switch (horizontalAlign) {
+
                 case 'center':
     
                     outerX =
                         this.padding.left +
                         (
-                            finalAvailableWidth -
+                            finalContentWidth -
                             outerWidth
                         ) / 2;
     
@@ -594,11 +586,7 @@ export default class Column extends Container {
         // 6. FINALIZE
         ////////////////////////////////////////
     
-        this.layoutDirty = false;
-    
-        Debug.updateBounds(this);
-    
-        return this;
+        this.finishLayout();
     }
 
     ////

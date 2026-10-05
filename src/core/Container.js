@@ -1,4 +1,5 @@
 import Debug from './Debug.js';
+import LayoutConstraints from '../layout/LayoutConstraints.js';
 import Component from './Component.js';
 
 export default class Container extends Component {
@@ -11,6 +12,33 @@ export default class Container extends Component {
 
         this.childLayoutOptions =
             new Map();
+    }
+
+    getLayoutConstraints() {
+    
+        return new LayoutConstraints({
+    
+            width:
+                this.getLayoutWidth(),
+    
+            height:
+                this.getLayoutHeight(),
+    
+            padding:
+                this.padding ??
+                this.getPadding()
+        });
+    }
+
+    beginLayout() {
+        Debug.clearLayoutBounds(this);
+        return this;
+    }
+
+    finishLayout() {
+        this.layoutDirty = false;
+        Debug.updateBounds(this);
+        return this;
     }
 
     //////////////////////////////////////////
@@ -412,6 +440,54 @@ export default class Container extends Component {
             layoutWidth,
             layoutHeight
         );
+    }
+
+    resolveChildren(
+        availableWidth = null,
+        availableHeight = null,
+        fillWidth = null,
+        fillHeight = null
+    ) {
+    
+        for (const child of this.children) {
+    
+            const options =
+                this.childLayoutOptions.get(child);
+    
+            if (!options) {
+                continue;
+            }
+    
+            const childWidth =
+                this.resolveChildWidth(
+                    child,
+                    options,
+                    availableWidth,
+                    fillWidth
+                );
+    
+            const childHeight =
+                this.resolveChildHeight(
+                    child,
+                    options,
+                    availableHeight,
+                    fillHeight
+                );
+    
+            const layoutSizeChanged =
+                this.applyChildLayout(
+                    child,
+                    options,
+                    childWidth,
+                    childHeight
+                );
+    
+            if (layoutSizeChanged) {
+                child.layout();
+            }
+        }
+    
+        return this;
     }
 
     //////////////////////////////////////////
