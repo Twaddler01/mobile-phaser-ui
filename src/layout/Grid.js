@@ -345,6 +345,169 @@ export default class Grid extends Container {
     }
 
     ////////////////////////////////////////
+    // RESOLVE CHILD CELLS
+    ////////////////////////////////////////
+    
+    resolveChildCells() {
+    
+        const columns =
+            this.getColumnCount();
+    
+        const rows =
+            this.getRowCount();
+    
+        const occupiedCells =
+            new Set();
+    
+        const childCells =
+            new Map();
+    
+        ////////////////////////////////////////
+        // RESERVE EXPLICIT CELLS
+        ////////////////////////////////////////
+    
+        for (const child of this.children) {
+    
+            const options =
+                this.childLayoutOptions.get(child);
+    
+            if (!options) {
+                continue;
+            }
+    
+            const hasExplicitPosition =
+                options.column !== null &&
+                options.column !== undefined &&
+                options.row !== null &&
+                options.row !== undefined;
+    
+            if (!hasExplicitPosition) {
+                continue;
+            }
+    
+            occupiedCells.add(
+                `${options.column},${options.row}`
+            );
+        }
+    
+        ////////////////////////////////////////
+        // ALLOCATE CHILDREN
+        ////////////////////////////////////////
+    
+        let autoIndex = 0;
+    
+        for (const child of this.children) {
+    
+            const options =
+                this.childLayoutOptions.get(child);
+    
+            if (!options) {
+                continue;
+            }
+    
+            const hasExplicitPosition =
+                options.column !== null &&
+                options.column !== undefined &&
+                options.row !== null &&
+                options.row !== undefined;
+    
+            let column;
+            let row;
+    
+            ////////////////////////////////////////
+            // EXPLICIT POSITION
+            ////////////////////////////////////////
+    
+            if (hasExplicitPosition) {
+    
+                column =
+                    options.column;
+    
+                row =
+                    options.row;
+    
+            }
+    
+            ////////////////////////////////////////
+            // AUTO POSITION
+            ////////////////////////////////////////
+    
+            else {
+    
+                while (
+                    autoIndex <
+                    columns * rows
+                ) {
+    
+                    column =
+                        autoIndex % columns;
+    
+                    row =
+                        Math.floor(
+                            autoIndex / columns
+                        );
+    
+                    autoIndex++;
+    
+                    if (
+                        !occupiedCells.has(
+                            `${column},${row}`
+                        )
+                    ) {
+                        break;
+                    }
+                }
+            }
+    
+            ////////////////////////////////////////
+            // VALIDATE CELL
+            ////////////////////////////////////////
+    
+            if (
+                column < 0 ||
+                column >= columns ||
+                row < 0 ||
+                row >= rows
+            ) {
+    
+                if (Debug.enabled) {
+    
+                    console.warn(
+                        `Grid: child "${child.id ?? 'unknown'}" ` +
+                        `is outside the grid bounds.`,
+                        {
+                            column,
+                            row,
+                            columns,
+                            rows
+                        }
+                    );
+                }
+    
+                continue;
+            }
+    
+            ////////////////////////////////////////
+            // STORE CELL
+            ////////////////////////////////////////
+    
+            childCells.set(
+                child,
+                {
+                    column,
+                    row
+                }
+            );
+    
+            occupiedCells.add(
+                `${column},${row}`
+            );
+        }
+    
+        return childCells;
+    }
+
+    ////////////////////////////////////////
     // GRID ROW HEIGHTS
     ////////////////////////////////////////
 
@@ -353,35 +516,31 @@ export default class Grid extends Container {
         const rows =
             this.getRowCount();
     
-        const columns =
-            this.getColumnCount();
-    
         const rowHeights =
             new Array(rows).fill(0);
     
-        this.children.forEach((child, index) => {
+        const childCells =
+            this.resolveChildCells();
+    
+        for (const child of this.children) {
     
             const options =
                 this.childLayoutOptions.get(child);
     
-            if (!options) return;
-    
-            const column =
-                options.column ??
-                (index % columns);
-    
-            const row =
-                options.row ??
-                Math.floor(index / columns);
-
-            if (
-                row < 0 ||
-                row >= rows ||
-                column < 0 ||
-                column >= columns
-            ) {
-                return;
+            if (!options) {
+                continue;
             }
+    
+            const cell =
+                childCells.get(child);
+    
+            if (!cell) {
+                continue;
+            }
+    
+            const {
+                row
+            } = cell;
     
             const childHeight =
                 options.height ??
@@ -400,8 +559,8 @@ export default class Grid extends Container {
                     rowHeights[row],
                     outerHeight
                 );
-        });
-
+        }
+    
         return rowHeights;
     }
 
@@ -410,38 +569,35 @@ export default class Grid extends Container {
     ////////////////////////////////////////
     
     getColumnWidths() {
-
+    
         const columns =
             this.getColumnCount();
     
         const columnWidths =
             new Array(columns).fill(0);
     
-        this.children.forEach((child, index) => {
+        const childCells =
+            this.resolveChildCells();
+    
+        for (const child of this.children) {
     
             const options =
                 this.childLayoutOptions.get(child);
     
             if (!options) {
-                return;
+                continue;
             }
-
-            const column =
-                options.column ??
-                (index % columns);
-            
-            const row =
-                options.row ??
-                Math.floor(index / columns);
-
-            if (
-                column < 0 ||
-                column >= columns ||
-                row < 0 ||
-                row >= this.getRowCount()
-            ) {
-                return;
+    
+            const cell =
+                childCells.get(child);
+    
+            if (!cell) {
+                continue;
             }
+    
+            const {
+                column
+            } = cell;
     
             const childWidth =
                 options.width ??
@@ -460,8 +616,8 @@ export default class Grid extends Container {
                     columnWidths[column],
                     outerWidth
                 );
-        });
-
+        }
+    
         return columnWidths;
     }
 
@@ -567,120 +723,38 @@ export default class Grid extends Container {
             }
         }
 
-        const occupiedCells = new Set();
+        ////////////////////////////////////////
+        // ALLOCATE + RESOLVE CHILDREN
+        ////////////////////////////////////////
+
+        const childCells =
+            this.resolveChildCells();
         
         for (const child of this.children) {
         
             const options =
                 this.childLayoutOptions.get(child);
         
-            if (
-                options?.column !== null &&
-                options?.column !== undefined &&
-                options?.row !== null &&
-                options?.row !== undefined
-            ) {
-                occupiedCells.add(
-                    `${options.column},${options.row}`
-                );
-            }
-        }
-
-        ////////////////////////////////////////
-        // ALLOCATE + RESOLVE CHILDREN
-        ////////////////////////////////////////
-
-        const childCells = new Map();
-        let autoIndex = 0;
-
-        this.children.forEach(child => {
-
-            const options =
-                this.childLayoutOptions.get(
-                    child
-                );
-
             if (!options) {
-                return;
+                continue;
             }
-
+        
+            const cell =
+                childCells.get(child);
+        
+            if (!cell) {
+                continue;
+            }
+        
+            const {
+                column,
+                row
+            } = cell;
+        
             const {
                 margin
             } = options;
-
-            // GRID POSITION
-
-            let column;
-            let row;
-            
-            const hasExplicitPosition =
-                options.column !== null &&
-                options.column !== undefined &&
-                options.row !== null &&
-                options.row !== undefined;
-            
-            if (hasExplicitPosition) {
-            
-                column = options.column;
-                row = options.row;
-            
-            } else {
-            
-                // Find next unoccupied cell
-                while (autoIndex < columns * rows) {
-            
-                    column =
-                        autoIndex % columns;
-            
-                    row =
-                        Math.floor(
-                            autoIndex / columns
-                        );
-            
-                    autoIndex++;
-            
-                    if (
-                        !occupiedCells.has(
-                            `${column},${row}`
-                        )
-                    ) {
-                        break;
-                    }
-                }
-            }
-
-            if (
-                column < 0 ||
-                column >= columns ||
-                row < 0 ||
-                row >= rows
-            ) {
-            
-                if (Debug.enabled) {
-                    console.warn(
-                        `Grid: child "${child.id ?? 'unknown'}" ` +
-                        `is outside the grid bounds.`,
-                        {
-                            column,
-                            row,
-                            columns,
-                            rows
-                        }
-                    );
-                }
-            
-                return;
-            }
-
-            childCells.set(child, {
-                column,
-                row
-            });
-
-            occupiedCells.add(
-                `${column},${row}`
-            );
-
+        
             const availableWidth =
                 Math.max(
                     0,
@@ -722,7 +796,7 @@ export default class Grid extends Container {
             if (layoutSizeChanged) {
                 child.layout();
             }
-        });
+        }
 
         ////////////////////////////////////////
         // POSITION CHILDREN

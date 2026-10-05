@@ -219,6 +219,79 @@ this.newCycleLoop =
 this.newCycle = 
     this.createClickCycle([
 
+
+
+
+
+() => {
+
+    this.destroyTest();
+
+    console.log(
+        'GRID REFACTOR TEST'
+    );
+
+    const root =
+        new Grid(this.scene, {
+            columns: 3,
+            rows: 2,
+            padding: 20,
+            gap: 10
+        });
+
+    const childA =
+        new Card(this.scene, {
+            width: 50,
+            height: 50
+        });
+
+    const childB =
+        new Card(this.scene, {
+            width: 150,
+            height: 150
+        });
+
+    const childC =
+        new Card(this.scene, {
+            width: 250,
+            height: 250
+        });
+
+    const childD1 =
+        new Card(this.scene, {
+            width: 160,
+            height: 80
+        });
+    
+    const childD2 =
+        new Card(this.scene, {
+            width: 80,
+            height: 80
+        });
+
+    root.add(childA);
+
+    root.add(childB, {
+        column: 0,
+        row: 1
+    });
+
+    root.add(childC);
+
+    root.add(childD1, {
+        column: 2,
+        row: 0
+    });
+
+    root.add(childD2, {
+        column: 2,
+        row: 1
+    });
+
+    this.addTest(root);
+},
+
+
 () => {
 
     this.destroyTest();

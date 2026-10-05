@@ -29,6 +29,18 @@ export default class Container extends Component {
             height:
                 this.getLayoutHeight(),
     
+            minWidth:
+                this.minWidth,
+    
+            maxWidth:
+                this.maxWidth,
+    
+            minHeight:
+                this.minHeight,
+    
+            maxHeight:
+                this.maxHeight,
+    
             padding:
                 this.padding
         });
@@ -440,9 +452,18 @@ export default class Container extends Component {
                 height
             );
     
+        const constraints =
+            child.getLayoutConstraints();
+    
+        const size =
+            constraints.constrainSize(
+                layoutWidth,
+                layoutHeight
+            );
+    
         return child.setLayoutSize(
-            layoutWidth,
-            layoutHeight
+            size.width,
+            size.height
         );
     }
 
