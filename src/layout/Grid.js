@@ -508,60 +508,34 @@ export default class Grid extends Container {
     }
 
     ////////////////////////////////////////
-    // GRID ROW HEIGHTS
+    // CHILD MEASURED WIDTH
     ////////////////////////////////////////
-
-    getRowHeights() {
     
-        const rows =
-            this.getRowCount();
+    getChildMeasuredWidth(child, options) {
     
-        const rowHeights =
-            new Array(rows).fill(0);
+        const width =
+            options.width ??
+            child.getLayoutWidth();
     
-        const childCells =
-            this.resolveChildCells();
+        return child
+            .getLayoutConstraints()
+            .constrainWidth(width);
+    }
     
-        for (const child of this.children) {
     
-            const options =
-                this.childLayoutOptions.get(child);
+    ////////////////////////////////////////
+    // CHILD MEASURED HEIGHT
+    ////////////////////////////////////////
     
-            if (!options) {
-                continue;
-            }
+    getChildMeasuredHeight(child, options) {
     
-            const cell =
-                childCells.get(child);
+        const height =
+            options.height ??
+            child.getLayoutHeight();
     
-            if (!cell) {
-                continue;
-            }
-    
-            const {
-                row
-            } = cell;
-    
-            const childHeight =
-                options.height ??
-                child.getLayoutHeight();
-    
-            const margin =
-                options.margin;
-    
-            const outerHeight =
-                margin.top +
-                childHeight +
-                margin.bottom;
-    
-            rowHeights[row] =
-                Math.max(
-                    rowHeights[row],
-                    outerHeight
-                );
-        }
-    
-        return rowHeights;
+        return child
+            .getLayoutConstraints()
+            .constrainHeight(height);
     }
 
     ////////////////////////////////////////
@@ -600,8 +574,10 @@ export default class Grid extends Container {
             } = cell;
     
             const childWidth =
-                options.width ??
-                child.getLayoutWidth();
+                this.getChildMeasuredWidth(
+                    child,
+                    options
+                );
     
             const margin =
                 options.margin;
@@ -619,6 +595,65 @@ export default class Grid extends Container {
         }
     
         return columnWidths;
+    }
+
+    ////////////////////////////////////////
+    // GRID ROW HEIGHTS
+    ////////////////////////////////////////
+
+    getRowHeights() {
+    
+        const rows =
+            this.getRowCount();
+    
+        const rowHeights =
+            new Array(rows).fill(0);
+    
+        const childCells =
+            this.resolveChildCells();
+    
+        for (const child of this.children) {
+    
+            const options =
+                this.childLayoutOptions.get(child);
+    
+            if (!options) {
+                continue;
+            }
+    
+            const cell =
+                childCells.get(child);
+    
+            if (!cell) {
+                continue;
+            }
+    
+            const {
+                row
+            } = cell;
+    
+            const childHeight =
+                this.getChildMeasuredHeight(
+                    child,
+                    options
+                );
+    
+            const margin =
+                options.margin;
+    
+            const outerHeight =
+                margin.top +
+                childHeight +
+                margin.bottom;
+    
+            rowHeights[row] =
+                Math.max(
+                    rowHeights[row],
+                    outerHeight
+                );
+        }
+    
+        return rowHeights;
     }
 
     //////////////////////////////////////////

@@ -1,5 +1,4 @@
 import Debug from './Debug.js';
-import LayoutConstraints from '../layout/LayoutConstraints.js';
 import Component from './Component.js';
 
 export default class Container extends Component {
@@ -17,33 +16,6 @@ export default class Container extends Component {
             this.getPadding(
                 config.padding
             );
-    }
-
-    getLayoutConstraints() {
-    
-        return new LayoutConstraints({
-    
-            width:
-                this.getLayoutWidth(),
-    
-            height:
-                this.getLayoutHeight(),
-    
-            minWidth:
-                this.minWidth,
-    
-            maxWidth:
-                this.maxWidth,
-    
-            minHeight:
-                this.minHeight,
-    
-            maxHeight:
-                this.maxHeight,
-    
-            padding:
-                this.padding
-        });
     }
 
     beginLayout() {
@@ -451,16 +423,16 @@ export default class Container extends Component {
                 options,
                 height
             );
-    
+
         const constraints =
             child.getLayoutConstraints();
-    
+        
         const size =
             constraints.constrainSize(
                 layoutWidth,
                 layoutHeight
             );
-    
+        
         return child.setLayoutSize(
             size.width,
             size.height

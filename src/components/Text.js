@@ -97,10 +97,17 @@ export default class Text extends Component {
     ////////////////////////////////////////
     // UPDATE SIZE
     ////////////////////////////////////////
-
+    
     updateSize() {
+    
         const wrapMode =
             this.getWrapMode();
+    
+        let width =
+            this.width;
+    
+        let height =
+            this.height;
     
         ////////////////////////////////////////
         // WIDTH
@@ -110,17 +117,17 @@ export default class Text extends Component {
     
             if (wrapMode === 'explicit') {
     
-                this.width =
+                width =
                     this.wordWrapWidth;
     
             } else if (wrapMode === 'auto') {
     
-                this.width =
+                width =
                     this.layoutWidth;
     
             } else {
     
-                this.width =
+                width =
                     this.text.width;
             }
         }
@@ -131,9 +138,18 @@ export default class Text extends Component {
     
         if (this.heightAuto) {
     
-            this.height =
+            height =
                 this.text.height;
         }
+    
+        ////////////////////////////////////////
+        // COMMIT MEASURED SIZE
+        ////////////////////////////////////////
+    
+        this.setMeasuredSize(
+            width,
+            height
+        );
     
         Debug.updateBounds(this);
     

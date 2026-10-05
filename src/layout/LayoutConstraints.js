@@ -48,6 +48,46 @@ export default class LayoutConstraints {
             options.padding ?? null;
     }
 
+    get contentWidth() {
+    
+        if (this.width === null) {
+            return null;
+        }
+    
+        const padding =
+            this.padding ?? {
+                left: 0,
+                right: 0
+            };
+    
+        return Math.max(
+            0,
+            this.width -
+            padding.left -
+            padding.right
+        );
+    }
+    
+    get contentHeight() {
+    
+        if (this.height === null) {
+            return null;
+        }
+    
+        const padding =
+            this.padding ?? {
+                top: 0,
+                bottom: 0
+            };
+    
+        return Math.max(
+            0,
+            this.height -
+            padding.top -
+            padding.bottom
+        );
+    }
+
     ////////////////////////////////////////
     // CONSTRAIN WIDTH
     ////////////////////////////////////////

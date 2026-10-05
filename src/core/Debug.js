@@ -152,15 +152,24 @@ class Debug {
             showPosition:
                 options.tree?.showPosition ?? true,
         
-            showSize:
-                options.tree?.showSize ?? true,
-        
-            showLayoutSize:
-                options.tree?.showLayoutSize ?? true,
-        
+            showMeasured:
+                options.tree?.showMeasured ?? true,
+            
+            showAllocated:
+                options.tree?.showAllocated ?? true,
+            
             showConstraints:
                 options.tree?.showConstraints ?? true,
-        
+            
+            showEffective:
+                options.tree?.showEffective ?? true,
+            
+            showLayoutOptions:
+                options.tree?.showLayoutOptions ?? true,
+            
+            showContentSize:
+                options.tree?.showContentSize ?? true,
+
             showDirty:
                 options.tree?.showDirty ?? false,
         
@@ -592,17 +601,24 @@ class Debug {
                 );
             }
     
-            if (settings.showSize) {
-    
+            if (settings.showMeasured) {
+            
                 details.push(
-                    `size:${node.width}×${node.height}`
+                    `measured:${node.width}×${node.height}`
                 );
             }
     
-            if (settings.showLayoutSize) {
-    
+            if (settings.showAllocated) {
+            
                 details.push(
-                    `layout:${node.getLayoutWidth()}×${node.getLayoutHeight()}`
+                    `allocated:${node.layoutWidth}×${node.layoutHeight}`
+                );
+            }
+
+            if (settings.showEffective) {
+            
+                details.push(
+                    `effective:${node.getLayoutWidth()}×${node.getLayoutHeight()}`
                 );
             }
 
@@ -614,9 +630,63 @@ class Debug {
                 if (constraints) {
             
                     details.push(
-                        `constraints:${constraints.minWidth}–${constraints.maxWidth} × ` +
-                        `${constraints.minHeight}–${constraints.maxHeight}`
+                        `constraints:${this.formatConstraint(constraints.minWidth)}–` +
+                        `${this.formatConstraint(constraints.maxWidth)} × ` +
+                        `${this.formatConstraint(constraints.minHeight)}–` +
+                        `${this.formatConstraint(constraints.maxHeight)}`
                     );
+                }
+            }
+
+            if (settings.showContentSize) {
+            
+                const constraints =
+                    node.getLayoutConstraints?.();
+            
+                if (constraints) {
+            
+                    details.push(
+                        `content:${constraints.contentWidth}×` +
+                        `${constraints.contentHeight}`
+                    );
+                }
+            }
+
+            if (settings.showLayoutOptions) {
+            
+                const options =
+                    node.layoutParent
+                        ?.childLayoutOptions
+                        ?.get(node);
+            
+                if (options) {
+            
+                    const parts = [];
+            
+                    if (options.width !== null) {
+                        parts.push(
+                            `width:${options.width}`
+                        );
+                    }
+            
+                    if (options.height !== null) {
+                        parts.push(
+                            `height:${options.height}`
+                        );
+                    }
+            
+                    if (options.fill !== null) {
+                        parts.push(
+                            `fill:${options.fill}`
+                        );
+                    }
+            
+                    if (parts.length) {
+            
+                        details.push(
+                            `layout:${parts.join(',')}`
+                        );
+                    }
                 }
             }
 
@@ -714,6 +784,13 @@ class Debug {
         return this;
     }
 
+    // ^ Infinity output cleanup
+    formatConstraint(value) {
+        return value === Infinity
+            ? '∞'
+            : value;
+    }
+
     ////////////////////////////////////////
     // STATS
     ////////////////////////////////////////
@@ -760,35 +837,31 @@ class Debug {
                 component.getWorldY(),
     
             ////////////////////////////////////////
-            // INTRINSIC SIZE
+            // MEASURED
             ////////////////////////////////////////
-    
-            width:
-                component.width,
-    
-            height:
-                component.height,
-    
+            
+            measured: {
+            
+                width:
+                    component.width,
+            
+                height:
+                    component.height
+            },
+            
             ////////////////////////////////////////
-            // PARENT ALLOCATION
+            // ALLOCATED
             ////////////////////////////////////////
-    
-            layoutWidth:
-                component.layoutWidth,
-    
-            layoutHeight:
-                component.layoutHeight,
-    
-            ////////////////////////////////////////
-            // RESOLVED SIZE
-            ////////////////////////////////////////
-    
-            actualWidth:
-                component.getLayoutWidth(),
-    
-            actualHeight:
-                component.getLayoutHeight(),
-
+            
+            allocated: {
+            
+                width:
+                    component.layoutWidth,
+            
+                height:
+                    component.layoutHeight
+            },
+            
             ////////////////////////////////////////
             // CONSTRAINTS
             ////////////////////////////////////////
@@ -803,27 +876,54 @@ class Debug {
                 }
             
                 return {
+                
                     width:
                         constraints.width,
-            
+                
                     height:
                         constraints.height,
-            
+                
                     minWidth:
                         constraints.minWidth,
-            
+                
                     maxWidth:
                         constraints.maxWidth,
-            
+                
                     minHeight:
                         constraints.minHeight,
-            
+                
                     maxHeight:
-                        constraints.maxHeight
+                        constraints.maxHeight,
+                
+                    contentWidth:
+                        constraints.contentWidth,
+                
+                    contentHeight:
+                        constraints.contentHeight
                 };
-            
+
             })(),
 
+            ////////////////////////////////////////
+            // EFFECTIVE
+            ////////////////////////////////////////
+            
+            effective: {
+            
+                width:
+                    component.getLayoutWidth(),
+            
+                height:
+                    component.getLayoutHeight()
+            },
+
+            ////////////////////////////////////////
+            // LAYOUT OPTIONS
+            ////////////////////////////////////////
+            
+            layoutOptions:
+                component.layoutParent?.childLayoutOptions?.get(component) ?? null,
+            
             ////////////////////////////////////////
             // SIZING
             ////////////////////////////////////////
@@ -840,12 +940,6 @@ class Debug {
             
             text:
                 component.textValue,
-            
-            textWidth:
-                component.textWidth,
-            
-            textHeight:
-                component.textHeight,
             
             wordWrapWidth:
                 component.layoutWidth,
@@ -864,9 +958,6 @@ class Debug {
             ////////////////////////////////////////
             // LAYOUT STATE
             ////////////////////////////////////////
-            
-            layoutOptions:
-                component.layoutParent?.childLayoutOptions?.get(component) ?? null,
             
             layoutDirty:
                 component.layoutDirty,

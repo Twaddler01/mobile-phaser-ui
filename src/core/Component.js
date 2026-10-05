@@ -1,4 +1,6 @@
 import Debug from './Debug.js';
+import LayoutConstraints from '../layout/LayoutConstraints.js';
+
 export default class Component {
 
     constructor(scene, config = {}) {
@@ -271,16 +273,7 @@ export default class Component {
     // height → use intrinsic height
 
     setLayoutSize(width = null, height = null) {
-/*
-console.log('SET LAYOUT SIZE', {
-    id: this.id,
-    type: this.constructor.name,
-    oldWidth: this.layoutWidth,
-    oldHeight: this.layoutHeight,
-    newWidth: width,
-    newHeight: height
-});
-*/
+
         const changed =
             this.layoutWidth !== width ||
             this.layoutHeight !== height;
@@ -295,6 +288,38 @@ console.log('SET LAYOUT SIZE', {
         this.markLayoutDirty();
     
         return true;
+    }
+
+    setMeasuredSize(width, height) {
+        const changed =
+            this.width !== width ||
+            this.height !== height;
+    
+        if (!changed) {
+            return false;
+        }
+    
+        this.width = width;
+        this.height = height;
+    
+        this.markLayoutDirty();
+    
+        return true;
+    }
+
+    getLayoutConstraints() {
+    
+        return new LayoutConstraints({
+    
+            width:
+                this.getLayoutWidth(),
+    
+            height:
+                this.getLayoutHeight(),
+    
+            padding:
+                this.padding
+        });
     }
 
     getLayoutWidth() {
