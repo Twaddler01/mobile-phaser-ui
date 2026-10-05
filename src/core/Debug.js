@@ -158,12 +158,14 @@ class Debug {
             showLayoutSize:
                 options.tree?.showLayoutSize ?? true,
         
+            showConstraints:
+                options.tree?.showConstraints ?? true,
+        
             showDirty:
                 options.tree?.showDirty ?? false,
-
+        
             showText:
                 options.tree?.showText ?? true,
-
         };
 
         ////////////////////////////////////////
@@ -604,6 +606,20 @@ class Debug {
                 );
             }
 
+            if (settings.showConstraints) {
+            
+                const constraints =
+                    node.getLayoutConstraints?.();
+            
+                if (constraints) {
+            
+                    details.push(
+                        `constraints:${constraints.minWidth}–${constraints.maxWidth} × ` +
+                        `${constraints.minHeight}–${constraints.maxHeight}`
+                    );
+                }
+            }
+
             if (
                 node.constructor.name === 'Text' &&
                 settings.showText
@@ -772,7 +788,42 @@ class Debug {
     
             actualHeight:
                 component.getLayoutHeight(),
-    
+
+            ////////////////////////////////////////
+            // CONSTRAINTS
+            ////////////////////////////////////////
+            
+            constraints: (() => {
+            
+                const constraints =
+                    component.getLayoutConstraints?.();
+            
+                if (!constraints) {
+                    return null;
+                }
+            
+                return {
+                    width:
+                        constraints.width,
+            
+                    height:
+                        constraints.height,
+            
+                    minWidth:
+                        constraints.minWidth,
+            
+                    maxWidth:
+                        constraints.maxWidth,
+            
+                    minHeight:
+                        constraints.minHeight,
+            
+                    maxHeight:
+                        constraints.maxHeight
+                };
+            
+            })(),
+
             ////////////////////////////////////////
             // SIZING
             ////////////////////////////////////////
