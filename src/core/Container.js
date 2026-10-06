@@ -479,7 +479,10 @@ export default class Container extends Component {
                     childHeight
                 );
     
-            if (layoutSizeChanged) {
+            if (
+                layoutSizeChanged ||
+                child.layoutDirty
+            ) {
                 child.layout();
             }
         }

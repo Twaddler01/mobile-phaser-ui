@@ -13,8 +13,23 @@ export default class Row extends Container {
         this.align =
             config.align ?? 'start';
 
-        this.justify =
+        this._justify =
             config.justify ?? 'start';
+    }
+
+    get justify() {
+        return this._justify;
+    }
+    
+    set justify(value) {
+    
+        if (this._justify === value) {
+            return;
+        }
+    
+        this._justify = value;
+    
+        this.markLayoutDirty();
     }
 
     updateSize() {

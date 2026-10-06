@@ -39,6 +39,46 @@ export default class DebugButtons {
         this.spacing = 10;
 
         this.create();
+        this.setupButtons();
+    }
+
+    setupButtons() {
+//******************************
+        this.addButton('MISC Tests', () => this.miscCycle());
+//******************************
+        this.addButton('INSPECT', () => {
+        
+            const root =
+                this.testComponents[0];
+        
+            if (!root) {
+                console.warn(
+                    'No test component to inspect.'
+                );
+                return;
+            }
+        
+            root.layout();
+        
+            Debug.inspect(root, {
+                stats: true,
+                tree: true,
+                recursive: true
+            });
+        
+        });
+//******************************
+        this.addButton('newCycleLoop()', () => {
+            if (!this.createLoopTest_isSetup) {
+                this.createLoopTest();
+            } else {
+                this.newCycleLoop();
+            }
+        });
+
+
+
+
     }
 
     create() {
@@ -61,7 +101,9 @@ export default class DebugButtons {
         // ------------------------------------------
         
         this.destroyTest = () => {
-        
+
+            this.createLoopTest_isSetup = false;
+
             for (const component of this.testComponents) {  
                 component.destroy();  
             }
@@ -105,40 +147,6 @@ export default class DebugButtons {
         this.miscCycle =
             this.createClickCycle(this.miscTests);
 
-        // Loop Test (setup)
-        this.createLoopTest();
-
-        // ==========================================
-        // DEBUG BUTTONS
-        // ==========================================
-        
-        this.addButton('MISC Tests', () => this.miscCycle());
-        
-        this.addButton('INSPECT', () => {
-        
-            const root =
-                this.testComponents[0];
-        
-            if (!root) {
-                console.warn(
-                    'No test component to inspect.'
-                );
-                return;
-            }
-        
-            root.layout();
-        
-            Debug.inspect(root, {
-                stats: true,
-                tree: true,
-                recursive: true
-            });
-        
-        });
-
-        this.addButton('REQ: createLoopTest() \nnewCycleLoop()', () => this.newCycleLoop());
-
-        
     }
 
     addTitle(label) {
@@ -373,7 +381,7 @@ export default class DebugButtons {
         let index = 0;
     
         const loop =
-            options.loop ?? false;
+            options.loop ?? true;
     
         return () => {
     
@@ -398,6 +406,7 @@ export default class DebugButtons {
     }
 
     createLoopTest() {
+
         this.destroyTest();
         
         console.log(
@@ -416,7 +425,16 @@ export default class DebugButtons {
             'space-around',
             'space-evenly'
         ];
-        
+
+        this.parent =
+            new Column(this.scene, {
+                x: 100,
+                y: 100,
+                height: 1200,
+                width: 600
+            });
+        //
+
         this.column =
             new Column(this.scene, {
                 x: 100,
@@ -424,6 +442,21 @@ export default class DebugButtons {
         
                 width: 500,
                 height: 600,
+        
+                padding: 30,
+                gap: 15,
+        
+                justify: this.modes[0]
+            });
+        //
+        
+        this.row =
+            new Row(this.scene, {
+                x: 100,
+                y: 100,
+        
+                width: 600,
+                height: 500,
         
                 padding: 30,
                 gap: 15,
@@ -460,11 +493,48 @@ export default class DebugButtons {
         
                 return card;
             };
+
+        const createCard2 =
+            (label, width) => {
         
+                const card =
+                    new Card(this.scene, {
+                        width,
+                        height: null,
+        
+                        style: {
+                            backgroundColor: 0x444444,
+                            radius: 8
+                        }
+                    });
+                //
+        
+                card.add(
+                    new Text(this.scene, {
+                        text: label,
+                        fontSize: '24px'
+                    }),
+                    {
+                        horizontalAlign: 'center',
+                        verticalAlign: 'center'
+                    }
+                );
+        
+                return card;
+            };
+        
+
         this.column.add(
             createCard('ONE', 60),
             {
                 fill: 'horizontal'
+            }
+        );
+        
+        this.row.add(
+            createCard2('ONE', 60),
+            {
+                fill: 'vertical'
             }
         );
         
@@ -474,6 +544,13 @@ export default class DebugButtons {
                 fill: 'horizontal'
             }
         );
+
+        this.row.add(
+            createCard2('TWO', 80),
+            {
+                fill: 'vertical'
+            }
+        );
         
         this.column.add(
             createCard('THREE', 100),
@@ -481,42 +558,34 @@ export default class DebugButtons {
                 fill: 'horizontal'
             }
         );
+
+        this.row.add(
+            createCard2('THREE', 100),
+            {
+                fill: 'vertical'
+            }
+        );
+
+        this.parent.add(this.column);
+        this.parent.add(this.row);
         
-        this.addTest(this.column);
+        this.addTest(this.parent);
         
-        this.modes = [
-            'start',
-            'center',
-            'end',
-            'space-between',
-            'space-around',
-            'space-evenly'
-        ];
-        
-        this.newCycleLoop = 
+        this.newCycleLoop =
             this.createClickCycle(
-                this.modes.map(() => {
+                this.modes.map(mode => {
         
-                    return (i) => {
+                    return () => {
         
-                        const mode =
-                            this.modes[i];
+                        console.log('JUSTIFY:', mode);
         
-                        console.log(
-                            'JUSTIFY:',
-                            mode
-                        );
+                        this.column.justify = mode;
+                        this.row.justify = mode;
         
-                        this.column.justify =
-                            mode;
-        
-                        this.column.requestLayout();
                     };
-                }),
-                {
-                    loop: true
-                }
+                })
             );
-        //
+        
+        this.createLoopTest_isSetup = true;
     }
 }
