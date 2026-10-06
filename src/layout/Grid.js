@@ -167,121 +167,110 @@ export default class Grid extends Container {
         // 6. MEASURE
         // ==================================
 
-const resolvedRowHeights =
-    this.getResolvedRowHeights();
-
-console.log(
-    'GRID RESOLVED ROW HEIGHTS',
-    resolvedRowHeights
-);
-
-// ==================================
-// 7A. FINAL TRACKS
-// ==================================
-
-if (
-    this.heightAuto &&
-    this.layoutHeight === null
-) {
-    rowHeights =
-        resolvedRowHeights;
-
-    this.height =
-        this.padding.top +
-        rowHeights.reduce(
-            (total, height) =>
-                total + height,
-            0
-        ) +
-        Math.max(
-            0,
-            rowHeights.length - 1
-        ) *
-        this.gap +
-        this.padding.bottom;
-}
-
-// ==================================
-// 7B. FINAL ALLOCATION
-// ==================================
-
-for (const child of this.children) {
-
-    const options =
-        this.childLayoutOptions.get(child);
-
-    if (!options) {
-        continue;
-    }
-
-    const cell =
-        childCells.get(child);
-
-    if (!cell) {
-        continue;
-    }
-
-    const {
-        column,
-        row
-    } = cell;
-
-    const {
-        margin
-    } = options;
-
-    const availableWidth =
-        Math.max(
-            0,
-            columnWidths[column] -
-            margin.left -
-            margin.right
-        );
-
-    const availableHeight =
-        Math.max(
-            0,
-            rowHeights[row] -
-            margin.top -
-            margin.bottom
-        );
-
-    const childWidth =
-        this.resolveChildWidth(
-            child,
-            options,
-            availableWidth
-        );
-
-    const childHeight =
-        this.resolveChildHeight(
-            child,
-            options,
-            availableHeight
-        );
-
-    const layoutSizeChanged =
-        this.applyChildLayout(
-            child,
-            options,
-            childWidth,
-            childHeight
-        );
-
-    if (
-        layoutSizeChanged ||
-        child.layoutDirty
-    ) {
-        child.layout();
-    }
-}
-
-
-
+        const resolvedRowHeights =
+            this.getResolvedRowHeights();
+        
         // ==================================
-        // TEMPORARY: existing positioning
+        // 7A. FINAL TRACKS
         // ==================================
-
+        
+        if (
+            this.heightAuto &&
+            this.layoutHeight === null
+        ) {
+            rowHeights =
+                resolvedRowHeights;
+        
+            this.height =
+                this.padding.top +
+                rowHeights.reduce(
+                    (total, height) =>
+                        total + height,
+                    0
+                ) +
+                Math.max(
+                    0,
+                    rowHeights.length - 1
+                ) *
+                this.gap +
+                this.padding.bottom;
+        }
+        
+        // ==================================
+        // 7B. FINAL ALLOCATION
+        // ==================================
+        
+        for (const child of this.children) {
+        
+            const options =
+                this.childLayoutOptions.get(child);
+        
+            if (!options) {
+                continue;
+            }
+        
+            const cell =
+                childCells.get(child);
+        
+            if (!cell) {
+                continue;
+            }
+        
+            const {
+                column,
+                row
+            } = cell;
+        
+            const {
+                margin
+            } = options;
+        
+            const availableWidth =
+                Math.max(
+                    0,
+                    columnWidths[column] -
+                    margin.left -
+                    margin.right
+                );
+        
+            const availableHeight =
+                Math.max(
+                    0,
+                    rowHeights[row] -
+                    margin.top -
+                    margin.bottom
+                );
+        
+            const childWidth =
+                this.resolveChildWidth(
+                    child,
+                    options,
+                    availableWidth
+                );
+        
+            const childHeight =
+                this.resolveChildHeight(
+                    child,
+                    options,
+                    availableHeight
+                );
+        
+            const layoutSizeChanged =
+                this.applyChildLayout(
+                    child,
+                    options,
+                    childWidth,
+                    childHeight
+                );
+        
+            if (
+                layoutSizeChanged ||
+                child.layoutDirty
+            ) {
+                child.layout();
+            }
+        }
+////
         const columns = this.getColumnCount();
         const rows = this.getRowCount();
 
@@ -314,7 +303,7 @@ for (const child of this.children) {
         }
 
         ////////////////////////////////////////
-        // POSITION CHILDREN
+        // FINAL POSITIONING OF CHILDREN
         ////////////////////////////////////////
         
         for (const child of this.children) {
@@ -379,7 +368,7 @@ for (const child of this.children) {
                 );
         
             ////////////////////////////////////////
-            // HORIZONTAL POSITION
+            // FINAL HORIZONTAL POSITION
             ////////////////////////////////////////
         
             let x;
@@ -419,7 +408,7 @@ for (const child of this.children) {
             }
         
             ////////////////////////////////////////
-            // VERTICAL POSITION
+            // FINAL VERTICAL POSITION
             ////////////////////////////////////////
         
             let y;
@@ -457,11 +446,16 @@ for (const child of this.children) {
         
                     break;
             }
+    
+            ////////////////////////////////////////
+            // FINAL CHILD POSITION
+            ////////////////////////////////////////
         
             child.setPosition(
                 x,
                 y
             );
+
         }
 
         this.finishLayout();
