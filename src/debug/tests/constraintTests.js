@@ -24,6 +24,47 @@ export default function createConstraintTests(debug) {
     return [
 
 () => {
+    console.log('Grid test');
+    
+    destroyTest();
+    
+    const grid =
+        new Grid(scene, {
+            id: 'grid',
+            name: 'grid',
+            x: 100,
+            y: 100,
+            width: 500,
+            columns: 2,
+            padding: 20,
+            gap: 10
+        });
+    
+    const text =
+        new Text(scene, {
+            id: 'text',
+            text:
+                'This is deliberately long text that should wrap inside the Grid cell.',
+            fontSize: 32
+        });
+    
+    const card =
+        new Card(scene, {
+            id: 'card',
+            width: 100,
+            height: 80
+        });
+    
+    grid.add(text, {
+        fill: true
+    });
+
+    grid.add(card);
+
+    addTest(grid);
+},
+
+() => {
 
     destroyTest();
 

@@ -1,3 +1,17 @@
+/*
+WIP:
+
+1. ESTABLISH GRID
+2. DETERMINE TRACKS
+3. ALLOCATE BOTH AXES
+4. CONSTRAIN
+5. RESOLVE CHILD
+6. MEASURE
+7. FINAL TRACKS
+8. POSITION
+9. FINALIZE
+*/
+
 import Debug from '../core/Debug.js';
 import Container from '../core/Container.js';
 
@@ -828,9 +842,13 @@ export default class Grid extends Container {
                     childHeight
                 );
         
-            if (layoutSizeChanged) {
+            if (
+                layoutSizeChanged ||
+                child.layoutDirty
+            ) {
                 child.layout();
             }
+
         }
 
         ////////////////////////////////////////
