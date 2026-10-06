@@ -10,6 +10,7 @@ import Grid from '../layout/Grid.js';
 import Section from '../layout/Section.js';
 import Debug from '../core/Debug.js';
 import createMiscTests from './tests/miscTests.js';
+import createConstraintTests from './tests/constraintTests.js';
 
 export default class DebugButtons {
 
@@ -43,6 +44,8 @@ export default class DebugButtons {
     }
 
     setupButtons() {
+//******************************
+        this.addButton('CONSTRAINT Tests', () => this.constraintCycle());
 //******************************
         this.addButton('MISC Tests', () => this.miscCycle());
 //******************************
@@ -139,13 +142,19 @@ export default class DebugButtons {
         
         this.miscTests =
             createMiscTests(this);
-        
+
+        this.constraintTests =
+            createConstraintTests(this);
+
         // ==========================================
         // CYCLE
         // ==========================================
         
         this.miscCycle =
             this.createClickCycle(this.miscTests);
+
+        this.constraintCycle =
+            this.createClickCycle(this.constraintTests);
 
     }
 
@@ -427,11 +436,11 @@ export default class DebugButtons {
         ];
 
         this.parent =
-            new Column(this.scene, {
+            new Row(this.scene, {
                 x: 100,
                 y: 100,
-                height: 1200,
-                width: 600
+                height: 600,
+                width: 1200
             });
         //
 

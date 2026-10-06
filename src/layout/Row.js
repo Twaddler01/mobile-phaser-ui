@@ -195,7 +195,7 @@ export default class Row extends Container {
             );
 
         ////////////////////////////////////////
-        // RESOLVED CHILDREN WIDTH
+        // FINAL CHILD WIDTHS
         ////////////////////////////////////////
         
         const childrenWidth =
@@ -242,8 +242,10 @@ export default class Row extends Container {
                 childrenWidth
             );
 
-        // Determine horizontal starting position
-        // and spacing between children.
+        ////////////////////////////////////////
+        // 5. POSITION CHILDREN
+        ////////////////////////////////////////
+    
         let x;
         let spacing = 0;
         
@@ -309,7 +311,10 @@ export default class Row extends Container {
                 break;
         }
         
-        // POSITION CHILDREN
+        ////////////////////////////////////////
+        // POSITION EACH CHILD
+        ////////////////////////////////////////
+
         for (const child of this.children) {
 
             const options =
@@ -319,17 +324,8 @@ export default class Row extends Container {
                 continue;
             }
 
-            const {
-                margin
-            } = options;
+            const { margin } = options;
         
-            ////////////////////////////////////////
-            // CHILD SIZE
-            ////////////////////////////////////////
-            // fill consumes available main-axis
-            // space first; justify distributes 
-            // whatever remains.
-
             const childWidth =
                 this.resolveChildWidth(
                     child,
@@ -346,27 +342,20 @@ export default class Row extends Container {
                 );
 
             ////////////////////////////////////////
-            // APPLY LAYOUT SIZE
+            // HORIZONTAL POSITION
             ////////////////////////////////////////
-        
-            const layoutSizeChanged =
-                this.applyChildLayout(
-                    child,
-                    options,
-                    childWidth,
-                    childHeight
-                );
-            
-            if (layoutSizeChanged) {
-                child.layout();
-            }
-
-            // The actual child starts
-            // after its left margin.
+    
             const childX =
-                x +
-                margin.left;
-            
+                x + margin.left;
+
+            ////////////////////////////////////////
+            // VERTICAL ALIGNMENT
+            ////////////////////////////////////////
+
+            const verticalAlign =
+                options.verticalAlign ??
+                this.align;
+
             const outerHeight =
                 margin.top +
                 childHeight +
@@ -374,7 +363,7 @@ export default class Row extends Container {
             
             let outerY;
             
-            switch (this.align) {
+            switch (verticalAlign) {
             
                 case 'center':
                     outerY =
@@ -400,8 +389,7 @@ export default class Row extends Container {
             }
             
             const childY =
-                outerY +
-                margin.top;
+                outerY + margin.top;
 
             ////////////////////////////////////////
             // DEBUG
@@ -448,6 +436,10 @@ export default class Row extends Container {
                         : 0
                 );
         }
+
+        ////////////////////////////////////////
+        // 6. FINALIZE
+        ////////////////////////////////////////
 
         this.finishLayout();
     }

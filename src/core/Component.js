@@ -26,6 +26,18 @@ export default class Component {
         this.heightAuto =
             config.height === undefined;
 
+        this.minWidth =
+            config.minWidth ?? 0;
+        
+        this.maxWidth =
+            config.maxWidth ?? null;
+        
+        this.minHeight =
+            config.minHeight ?? 0;
+        
+        this.maxHeight =
+            config.maxHeight ?? null;
+
         // LAYOUT
         this.layoutParent = null;
 
@@ -316,6 +328,18 @@ export default class Component {
     
             height:
                 this.getLayoutHeight(),
+    
+            minWidth:
+                this.minWidth,
+    
+            maxWidth:
+                this.maxWidth,
+    
+            minHeight:
+                this.minHeight,
+    
+            maxHeight:
+                this.maxHeight,
     
             padding:
                 this.padding
