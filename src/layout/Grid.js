@@ -1,16 +1,3 @@
-/*
-WIP:
-1. ESTABLISH GRID
-2. DETERMINE TRACKS
-3. ALLOCATE BOTH AXES
-4. CONSTRAIN
-5. RESOLVE CHILD
-6. MEASURE
-7. FINAL TRACKS
-8. POSITION
-9. FINALIZE
-*/
-
 import Debug from '../core/Debug.js';
 import Container from '../core/Container.js';
 
@@ -132,13 +119,22 @@ export default class Grid extends Container {
                     availableWidth
                 );
     
+            const hasAllocatedHeight =
+                !this.heightAuto ||
+                this.layoutHeight !== null;
+            
+            const childAvailableHeight =
+                hasAllocatedHeight
+                    ? availableHeight
+                    : null;
+            
             const childHeight =
                 this.resolveChildHeight(
                     child,
                     options,
-                    availableHeight
+                    childAvailableHeight
                 );
-    
+                
             // ==================================
             // 4. CONSTRAIN
             // ==================================
@@ -462,6 +458,23 @@ export default class Grid extends Container {
     }
 
     ////////////////////////////////////////
+    // CHILD RESOLVED HEIGHT
+    ////////////////////////////////////////
+    
+    getChildResolvedHeight(child, options) {
+    
+        const measuredHeight =
+            child.height;
+    
+        const constraints =
+            child.getLayoutConstraints();
+    
+        return constraints.constrainHeight(
+            measuredHeight
+        );
+    }
+
+    ////////////////////////////////////////
     // MEASURE RESOLVED ROW HEIGHTS
     ////////////////////////////////////////
     
@@ -500,7 +513,10 @@ export default class Grid extends Container {
                 options.margin;
     
             const childHeight =
-                child.height;
+                this.getChildResolvedHeight(
+                    child,
+                    options
+                );
     
             const outerHeight =
                 margin.top +

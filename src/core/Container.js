@@ -167,15 +167,21 @@ export default class Container extends Component {
         availableWidth = null,
         fillWidth = null
     ) {
-
+    
+        // Explicit width takes priority.
+        if (options.width !== null) {
+            return options.width;
+        }
+    
+        // Existing fill behavior.
         if (this.isFillWidth(options)) {
-
+    
             if (fillWidth !== null) {
                 return fillWidth;
             }
-
+    
             if (availableWidth !== null) {
-
+    
                 return Math.max(
                     0,
                     availableWidth -
@@ -183,8 +189,26 @@ export default class Container extends Component {
                     options.margin.right
                 );
             }
+    
+            return null;
         }
-
+    
+        // Auto-wrapping components use the
+        // available width as their constraint.
+        if (
+            child.usesAvailableWidth?.() &&
+            availableWidth !== null
+        ) {
+    
+            return Math.max(
+                0,
+                availableWidth -
+                options.margin.left -
+                options.margin.right
+            );
+        }
+    
+        // Other children retain intrinsic sizing.
         return this.getChildWidth(
             child,
             options
@@ -213,6 +237,9 @@ export default class Container extends Component {
                     options.margin.bottom
                 );
             }
+            
+            // No vertical allocation exists yet.
+            return null;
         }
 
         return this.getChildHeight(
@@ -378,15 +405,15 @@ export default class Container extends Component {
     
         if (
             options.width !== null ||
-            this.isFillWidth(options)
+            this.isFillWidth(options) ||
+            child.usesAvailableWidth?.()
         ) {
             return resolvedWidth;
         }
     
         return null;
     }
-    
-    
+        
     getChildLayoutHeight(
         child,
         options,

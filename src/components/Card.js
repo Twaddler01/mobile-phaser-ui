@@ -198,9 +198,18 @@ export default class Card extends Container {
         // 2–3. ALLOCATE + RESOLVE CHILDREN
         ////////////////////////////////////////
 
+        const hasAllocatedHeight =
+            !this.heightAuto ||
+            this.layoutHeight !== null;
+        
+        const availableHeight =
+            hasAllocatedHeight
+                ? contentHeight
+                : null;
+        
         this.resolveChildren(
             contentWidth,
-            contentHeight
+            availableHeight
         );
 
         ////////////////////////////////////////

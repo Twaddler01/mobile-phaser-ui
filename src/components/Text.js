@@ -230,6 +230,14 @@ export default class Text extends Component {
         return 'none';
     }
 
+    usesAvailableWidth() {
+    
+        return (
+            this.widthAuto &&
+            this.wordWrapWidth === undefined
+        );
+    }
+
     ////////////////////////////////////////
     // COLOR
     ////////////////////////////////////////

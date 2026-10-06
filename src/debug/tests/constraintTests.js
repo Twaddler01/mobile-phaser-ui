@@ -24,6 +24,92 @@ export default function createConstraintTests(debug) {
     return [
 
 () => {
+
+    destroyTest();
+
+    const grid =
+        new Grid(scene, {
+            id: 'grid',
+            width: 500,
+            columns: 1,
+            padding: 20,
+            gap: 10
+        });
+
+    const card =
+        new Card(scene, {
+            id: 'card',
+            padding: 20
+        });
+
+    const column =
+        new Column(scene, {
+            id: 'column',
+            gap: 10
+        });
+
+    const title =
+        new Text(scene, {
+            id: 'title',
+            text: 'Nested layout test',
+            fontSize: 32
+        });
+
+    const body =
+        new Text(scene, {
+            id: 'body',
+            text:
+                'This is deliberately long text inside a nested Column. ' +
+                'The Grid gives the Card a width, the Card gives the Column ' +
+                'a width, and the Text should wrap and cause the entire ' +
+                'hierarchy to become taller.',
+            fontSize: 32
+        });
+
+    column.add(title);
+    column.add(body);
+
+    card.add(column, {
+        fill: true
+    });
+
+    grid.add(card, {
+        fill: true
+    });
+
+    addTest(grid);
+},
+
+() => {
+    destroyTest();
+    const grid = new Grid(scene, {
+        id: 'grid',
+        width: 500,
+        columns: 2,
+        padding: 20,
+        gap: 10
+    });
+    
+    const text = new Text(scene, {
+        id: 'text',
+        text:
+            'This text should wrap, but its height should be constrained.',
+        fontSize: 32,
+        minHeight: 250
+    });
+    
+    const card = new Card(scene, {
+        id: 'card',
+        width: 100,
+        height: 60
+    });
+    
+    grid.add(text, { fill: true });
+    grid.add(card);
+    addTest(grid);
+},
+
+() => {
     console.log('Grid multi-row auto-height test');
 
     destroyTest();
