@@ -1,6 +1,5 @@
 /*
 WIP:
-
 1. ESTABLISH GRID
 2. DETERMINE TRACKS
 3. ALLOCATE BOTH AXES
@@ -55,11 +54,473 @@ export default class Grid extends Container {
         this.gap =
             config.gap ?? 0;
 
+        this.markLayoutDirty();
+    }
+
+    ////////////////////////////////////////
+    // LAYOUT
+    ////////////////////////////////////////
+
+    layout() {
+    
+        // ==================================
+        // 1. ESTABLISH GRID
+        // ==================================
+    
+        this.beginLayout();
+
+        // ==================================
+        // 2. DETERMINE INITIAL TRACKS
+        // ==================================
+    
+        this.updateSize();
+    
+        let columnWidths =
+            this.getColumnWidthsForLayout();
+    
+        let rowHeights =
+            this.getRowHeightsForLayout();
+    
+        // ==================================
+        // 3. ALLOCATE BOTH AXES
+        // ==================================
+    
+        const childCells =
+            this.resolveChildCells();
+    
+        for (const child of this.children) {
+    
+            const options =
+                this.childLayoutOptions.get(child);
+    
+            if (!options) continue;
+    
+            const cell =
+                childCells.get(child);
+    
+            if (!cell) continue;
+    
+            const {
+                column,
+                row
+            } = cell;
+    
+            const {
+                margin
+            } = options;
+    
+            const availableWidth =
+                Math.max(
+                    0,
+                    columnWidths[column] -
+                    margin.left -
+                    margin.right
+                );
+    
+            const availableHeight =
+                Math.max(
+                    0,
+                    rowHeights[row] -
+                    margin.top -
+                    margin.bottom
+                );
+    
+            const childWidth =
+                this.resolveChildWidth(
+                    child,
+                    options,
+                    availableWidth
+                );
+    
+            const childHeight =
+                this.resolveChildHeight(
+                    child,
+                    options,
+                    availableHeight
+                );
+    
+            // ==================================
+            // 4. CONSTRAIN
+            // ==================================
+    
+            const layoutSizeChanged =
+                this.applyChildLayout(
+                    child,
+                    options,
+                    childWidth,
+                    childHeight
+                );
+    
+            // ==================================
+            // 5. RESOLVE CHILD
+            // ==================================
+    
+            if (
+                layoutSizeChanged ||
+                child.layoutDirty
+            ) {
+                child.layout();
+            }
+        }
+    
+        // ==================================
+        // 6. MEASURE
+        // ==================================
+
+const resolvedRowHeights =
+    this.getResolvedRowHeights();
+
+console.log(
+    'GRID RESOLVED ROW HEIGHTS',
+    resolvedRowHeights
+);
+
+// ==================================
+// 7A. FINAL TRACKS
+// ==================================
+
+if (
+    this.heightAuto &&
+    this.layoutHeight === null
+) {
+    rowHeights =
+        resolvedRowHeights;
+
+    this.height =
+        this.padding.top +
+        rowHeights.reduce(
+            (total, height) =>
+                total + height,
+            0
+        ) +
+        Math.max(
+            0,
+            rowHeights.length - 1
+        ) *
+        this.gap +
+        this.padding.bottom;
+}
+
+// ==================================
+// 7B. FINAL ALLOCATION
+// ==================================
+
+for (const child of this.children) {
+
+    const options =
+        this.childLayoutOptions.get(child);
+
+    if (!options) {
+        continue;
+    }
+
+    const cell =
+        childCells.get(child);
+
+    if (!cell) {
+        continue;
+    }
+
+    const {
+        column,
+        row
+    } = cell;
+
+    const {
+        margin
+    } = options;
+
+    const availableWidth =
+        Math.max(
+            0,
+            columnWidths[column] -
+            margin.left -
+            margin.right
+        );
+
+    const availableHeight =
+        Math.max(
+            0,
+            rowHeights[row] -
+            margin.top -
+            margin.bottom
+        );
+
+    const childWidth =
+        this.resolveChildWidth(
+            child,
+            options,
+            availableWidth
+        );
+
+    const childHeight =
+        this.resolveChildHeight(
+            child,
+            options,
+            availableHeight
+        );
+
+    const layoutSizeChanged =
+        this.applyChildLayout(
+            child,
+            options,
+            childWidth,
+            childHeight
+        );
+
+    if (
+        layoutSizeChanged ||
+        child.layoutDirty
+    ) {
+        child.layout();
+    }
+}
+
+
+
+        // ==================================
+        // TEMPORARY: existing positioning
+        // ==================================
+
+        const columns = this.getColumnCount();
+        const rows = this.getRowCount();
+
+        const columnOffsets =
+            this.getColumnOffsets(columnWidths);
+        
+        const rowOffsets =
+            this.getRowOffsets(rowHeights);
+
         ////////////////////////////////////////
-        // LAYOUT
+        // DEBUG GRID CELLS
         ////////////////////////////////////////
 
-        this.markLayoutDirty();
+        for (let row = 0; row < rows; row++) {
+        
+            for (let column = 0; column < columns; column++) {
+        
+                Debug.drawLayoutBounds(
+                    this,
+                    columnOffsets[column],
+                    rowOffsets[row],
+                    columnWidths[column],
+                    rowHeights[row],
+                    Debug.layout.grid.borderColor,
+                    Debug.layout.grid.fillColor,
+                    Debug.layout.grid.fillAlpha,
+                    Debug.layout.grid.borderAlpha
+                );
+            }
+        }
+
+        ////////////////////////////////////////
+        // POSITION CHILDREN
+        ////////////////////////////////////////
+        
+        for (const child of this.children) {
+        
+            const options =
+                this.childLayoutOptions.get(child);
+        
+            if (!options) {
+                continue;
+            }
+        
+            const cell =
+                childCells.get(child);
+        
+            if (!cell) {
+                continue;
+            }
+        
+            const {
+                column,
+                row
+            } = cell;
+        
+            const {
+                margin,
+                horizontalAlign,
+                verticalAlign
+            } = options;
+        
+            const cellX =
+                columnOffsets[column];
+        
+            const cellY =
+                rowOffsets[row];
+        
+            const cellWidth =
+                columnWidths[column];
+        
+            const cellHeight =
+                rowHeights[row];
+        
+            const childWidth =
+                child.getLayoutWidth();
+        
+            const childHeight =
+                child.getLayoutHeight();
+        
+            const availableWidth =
+                Math.max(
+                    0,
+                    cellWidth -
+                    margin.left -
+                    margin.right
+                );
+        
+            const availableHeight =
+                Math.max(
+                    0,
+                    cellHeight -
+                    margin.top -
+                    margin.bottom
+                );
+        
+            ////////////////////////////////////////
+            // HORIZONTAL POSITION
+            ////////////////////////////////////////
+        
+            let x;
+        
+            switch (horizontalAlign) {
+        
+                case 'center':
+        
+                    x =
+                        cellX +
+                        margin.left +
+                        (
+                            availableWidth -
+                            childWidth
+                        ) / 2;
+        
+                    break;
+        
+                case 'end':
+        
+                    x =
+                        cellX +
+                        cellWidth -
+                        margin.right -
+                        childWidth;
+        
+                    break;
+        
+                case 'start':
+                default:
+        
+                    x =
+                        cellX +
+                        margin.left;
+        
+                    break;
+            }
+        
+            ////////////////////////////////////////
+            // VERTICAL POSITION
+            ////////////////////////////////////////
+        
+            let y;
+        
+            switch (verticalAlign) {
+        
+                case 'center':
+        
+                    y =
+                        cellY +
+                        margin.top +
+                        (
+                            availableHeight -
+                            childHeight
+                        ) / 2;
+        
+                    break;
+        
+                case 'end':
+        
+                    y =
+                        cellY +
+                        cellHeight -
+                        margin.bottom -
+                        childHeight;
+        
+                    break;
+        
+                case 'start':
+                default:
+        
+                    y =
+                        cellY +
+                        margin.top;
+        
+                    break;
+            }
+        
+            child.setPosition(
+                x,
+                y
+            );
+        }
+
+        this.finishLayout();
+    }
+
+    ////////////////////////////////////////
+    // MEASURE RESOLVED ROW HEIGHTS
+    ////////////////////////////////////////
+    
+    getResolvedRowHeights() {
+    
+        const rows =
+            this.getRowCount();
+    
+        const rowHeights =
+            new Array(rows).fill(0);
+    
+        const childCells =
+            this.resolveChildCells();
+    
+        for (const child of this.children) {
+    
+            const options =
+                this.childLayoutOptions.get(child);
+    
+            if (!options) {
+                continue;
+            }
+    
+            const cell =
+                childCells.get(child);
+    
+            if (!cell) {
+                continue;
+            }
+    
+            const {
+                row
+            } = cell;
+    
+            const margin =
+                options.margin;
+    
+            const childHeight =
+                child.height;
+    
+            const outerHeight =
+                margin.top +
+                childHeight +
+                margin.bottom;
+    
+            rowHeights[row] =
+                Math.max(
+                    rowHeights[row],
+                    outerHeight
+                );
+        }
+    
+        return rowHeights;
     }
 
     ////////////////////////////////////////
@@ -719,290 +1180,6 @@ export default class Grid extends Container {
         }
     
         return offsets;
-    }
-
-    ////////////////////////////////////////
-    // LAYOUT
-    ////////////////////////////////////////
-
-    layout() {
-
-        this.beginLayout();
-
-        ////////////////////////////////////////
-        // RESOLVE GRID SIZE
-        ////////////////////////////////////////
-
-        this.updateSize();
-
-        const columns = this.getColumnCount();
-        const rows = this.getRowCount();
-        
-        const columnWidths =
-            this.getColumnWidthsForLayout();
-
-        const rowHeights =
-            this.getRowHeightsForLayout();
-        
-        const columnOffsets =
-            this.getColumnOffsets(columnWidths);
-        
-        const rowOffsets =
-            this.getRowOffsets(rowHeights);
-
-        ////////////////////////////////////////
-        // DEBUG GRID CELLS
-        ////////////////////////////////////////
-
-        for (let row = 0; row < rows; row++) {
-        
-            for (let column = 0; column < columns; column++) {
-        
-                Debug.drawLayoutBounds(
-                    this,
-                    columnOffsets[column],
-                    rowOffsets[row],
-                    columnWidths[column],
-                    rowHeights[row],
-                    Debug.layout.grid.borderColor,
-                    Debug.layout.grid.fillColor,
-                    Debug.layout.grid.fillAlpha,
-                    Debug.layout.grid.borderAlpha
-                );
-            }
-        }
-
-        ////////////////////////////////////////
-        // ALLOCATE + RESOLVE CHILDREN
-        ////////////////////////////////////////
-
-        const childCells =
-            this.resolveChildCells();
-        
-        for (const child of this.children) {
-        
-            const options =
-                this.childLayoutOptions.get(child);
-        
-            if (!options) {
-                continue;
-            }
-        
-            const cell =
-                childCells.get(child);
-        
-            if (!cell) {
-                continue;
-            }
-        
-            const {
-                column,
-                row
-            } = cell;
-        
-            const {
-                margin
-            } = options;
-        
-            const availableWidth =
-                Math.max(
-                    0,
-                    columnWidths[column] -
-                    margin.left -
-                    margin.right
-                );
-        
-            const availableHeight =
-                Math.max(
-                    0,
-                    rowHeights[row] -
-                    margin.top -
-                    margin.bottom
-                );
-        
-            const childWidth =
-                this.resolveChildWidth(
-                    child,
-                    options,
-                    availableWidth
-                );
-        
-            const childHeight =
-                this.resolveChildHeight(
-                    child,
-                    options,
-                    availableHeight
-                );
-        
-            const layoutSizeChanged =
-                this.applyChildLayout(
-                    child,
-                    options,
-                    childWidth,
-                    childHeight
-                );
-        
-            if (
-                layoutSizeChanged ||
-                child.layoutDirty
-            ) {
-                child.layout();
-            }
-
-        }
-
-        ////////////////////////////////////////
-        // POSITION CHILDREN
-        ////////////////////////////////////////
-        
-        for (const child of this.children) {
-        
-            const options =
-                this.childLayoutOptions.get(child);
-        
-            if (!options) {
-                continue;
-            }
-        
-            const cell =
-                childCells.get(child);
-        
-            if (!cell) {
-                continue;
-            }
-        
-            const {
-                column,
-                row
-            } = cell;
-        
-            const {
-                margin,
-                horizontalAlign,
-                verticalAlign
-            } = options;
-        
-            const cellX =
-                columnOffsets[column];
-        
-            const cellY =
-                rowOffsets[row];
-        
-            const cellWidth =
-                columnWidths[column];
-        
-            const cellHeight =
-                rowHeights[row];
-        
-            const childWidth =
-                child.getLayoutWidth();
-        
-            const childHeight =
-                child.getLayoutHeight();
-        
-            const availableWidth =
-                Math.max(
-                    0,
-                    cellWidth -
-                    margin.left -
-                    margin.right
-                );
-        
-            const availableHeight =
-                Math.max(
-                    0,
-                    cellHeight -
-                    margin.top -
-                    margin.bottom
-                );
-        
-            ////////////////////////////////////////
-            // HORIZONTAL POSITION
-            ////////////////////////////////////////
-        
-            let x;
-        
-            switch (horizontalAlign) {
-        
-                case 'center':
-        
-                    x =
-                        cellX +
-                        margin.left +
-                        (
-                            availableWidth -
-                            childWidth
-                        ) / 2;
-        
-                    break;
-        
-                case 'end':
-        
-                    x =
-                        cellX +
-                        cellWidth -
-                        margin.right -
-                        childWidth;
-        
-                    break;
-        
-                case 'start':
-                default:
-        
-                    x =
-                        cellX +
-                        margin.left;
-        
-                    break;
-            }
-        
-            ////////////////////////////////////////
-            // VERTICAL POSITION
-            ////////////////////////////////////////
-        
-            let y;
-        
-            switch (verticalAlign) {
-        
-                case 'center':
-        
-                    y =
-                        cellY +
-                        margin.top +
-                        (
-                            availableHeight -
-                            childHeight
-                        ) / 2;
-        
-                    break;
-        
-                case 'end':
-        
-                    y =
-                        cellY +
-                        cellHeight -
-                        margin.bottom -
-                        childHeight;
-        
-                    break;
-        
-                case 'start':
-                default:
-        
-                    y =
-                        cellY +
-                        margin.top;
-        
-                    break;
-            }
-        
-            child.setPosition(
-                x,
-                y
-            );
-        }
-
-        this.finishLayout();
     }
 
     ////////////////////////////////////////

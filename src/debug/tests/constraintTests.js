@@ -24,6 +24,83 @@ export default function createConstraintTests(debug) {
     return [
 
 () => {
+    console.log('Grid multi-row auto-height test');
+
+    destroyTest();
+
+    const grid =
+        new Grid(scene, {
+            id: 'grid',
+            width: 500,
+            columns: 2,
+            padding: 20,
+            gap: 10
+        });
+
+    const textTall =
+        new Text(scene, {
+            id: 'textTall',
+            text:
+                'This is deliberately long text that should wrap into a tall cell. This row should become the tallest row.',
+            fontSize: 32
+        });
+
+    const cardShort =
+        new Card(scene, {
+            id: 'cardShort',
+            width: 100,
+            height: 60
+        });
+
+    const textMedium =
+        new Text(scene, {
+            id: 'textMedium',
+            text:
+                'This row should be shorter than the first row.',
+            fontSize: 32
+        });
+
+    const cardMedium =
+        new Card(scene, {
+            id: 'cardMedium',
+            width: 100,
+            height: 100
+        });
+
+    const cardTall =
+        new Card(scene, {
+            id: 'cardTall',
+            width: 100,
+            height: 140
+        });
+
+    const cardShort2 =
+        new Card(scene, {
+            id: 'cardShort2',
+            width: 100,
+            height: 50
+        });
+
+    grid.add(textTall, {
+        fill: true
+    });
+
+    grid.add(cardShort);
+
+    grid.add(textMedium, {
+        fill: true
+    });
+
+    grid.add(cardMedium);
+
+    grid.add(cardTall);
+
+    grid.add(cardShort2);
+
+    addTest(grid);
+},
+
+() => {
     console.log('Grid test');
     
     destroyTest();
@@ -31,10 +108,8 @@ export default function createConstraintTests(debug) {
     const grid =
         new Grid(scene, {
             id: 'grid',
-            name: 'grid',
-            x: 100,
-            y: 100,
             width: 500,
+            height: 400,
             columns: 2,
             padding: 20,
             gap: 10
