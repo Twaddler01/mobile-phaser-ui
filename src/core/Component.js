@@ -12,9 +12,6 @@ export default class Component {
             height: config.height ?? 0
         });
 
-        //this.width = config.width ?? 0;
-        //this.height = config.height ?? 0;
-
         // No parent has assigned this dimension
         this.layoutWidth = null;
         this.layoutHeight = null;

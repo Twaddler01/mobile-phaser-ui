@@ -17,11 +17,10 @@ export default function createScrollTests(debug) {
         scene,
         width,
         height,
-        destroyTest,
+        state,
+        resetTest,
         addTest
     } = debug;
-
-    const state = {};
 
     return [
 
@@ -31,7 +30,7 @@ export default function createScrollTests(debug) {
 
 () => {
 
-    destroyTest();
+    resetTest();
 
     state.root =
         new Row(scene, {
@@ -179,7 +178,7 @@ export default function createScrollTests(debug) {
 
 () => {
 
-    destroyTest();
+    resetTest();
 
     console.log(
         '4 — ROW → SCROLLVIEW FILL'
@@ -239,7 +238,7 @@ export default function createScrollTests(debug) {
 
 () => {
 
-    destroyTest();
+    resetTest();
 
     console.log(
         '3 — SCROLLVIEW BOTH AXES'
@@ -293,7 +292,7 @@ export default function createScrollTests(debug) {
 
 () => {
 
-    destroyTest();
+    resetTest();
 
     console.log(
         '2 — SCROLLVIEW HORIZONTAL COLUMN'
@@ -346,7 +345,7 @@ export default function createScrollTests(debug) {
 
 () => {
 
-    destroyTest();
+    resetTest();
 
     console.log(
         '1 — SCROLLVIEW VERTICAL COLUMN'

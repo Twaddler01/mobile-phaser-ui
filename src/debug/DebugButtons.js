@@ -147,7 +147,17 @@ export default class DebugButtons {
             this.testContainer.removeAll(false);
 
         };
+
+        this.state = {};
+    
+        this.resetTest = () => {
+            this.destroyTest();
         
+            for (const key of Object.keys(this.state)) {
+                delete this.state[key];
+            }
+        };
+
         // ------------------------------------------
         // ADD COMPONENT TO TEST CONTAINER
         // ------------------------------------------
