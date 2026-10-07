@@ -204,6 +204,9 @@ class Debug {
                 options.inspect?.tree ?? false,
             
             // recursive: true     // (could get messy)
+            
+            scroll:
+                options.inspect?.scroll ?? false,
         };
 
         ////////////////////////////////////////
@@ -1014,10 +1017,187 @@ class Debug {
                 });
             }
         }
-    
+
+        if (
+            settings.scroll &&
+            component.constructor.name === 'ScrollView'
+        ) {
+        
+            console.table(
+                this.scroll(component)
+            );
+        }
+
         console.groupEnd();
     
         return this;
+    }
+
+    scroll(component) {
+    
+        if (
+            !this.enabled ||
+            !component ||
+            component.constructor.name !== 'ScrollView'
+        ) {
+            return null;
+        }
+    
+        const content =
+            component.content;
+    
+        const options =
+            content
+                ? component.childLayoutOptions?.get(content)
+                : null;
+    
+        const margin =
+            options?.margin ?? {
+                left: 0,
+                right: 0,
+                top: 0,
+                bottom: 0
+            };
+    
+        const viewportWidth =
+            component.getViewportWidth();
+    
+        const viewportHeight =
+            component.getViewportHeight();
+    
+        const extentWidth =
+            margin.left +
+            component.contentWidth +
+            margin.right;
+    
+        const extentHeight =
+            margin.top +
+            component.contentHeight +
+            margin.bottom;
+    
+        return {
+    
+            direction:
+                component.direction,
+    
+            ////////////////////////////////////////
+            // VIEWPORT
+            ////////////////////////////////////////
+    
+            viewportWidth,
+            viewportHeight,
+    
+            ////////////////////////////////////////
+            // CONTENT
+            ////////////////////////////////////////
+    
+            content:
+                content
+                    ? this.getLabel(content)
+                    : null,
+    
+            contentMeasuredWidth:
+                content?.width ?? 0,
+    
+            contentMeasuredHeight:
+                content?.height ?? 0,
+    
+            contentAllocatedWidth:
+                content?.layoutWidth ?? null,
+    
+            contentAllocatedHeight:
+                content?.layoutHeight ?? null,
+    
+            contentWidth:
+                component.contentWidth,
+    
+            contentHeight:
+                component.contentHeight,
+    
+            ////////////////////////////////////////
+            // EXTENT
+            ////////////////////////////////////////
+    
+            extentWidth,
+            extentHeight,
+    
+            ////////////////////////////////////////
+            // MARGINS
+            ////////////////////////////////////////
+    
+            marginLeft:
+                margin.left,
+    
+            marginRight:
+                margin.right,
+    
+            marginTop:
+                margin.top,
+    
+            marginBottom:
+                margin.bottom,
+    
+            ////////////////////////////////////////
+            // SCROLL
+            ////////////////////////////////////////
+    
+            scrollX:
+                component.scrollX,
+    
+            scrollY:
+                component.scrollY,
+    
+            maxScrollX:
+                component.maxScrollX,
+    
+            maxScrollY:
+                component.maxScrollY,
+    
+            ////////////////////////////////////////
+            // OVERFLOW
+            ////////////////////////////////////////
+    
+            overflowX:
+                Math.max(
+                    0,
+                    extentWidth - viewportWidth
+                ),
+    
+            overflowY:
+                Math.max(
+                    0,
+                    extentHeight - viewportHeight
+                ),
+    
+            ////////////////////////////////////////
+            // MASK
+            ////////////////////////////////////////
+    
+            maskPadding:
+                component.maskPadding,
+    
+            maskWidth:
+                component.maskShape?.width ?? 0,
+    
+            maskHeight:
+                component.maskShape?.height ?? 0,
+    
+            ////////////////////////////////////////
+            // INPUT
+            ////////////////////////////////////////
+    
+            scrollZoneWidth:
+                component.scrollZone?.width ?? 0,
+    
+            scrollZoneHeight:
+                component.scrollZone?.height ?? 0,
+    
+            dragging:
+                component.isDragging,
+    
+            didDrag:
+                component.didDrag
+        };
     }
 
     ////////////////////////////////////////

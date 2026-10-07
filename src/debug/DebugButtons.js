@@ -12,6 +12,7 @@ import Debug from '../core/Debug.js';
 import createMiscTests from './tests/miscTests.js';
 import createRowTests from './tests/rowTests.js';
 import createConstraintTests from './tests/constraintTests.js';
+import createScrollTests from './tests/scrollTests.js';
 
 export default class DebugButtons {
 
@@ -46,11 +47,38 @@ export default class DebugButtons {
 
     setupButtons() {
 //******************************
+        this.addButton('SCROLL Tests', () => this.scrollCycle());
+//******************************
         this.addButton('ROW Tests', () => this.rowCycle());
 //******************************
         this.addButton('CONSTRAINT Tests', () => this.constraintCycle());
 //******************************
         this.addButton('MISC Tests', () => this.miscCycle());
+//******************************
+        this.addButton('INSPECT SCROLL', () => {
+
+            const scroll =
+                this.testComponents[0];
+        
+            if (!scroll) {
+                console.warn(
+                    'No test component to inspect.'
+                );
+                return;
+            }
+        
+            console.log('==== INSPECT SCROLL ====');
+
+            Debug.inspect(scroll, {
+                stats: true,
+                scroll: true
+            });
+            
+            Debug.tree(scroll);
+
+            console.log('========');
+        });
+        
 //******************************
         this.addButton('INSPECT', () => {
         
@@ -63,14 +91,15 @@ export default class DebugButtons {
                 );
                 return;
             }
-        
-            root.layout();
+    
+            console.log('==== INSPECT ALL ====');
         
             Debug.inspect(root, {
                 stats: true,
                 tree: true,
                 recursive: true
             });
+            console.log('========');
         
         });
 //******************************
@@ -152,6 +181,9 @@ export default class DebugButtons {
         this.rowTests =
             createRowTests(this);
 
+        this.scrollTests =
+            createScrollTests(this);
+
         // ==========================================
         // CYCLE
         // ==========================================
@@ -164,6 +196,9 @@ export default class DebugButtons {
 
         this.rowCycle =
             this.createClickCycle(this.rowTests);
+        
+        this.scrollCycle =
+            this.createClickCycle(this.scrollTests);
 
     }
 

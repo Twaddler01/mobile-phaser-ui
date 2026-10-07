@@ -1778,8 +1778,8 @@ export default function createRowTests(debug) {
 },
 
 () => {
+    console.log('**** root13.width update to 600 ****');
     root13.width = 600;
-    root13.requestLayout();
 
     console.log({
         root13: {
