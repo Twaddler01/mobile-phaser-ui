@@ -7,11 +7,9 @@ export default class Column extends Container {
 
         super(scene, config);
 
-        this.padding =
-            this.getPadding(config.padding);
-
-        this.gap =
-            config.gap ?? 0;
+        this.defineLayoutProperties({
+            gap: config.gap ?? 0
+        });
 
         this.align =
             config.align ?? 'start';

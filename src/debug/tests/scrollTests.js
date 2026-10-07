@@ -21,10 +21,142 @@ export default function createScrollTests(debug) {
         addTest
     } = debug;
 
+    const state = {};
+
     return [
 
 // ==================================
-// 4. ROW → SCROLLVIEW FILL
+// 4. ROW → SCROLLVIEW LIVE UPDATES
+// ==================================
+
+() => {
+
+    destroyTest();
+
+    state.root =
+        new Row(scene, {
+            width: width,
+            height: height / 2,
+            padding: 20,
+            gap: 20
+        });
+
+    state.left =
+        new Card(scene, {
+            width: 150,
+            height: 200
+        });
+
+    state.scroll =
+        new ScrollView(scene, {
+            height: 200,
+            padding: 20,
+            direction: 'vertical'
+        });
+
+    state.column =
+        new Column(scene, {
+            padding: 10,
+            gap: 10
+        });
+
+    for (let i = 1; i <= 12; i++) {
+
+        state.column.add(
+            new Card(scene, {
+                width: 250,
+                height: 80
+            })
+        );
+    }
+
+    state.scroll.add(state.column);
+
+    state.root.add(state.left);
+
+    state.root.add(state.scroll, {
+        fill: 'horizontal'
+    });
+
+    addTest(state.root);
+},
+
+() => {
+    console.log('**** ROOT WIDTH → 600 ****');
+    state.root.width = 600;
+},
+
+() => {
+    console.log('**** ROOT WIDTH → 400 ****');
+    state.root.width = 400;
+},
+
+() => {
+    console.log('**** ROOT WIDTH → 800 ****');
+    state.root.width = 800;
+},
+
+() => {
+
+    console.log(
+        '**** ROOT WIDTH → 600 ****'
+    );
+
+    state.root.width = 600;
+},
+
+() => {
+
+    console.log(
+        '**** ROOT WIDTH → 400 ****'
+    );
+
+    state.root.width = 400;
+},
+
+() => {
+
+    console.log(
+        '**** ROOT WIDTH → 800 ****'
+    );
+
+    state.root.width = 800;
+},
+
+() => {
+
+    console.log(
+        '**** SCROLL PADDING → 40 ****'
+    );
+
+    state.scroll.padding = 40;
+},
+
+() => {
+
+    console.log(
+        '**** COLUMN GAP → 20 ****'
+    );
+
+    state.column.gap = 20;
+},
+
+() => {
+
+    console.log(
+        '**** INSPECT FINAL ****'
+    );
+
+    Debug.inspect(state.scroll, {
+        stats: true,
+        scroll: true
+    });
+
+    Debug.tree(state.root);
+},
+
+// ==================================
+// ROW → SCROLLVIEW FILL
 // ==================================
 
 () => {

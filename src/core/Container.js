@@ -7,15 +7,18 @@ export default class Container extends Component {
     
         super(scene, config);
     
+        this.defineLayoutProperties({
+            padding: {
+                value: this.getPadding(config.padding),
+                normalize: value => this.getPadding(value)
+            }
+        });
+    
         this.children = [];
     
         this.childLayoutOptions =
             new Map();
-    
-        this.padding =
-            this.getPadding(
-                config.padding
-            );
+
     }
 
     beginLayout() {

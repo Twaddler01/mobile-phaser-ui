@@ -13,11 +13,6 @@ export default class ScrollView extends Container {
         this.direction =
             config.direction ?? 'vertical';
 
-        this.padding =
-            this.getPadding(
-                config.padding
-            );
-
         this.maskPadding =
             config.maskPadding ?? 0;
 

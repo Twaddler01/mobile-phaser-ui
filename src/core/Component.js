@@ -7,8 +7,13 @@ export default class Component {
 
         this.scene = scene;
 
-        this.width = config.width ?? 0;
-        this.height = config.height ?? 0;
+        this.defineLayoutProperties({
+            width: config.width ?? 0,
+            height: config.height ?? 0
+        });
+
+        //this.width = config.width ?? 0;
+        //this.height = config.height ?? 0;
 
         // No parent has assigned this dimension
         this.layoutWidth = null;
@@ -57,6 +62,55 @@ export default class Component {
         if (Debug.enabled) {
             Debug.createBounds(this);
         }
+    }
+
+    defineLayoutProperties(properties) {
+    
+        for (const [name, definition] of Object.entries(properties)) {
+    
+            const isConfig =
+                definition &&
+                typeof definition === 'object' &&
+                Object.hasOwn(definition, 'value');
+    
+            const normalize =
+                isConfig
+                    ? definition.normalize
+                    : null;
+    
+            let value =
+                isConfig
+                    ? definition.value
+                    : definition;
+    
+            Object.defineProperty(this, name, {
+    
+                configurable: true,
+                enumerable: true,
+    
+                get() {
+                    return value;
+                },
+    
+                set(next) {
+    
+                    const normalized =
+                        normalize
+                            ? normalize(next)
+                            : next;
+    
+                    if (value === normalized) {
+                        return;
+                    }
+    
+                    value = normalized;
+    
+                    this.markLayoutDirty();
+                }
+            });
+        }
+    
+        return this;
     }
 
     get x() {
