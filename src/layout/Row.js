@@ -34,29 +34,32 @@ export default class Row extends Container {
 
     updateSize() {
     
-        // AUTO WIDTH
-        if (
-            this.widthAuto &&
-            this.layoutWidth === null
-        ) {
-    
+        // WIDTH
+        // An allocated width takes priority over
+        // intrinsic measurement.
+        if (this.layoutWidth !== null) {
+
+            this.width = this.layoutWidth;
+
+        } else if (this.widthAuto) {
+
             const contentWidth =
                 this.children.reduce(
                     (total, child) => {
-    
+
                         const options =
                             this.childLayoutOptions.get(child);
-    
+
                         if (!options) {
                             return total;
                         }
-    
-                        const childWidth =
-                            options.width ?? child.getLayoutWidth();
 
-                        const { margin } =
-                            options;
-    
+                        const childWidth =
+                            options.width ??
+                            child.getLayoutWidth();
+
+                        const { margin } = options;
+
                         return (
                             total +
                             margin.left +
@@ -70,13 +73,13 @@ export default class Row extends Container {
                     0,
                     this.children.length - 1
                 ) * this.gap;
-    
+
             this.width =
                 this.padding.left +
                 contentWidth +
                 this.padding.right;
         }
-    
+
         // AUTO HEIGHT
         if (
             this.heightAuto &&

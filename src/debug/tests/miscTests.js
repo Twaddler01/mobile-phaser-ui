@@ -22,6 +22,121 @@ export default function createMiscTests(debug) {
 
     return [
 
+// ==================================
+// 12. ROW WIDTH DISTRIBUTION
+// ==================================
+
+() => {
+
+    destroyTest();
+
+    // ----------------------------------
+    // ROOT ROW
+    // ----------------------------------
+
+    const root = new Row(scene, {
+        name: 'root',
+        x: 100,
+        y: 100,
+
+        width: 800,
+        heightAuto: true,
+
+        padding: 20,
+        gap: 10,
+
+        justify: 'start'
+    });
+
+    // ----------------------------------
+    // FIXED CHILD A
+    // ----------------------------------
+
+    const fixedA = new Card(scene, {
+        name: 'fixedA',
+        width: 100,
+        height: 100
+    });
+
+    // ----------------------------------
+    // FILL CHILD A
+    // ----------------------------------
+
+    const fillA = new Card(scene, {
+        name: 'fillA',
+        height: 100
+    });
+
+    // ----------------------------------
+    // FIXED CHILD B
+    // ----------------------------------
+
+    const fixedB = new Card(scene, {
+        name: 'fixedB',
+        width: 150,
+        height: 100
+    });
+
+    // ----------------------------------
+    // FILL CHILD B
+    // ----------------------------------
+
+    const fillB = new Card(scene, {
+        name: 'fillB',
+        height: 100
+    });
+
+    // ----------------------------------
+    // ADD CHILDREN
+    // ----------------------------------
+
+    root.add(fixedA);
+
+    root.add(fillA, {
+        fill: 'horizontal'
+    });
+
+    root.add(fixedB);
+
+    root.add(fillB, {
+        fill: 'horizontal'
+    });
+
+    // ----------------------------------
+    // ADD TEST
+    // ----------------------------------
+
+    addTest(root);
+
+    // ----------------------------------
+    // DEBUG
+    // ----------------------------------
+
+    console.log(
+        '12 — ROW WIDTH DISTRIBUTION'
+    );
+
+    console.log({
+        root: {
+            width: root.width,
+            padding: root.padding,
+            gap: root.gap
+        },
+
+        children: [
+            fixedA,
+            fillA,
+            fixedB,
+            fillB
+        ].map(child => ({
+            name: child.name,
+            x: child.x,
+            width: child.width,
+            layoutWidth: child.layoutWidth
+        }))
+    });
+},
+
         () => {
 
             destroyTest();

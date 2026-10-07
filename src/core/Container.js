@@ -161,27 +161,27 @@ export default class Container extends Component {
         );
     }
 
+
     resolveChildWidth(
         child,
         options,
         availableWidth = null,
         fillWidth = null
     ) {
-    
+
         // Explicit width takes priority.
         if (options.width !== null) {
             return options.width;
         }
-    
-        // Existing fill behavior.
+
+        // Fill children receive their share.
         if (this.isFillWidth(options)) {
-    
+
             if (fillWidth !== null) {
                 return fillWidth;
             }
-    
+
             if (availableWidth !== null) {
-    
                 return Math.max(
                     0,
                     availableWidth -
@@ -189,17 +189,18 @@ export default class Container extends Component {
                     options.margin.right
                 );
             }
-    
+
             return null;
         }
-    
-        // Auto-wrapping components use the
-        // available width as their constraint.
+
+        // Automatic wrapping:
+        // Columns can offer the full available width.
+        // Rows must preserve intrinsic child widths.
         if (
+            this.constructor.name === 'Column' &&
             child.usesAvailableWidth?.() &&
             availableWidth !== null
         ) {
-    
             return Math.max(
                 0,
                 availableWidth -
@@ -207,8 +208,8 @@ export default class Container extends Component {
                 options.margin.right
             );
         }
-    
-        // Other children retain intrinsic sizing.
+
+        // All other children retain intrinsic sizing.
         return this.getChildWidth(
             child,
             options
@@ -402,18 +403,21 @@ export default class Container extends Component {
         options,
         resolvedWidth
     ) {
-    
+
         if (
             options.width !== null ||
             this.isFillWidth(options) ||
-            child.usesAvailableWidth?.()
+            (
+                this.constructor.name === 'Column' &&
+                child.usesAvailableWidth?.()
+            )
         ) {
             return resolvedWidth;
         }
-    
+
         return null;
     }
-        
+
     getChildLayoutHeight(
         child,
         options,

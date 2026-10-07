@@ -10,6 +10,7 @@ import Grid from '../layout/Grid.js';
 import Section from '../layout/Section.js';
 import Debug from '../core/Debug.js';
 import createMiscTests from './tests/miscTests.js';
+import createRowTests from './tests/rowTests.js';
 import createConstraintTests from './tests/constraintTests.js';
 
 export default class DebugButtons {
@@ -44,6 +45,8 @@ export default class DebugButtons {
     }
 
     setupButtons() {
+//******************************
+        this.addButton('ROW Tests', () => this.rowCycle());
 //******************************
         this.addButton('CONSTRAINT Tests', () => this.constraintCycle());
 //******************************
@@ -145,6 +148,9 @@ export default class DebugButtons {
 
         this.constraintTests =
             createConstraintTests(this);
+            
+        this.rowTests =
+            createRowTests(this);
 
         // ==========================================
         // CYCLE
@@ -155,6 +161,9 @@ export default class DebugButtons {
 
         this.constraintCycle =
             this.createClickCycle(this.constraintTests);
+
+        this.rowCycle =
+            this.createClickCycle(this.rowTests);
 
     }
 
