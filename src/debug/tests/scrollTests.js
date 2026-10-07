@@ -144,6 +144,24 @@ export default function createScrollTests(debug) {
 () => {
 
     console.log(
+        '**** COLUMN GAP → 5 ****'
+    );
+
+    state.column.gap = 5;
+},
+
+() => {
+
+    console.log(
+        '**** SCROLL PADDING → 0 ****'
+    );
+
+    state.scroll.padding = 0;
+},
+
+() => {
+
+    console.log(
         '**** INSPECT FINAL ****'
     );
 
