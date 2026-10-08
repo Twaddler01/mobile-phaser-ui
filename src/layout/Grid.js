@@ -45,6 +45,125 @@ export default class Grid extends Container {
     }
 
     ////////////////////////////////////////
+    // UPDATE SIZE
+    ////////////////////////////////////////
+
+    updateSize() {
+
+        ////////////////////////////////////////
+        // 1. MEASURE INTRINSIC WIDTH
+        ////////////////////////////////////////
+
+        let measuredWidth =
+            this.measuredWidth;
+
+        // AUTO WIDTH
+        if (
+            this.widthAuto &&
+            this.layoutWidth === null
+        ) {
+        
+            const columnWidths =
+                this.getColumnWidths();
+        
+            const totalColumnsWidth =
+                columnWidths.reduce(
+                    (total, width) =>
+                        total + width,
+                    0
+                );
+        
+            const totalGap =
+                Math.max(
+                    0,
+                    columnWidths.length - 1
+                ) *
+                this.gap;
+        
+            measuredWidth =
+                this.padding.left +
+                totalColumnsWidth +
+                totalGap +
+                this.padding.right;
+        }
+
+        ////////////////////////////////////////
+        // 2. MEASURE INTRINSIC HEIGHT
+        ////////////////////////////////////////
+    
+        let measuredHeight =
+            this.measuredHeight;
+
+        if (
+            this.heightAuto &&
+            this.layoutHeight === null
+        ) {
+        
+            const rowHeights =
+                this.getRowHeights();
+        
+            const totalRowsHeight =
+                rowHeights.reduce(
+                    (total, height) =>
+                        total + height,
+                    0
+                );
+        
+            const totalGap =
+                Math.max(
+                    0,
+                    rowHeights.length - 1
+                ) *
+                this.gap;
+        
+            measuredHeight =
+                this.padding.top +
+                totalRowsHeight +
+                totalGap +
+                this.padding.bottom;
+        }
+
+        ////////////////////////////////////////
+        // 3. COMMIT MEASURED SIZE
+        ////////////////////////////////////////
+    
+        this.measuredWidth =
+            measuredWidth;
+    
+        this.measuredHeight =
+            measuredHeight;
+    
+        ////////////////////////////////////////
+        // 4. APPLY EFFECTIVE SIZE
+        ////////////////////////////////////////
+    
+        if (this.layoutWidth !== null) {
+    
+            this.width =
+                this.layoutWidth;
+    
+        } else {
+    
+            this.width =
+                measuredWidth;
+        }
+    
+        if (this.layoutHeight !== null) {
+    
+            this.height =
+                this.layoutHeight;
+    
+        } else {
+    
+            this.height =
+                measuredHeight;
+        }
+    
+        return this;
+    }
+
+
+    ////////////////////////////////////////
     // LAYOUT
     ////////////////////////////////////////
 
@@ -177,7 +296,7 @@ export default class Grid extends Container {
             rowHeights =
                 resolvedRowHeights;
         
-            this.height =
+            const measuredHeight =
                 this.padding.top +
                 rowHeights.reduce(
                     (total, height) =>
@@ -190,6 +309,13 @@ export default class Grid extends Container {
                 ) *
                 this.gap +
                 this.padding.bottom;
+            
+            // COMMIT MEASURED SIZE
+            this.measuredHeight =
+                measuredHeight;
+
+            this.height =
+                measuredHeight;
         }
         
         // ==================================
@@ -758,75 +884,6 @@ export default class Grid extends Container {
 
         return new Array(rows)
             .fill(cellHeight);
-    }
-
-    ////////////////////////////////////////
-    // AUTO SIZE
-    ////////////////////////////////////////
-
-    updateSize() {
-
-        // AUTO WIDTH
-        if (
-            this.widthAuto &&
-            this.layoutWidth === null
-        ) {
-        
-            const columnWidths =
-                this.getColumnWidths();
-        
-            const totalColumnsWidth =
-                columnWidths.reduce(
-                    (total, width) =>
-                        total + width,
-                    0
-                );
-        
-            const totalGap =
-                Math.max(
-                    0,
-                    columnWidths.length - 1
-                ) *
-                this.gap;
-        
-            this.width =
-                this.padding.left +
-                totalColumnsWidth +
-                totalGap +
-                this.padding.right;
-        }
-
-        // AUTO HEIGHT
-        if (
-            this.heightAuto &&
-            this.layoutHeight === null
-        ) {
-        
-            const rowHeights =
-                this.getRowHeights();
-        
-            const totalRowsHeight =
-                rowHeights.reduce(
-                    (total, height) =>
-                        total + height,
-                    0
-                );
-        
-            const totalGap =
-                Math.max(
-                    0,
-                    rowHeights.length - 1
-                ) *
-                this.gap;
-        
-            this.height =
-                this.padding.top +
-                totalRowsHeight +
-                totalGap +
-                this.padding.bottom;
-        }
-
-        return this;
     }
 
     ////////////////////////////////////////

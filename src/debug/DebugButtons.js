@@ -1,13 +1,3 @@
-import Stack from '../layout/Stack.js';
-import Spacer from '../layout/Spacer.js';
-import Row from '../layout/Row.js';
-import Column from '../layout/Column.js';
-import Card from '../components/Card.js';
-import Text from '../components/Text.js';
-import Button from '../components/Button.js';
-import ScrollView from '../layout/ScrollView.js';
-import Grid from '../layout/Grid.js';
-import Section from '../layout/Section.js';
 import Debug from '../core/Debug.js';
 import createMiscTests from './tests/miscTests.js';
 import createRowTests from './tests/rowTests.js';
@@ -15,6 +5,7 @@ import createConstraintTests from './tests/constraintTests.js';
 import createScrollTests from './tests/scrollTests.js';
 import createStackTests from './tests/stackTests.js';
 import createColumnTests from './tests/columnTests.js';
+import createGridTests from './tests/gridTests.js';
 
 export default class DebugButtons {
 
@@ -48,6 +39,8 @@ export default class DebugButtons {
     }
 
     setupButtons() {
+//******************************
+        this.addButton('GRID Tests', () => this.gridCycle());
 //******************************
         this.addButton('COLUMN Tests', () => this.columnCyle());
 //******************************
@@ -84,9 +77,8 @@ export default class DebugButtons {
 
             console.log('========');
         });
-        
 //******************************
-        this.addButton('DEBUG', () => {
+        this.addButton('DEBUG STATS', () => {
         
             const root =
                 this.testComponents[0];
@@ -100,7 +92,29 @@ export default class DebugButtons {
     
             //console.log('==== TREE ====');
         
-            Debug.tree(root)
+            Debug.inspect(root, {
+                tree: true,
+                recursive: true
+            });
+            //console.log('========');
+        
+        });
+//******************************
+        this.addButton('DEBUG TREE', () => {
+        
+            const root =
+                this.testComponents[0];
+        
+            if (!root) {
+                console.warn(
+                    'No test component to inspect.'
+                );
+                return;
+            }
+    
+            //console.log('==== TREE ====');
+        
+            Debug.tree(root);
             //console.log('========');
         
         });
@@ -203,6 +217,9 @@ export default class DebugButtons {
             
         this.columnTests =
             createColumnTests(this);
+        
+        this.gridTests =
+            createGridTests(this);
 
         // ==========================================
         // CYCLE
@@ -225,6 +242,9 @@ export default class DebugButtons {
         
         this.columnCyle = 
             this.createClickCycle(this.columnTests);
+        
+        this.gridCycle =
+            this.createClickCycle(this.gridTests);
 
     }
 

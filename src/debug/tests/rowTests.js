@@ -16,7 +16,8 @@ export default function createRowTests(debug) {
         scene,
         width,
         height,
-        destroyTest,
+        state,
+        resetTest,
         addTest
     } = debug;
 
@@ -24,9 +25,133 @@ export default function createRowTests(debug) {
 
     return [
 
+// ========================================
+// ROW — MEASUREMENT / ALLOCATION
+// ========================================
+
+// 1. INITIAL
 () => {
 
-    destroyTest();
+    resetTest();
+
+    state.root =
+        new Row(scene, {
+            x: 100,
+            y: 100,
+
+            width: 500,
+
+            padding: 30,
+            gap: 20
+        });
+
+    state.cardA =
+        new Card(scene, {
+            padding: 20
+        });
+
+    state.textA =
+        new Text(scene, {
+            text: 'First card'
+        });
+
+    state.cardA.add(
+        state.textA
+    );
+
+    state.cardB =
+        new Card(scene, {
+            padding: 20
+        });
+
+    state.textB =
+        new Text(scene, {
+            text: 'Second card'
+        });
+
+    state.cardB.add(
+        state.textB
+    );
+
+    state.root.add(
+        state.cardA
+    );
+
+    state.root.add(
+        state.cardB
+    );
+
+    addTest(state.root);
+},
+
+// 2. CHANGE FIRST TEXT
+() => {
+
+    state.textA.setText(
+        'First card now has substantially more text.'
+    );
+},
+
+// 3. CHANGE SECOND TEXT
+() => {
+
+    state.textB.setText(
+        'Second card also has substantially more text.'
+    );
+},
+
+// 4. APPLY CARD FILL
+() => {
+
+    state.root.setChildOptions(
+        state.cardA,
+        {
+            fill: 'vertical'
+        }
+    );
+
+    state.root.setChildOptions(
+        state.cardB,
+        {
+            fill: 'vertical'
+        }
+    );
+},
+
+// 5. CHANGE TEXT WHILE FILLED
+() => {
+
+    state.textA.setText(
+        'First card becomes much longer while its Card is vertically allocated.'
+    );
+
+    state.textB.setText(
+        'Second card becomes much longer while its Card is vertically allocated.'
+    );
+},
+
+// 6. CLEAR FILL
+() => {
+
+    state.root.setChildOptions(
+        state.cardA,
+        {
+            fill: null
+        }
+    );
+
+    state.root.setChildOptions(
+        state.cardB,
+        {
+            fill: null
+        }
+    );
+    console.log('END');
+},
+
+() => {
+
+    resetTest();
 
     const root = new Row(scene, {
         name: 'root',
@@ -91,7 +216,7 @@ export default function createRowTests(debug) {
 
 () => {
 
-    destroyTest();
+    resetTest();
 
     const root = new Row(scene, {
         name: 'root',
@@ -138,7 +263,7 @@ export default function createRowTests(debug) {
 
 () => {
 
-    destroyTest();
+    resetTest();
 
     const root = new Row(scene, {
         name: 'root',
@@ -227,7 +352,7 @@ export default function createRowTests(debug) {
 
 () => {
 
-    destroyTest();
+    resetTest();
 
     const root = new Row(scene, {
         name: 'root',
@@ -319,7 +444,7 @@ export default function createRowTests(debug) {
 
 () => {
 
-    destroyTest();
+    resetTest();
 
     const root = new Row(scene, {
         name: 'root',
@@ -396,7 +521,7 @@ export default function createRowTests(debug) {
 
 () => {
 
-    destroyTest();
+    resetTest();
 
     const root = new Row(scene, {
         name: 'root',
@@ -471,7 +596,7 @@ export default function createRowTests(debug) {
 
 () => {
 
-    destroyTest();
+    resetTest();
 
     const root = new Row(scene, {
         name: 'root',
@@ -546,7 +671,7 @@ export default function createRowTests(debug) {
 
 () => {
 
-    destroyTest();
+    resetTest();
 
     const root = new Row(scene, {
         name: 'root',
@@ -635,7 +760,7 @@ export default function createRowTests(debug) {
 
 () => {
 
-    destroyTest();
+    resetTest();
 
     const root = new Row(scene, {
         name: 'root',
@@ -724,7 +849,7 @@ export default function createRowTests(debug) {
 
 () => {
 
-    destroyTest();
+    resetTest();
 
     const root = new Row(scene, {
         name: 'root',
@@ -813,7 +938,7 @@ export default function createRowTests(debug) {
 
 () => {
 
-    destroyTest();
+    resetTest();
 
     const root = new Row(scene, {
         name: 'root',
@@ -902,7 +1027,7 @@ export default function createRowTests(debug) {
 
 () => {
 
-    destroyTest();
+    resetTest();
 
     const root = new Row(scene, {
         name: 'root',
@@ -973,7 +1098,7 @@ export default function createRowTests(debug) {
 
 () => {
 
-    destroyTest();
+    resetTest();
 
     const root = new Row(scene, {
         name: 'root',
@@ -1047,7 +1172,7 @@ export default function createRowTests(debug) {
 
 () => {
 
-    destroyTest();
+    resetTest();
 
     const root = new Row(scene, {
         name: 'root',
@@ -1125,7 +1250,7 @@ export default function createRowTests(debug) {
 
 () => {
 
-    destroyTest();
+    resetTest();
 
     const root = new Row(scene, {
         name: 'root',
@@ -1199,7 +1324,7 @@ export default function createRowTests(debug) {
 
 () => {
 
-    destroyTest();
+    resetTest();
 
     const root = new Row(scene, {
         name: 'root',
@@ -1272,7 +1397,7 @@ export default function createRowTests(debug) {
 
 () => {
 
-    destroyTest();
+    resetTest();
 
     const root = new Row(scene, {
         name: 'root',
@@ -1345,7 +1470,7 @@ export default function createRowTests(debug) {
 
 () => {
 
-    destroyTest();
+    resetTest();
 
     const root = new Row(scene, {
         name: 'root',
@@ -1411,7 +1536,7 @@ export default function createRowTests(debug) {
 
 () => {
 
-    destroyTest();
+    resetTest();
 
     // ----------------------------------
     // ROOT ROW
@@ -1526,7 +1651,7 @@ export default function createRowTests(debug) {
 
 () => {
 
-    destroyTest();
+    resetTest();
 
     // ----------------------------------
     // ROOT ROW
@@ -1648,7 +1773,7 @@ export default function createRowTests(debug) {
 // ==================================
 
 () => {
-    destroyTest();
+    resetTest();
 
     // ----------------------------------
     // ROOT ROW
@@ -1796,7 +1921,7 @@ export default function createRowTests(debug) {
 
 () => {
 
-    destroyTest();
+    resetTest();
 
     // ----------------------------------
     // ROOT ROW
@@ -1909,7 +2034,7 @@ export default function createRowTests(debug) {
 
 () => {
 
-    destroyTest();
+    resetTest();
 
     const root = new Row(scene, {
         name: 'root',
@@ -1976,7 +2101,7 @@ export default function createRowTests(debug) {
 
 () => {
 
-    destroyTest();
+    resetTest();
 
     const root = new Row(scene, {
         name: 'root',
@@ -2052,7 +2177,7 @@ export default function createRowTests(debug) {
 
 () => {
 
-    destroyTest();
+    resetTest();
 
     const root = new Row(scene, {
         name: 'root',
@@ -2118,7 +2243,7 @@ export default function createRowTests(debug) {
 
 () => {
 
-    destroyTest();
+    resetTest();
 
     const root = new Row(scene, {
         name: 'root',
@@ -2215,7 +2340,7 @@ export default function createRowTests(debug) {
 
 () => {
 
-    destroyTest();
+    resetTest();
 
     const root = new Row(scene, {
         name: 'root',
@@ -2311,7 +2436,7 @@ export default function createRowTests(debug) {
 
 () => {
 
-    destroyTest();
+    resetTest();
 
     const root = new Row(scene, {
         name: 'root',
@@ -2372,7 +2497,7 @@ export default function createRowTests(debug) {
 
 () => {
 
-    destroyTest();
+    resetTest();
 
     const root = new Row(scene, {
         name: 'root',
@@ -2433,7 +2558,7 @@ export default function createRowTests(debug) {
 
 () => {
 
-    destroyTest();
+    resetTest();
 
     const root = new Row(scene, {
         name: 'root',
