@@ -176,6 +176,17 @@ export default class Grid extends Container {
         this.beginLayout();
 
         // ==================================
+        // MEASURE DIRTY CHILDREN
+        // ==================================
+        
+          for (const child of this.children) {
+        
+                if (child.layoutDirty) {
+                    child.layout();
+                }
+            }
+
+        // ==================================
         // 2. DETERMINE INITIAL TRACKS
         // ==================================
     
@@ -1085,7 +1096,7 @@ export default class Grid extends Container {
     ////////////////////////////////////////
     
     getColumnWidths() {
-    
+
         const columns =
             this.getColumnCount();
     
