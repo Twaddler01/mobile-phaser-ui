@@ -83,7 +83,7 @@ export default class DebugButtons {
         });
         
 //******************************
-        this.addButton('INSPECT', () => {
+        this.addButton('DEBUG', () => {
         
             const root =
                 this.testComponents[0];
@@ -95,7 +95,7 @@ export default class DebugButtons {
                 return;
             }
     
-            console.log('==== INSPECT ALL ====');
+            console.log('==== TREE ====');
         
             Debug.tree(root)
             console.log('========');

@@ -24,6 +24,72 @@ export default function createStackTests(debug) {
 
     return [
 
+// ==================================
+// NESTED MEASUREMENT / ALLOCATION
+// ==================================
+
+() => {
+console.log('INIT - NESTED MEASUREMENT / ALLOCATION');
+    resetTest();
+
+    state.root =
+        new Stack(scene, {
+            x: 100,
+            y: 100,
+            width: 500,
+            height: 400,
+            padding: 30
+        });
+
+    state.card =
+        new Card(scene, {
+            padding: 20
+        });
+
+    state.text =
+        new Text(scene, {
+            text: 'Initial text'
+        });
+
+    state.card.add(state.text);
+
+    state.root.add(state.card);
+
+    addTest(state.root);
+},
+
+// 2. CHANGE TEXT CONTENT
+() => {
+console.log('CHANGE TEXT CONTENT');
+    state.text.setText(
+        'This is substantially longer text.'
+    );
+},
+
+// 3. APPLY CARD FILL
+() => {
+console.log('APPLY CARD FILL');
+    state.root.setChildOptions(state.card, {
+        fill: true
+    });
+},
+
+// 4. CHANGE TEXT WHILE CARD IS FILLED
+() => {
+console.log('CHANGE TEXT WHILE CARD IS FILLED');
+    state.text.setText(
+        'This is an even longer piece of text that should change the intrinsic measurement while the Card remains allocated by the Stack.'
+    );
+},
+
+// 5. CLEAR CARD FILL
+() => {
+console.log('CLEAR CARD FILL');
+    state.root.setChildOptions(state.card, {
+        fill: null
+    });
+},
+
 // 1. INITIAL (MEASUREMENT CHANGE)
 () => {
     resetTest();
