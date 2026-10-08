@@ -7,15 +7,15 @@ export default class Stack extends Container {
 
         super(scene, config);
 
-        this.padding =
-            this.getPadding(config.padding);
-
     }
 
     updateSize() {
 
-        // AUTO WIDTH
-        if (this.widthAuto) {
+        // WIDTH
+        if (this.layoutWidth !== null) {
+            this.width = this.layoutWidth;
+        
+        } else if (this.widthAuto) {
 
             const contentWidth =
                 this.children.reduce(
@@ -51,8 +51,11 @@ export default class Stack extends Container {
                 this.padding.right;
         }
 
-        // AUTO HEIGHT
-        if (this.heightAuto) {
+        // HEIGHT
+        if (
+            this.heightAuto &&
+            this.layoutHeight === null
+        ) {
 
             const contentHeight =
                 this.children.reduce(
@@ -91,220 +94,225 @@ export default class Stack extends Container {
         return this;
     }
 
-    getPadding(padding = 0) {
-
-        if (typeof padding === 'number') {
-
-            return {
-                top: padding,
-                right: padding,
-                bottom: padding,
-                left: padding
-            };
-        }
-
-        return {
-            top: padding.top ?? 0,
-            right: padding.right ?? 0,
-            bottom: padding.bottom ?? 0,
-            left: padding.left ?? 0
-        };
-    }
-
     layout() {
-
-        Debug.clearLayoutBounds(this);
-
-        // Resolve child layouts first.
-        for (const child of this.children) {
-
-            if (
-                child.layoutDirty &&
-                typeof child.layout === 'function'
-            ) {
-                child.layout();
-            }
-        }
-
-        this.updateSize();
-
+    
+        this.beginLayout();
+    
+        ////////////////////////////////////////
+        // 1. GET CONSTRAINTS
+        //
+        // Determine the dimensions this Stack
+        // already knows from itself / its parent.
+        ////////////////////////////////////////
+    
+        const constraints =
+            this.getLayoutConstraints();
+    
+        const {
+            width: layoutWidth,
+            height: layoutHeight,
+            contentWidth,
+            contentHeight
+        } = constraints;
+    
+        ////////////////////////////////////////
+        // 2. ALLOCATE CHILD CONSTRAINTS
+        //
+        // Stack gives each child access to the
+        // same content area.
+        //
+        // No sequential allocation occurs.
+        // Each child resolves independently.
+        ////////////////////////////////////////
+        
         const availableWidth =
-            this.width -
-            this.padding.left -
-            this.padding.right;
-
+            contentWidth;
+        
         const availableHeight =
-            this.height -
-            this.padding.top -
-            this.padding.bottom;
+            contentHeight;
+            
+        ////////////////////////////////////////
+        // 3. RESOLVE CHILDREN
+        //
+        // Apply newly assigned constraints.
+        //
+        // If a child's constraint changes, resolve
+        // that child immediately so its final measured
+        // size is available to this Stack.
+        ////////////////////////////////////////
+        
+        this.resolveChildren(
+            availableWidth,
+            availableHeight
+        );
 
         ////////////////////////////////////////
-        // POSITION CHILDREN
+        // 4. MEASURE FINAL SIZE
+        //
+        // All children have now responded to their
+        // constraints, so Stack can measure itself
+        // using their final dimensions.
         ////////////////////////////////////////
-
+    
+        this.updateSize();
+    
+        ////////////////////////////////////////
+        // RE-CAPTURE FINAL DIMENSIONS
+        //
+        // updateSize() may have changed this Stack's
+        // intrinsic width/height.
+        ////////////////////////////////////////
+    
+        const finalConstraints =
+            this.getLayoutConstraints();
+    
+        const {
+            width: finalLayoutWidth,
+            height: finalLayoutHeight,
+            contentWidth: finalContentWidth,
+            contentHeight: finalContentHeight
+        } = finalConstraints;
+    
+        ////////////////////////////////////////
+        // 5. POSITION CHILDREN
+        //
+        // Each child occupies the Stack's content
+        // area and is positioned according to its
+        // own alignment and margins.
+        ////////////////////////////////////////
+        
         for (const child of this.children) {
-
+        
             const options =
                 this.childLayoutOptions.get(child);
-
+        
             if (!options) {
                 continue;
             }
-
-            const {
-                margin
-            } = options;
-
-            ////////////////////////////////////////
-            // AVAILABLE AREA
-            ////////////////////////////////////////
-
+        
+            const { margin } = options;
+        
             const childWidth =
                 this.resolveChildWidth(
                     child,
                     options,
-                    availableWidth
+                    finalContentWidth
                 );
-            
+        
             const childHeight =
                 this.resolveChildHeight(
                     child,
                     options,
-                    availableHeight
+                    finalContentHeight
                 );
-
-            ////////////////////////////////////////
-            // APPLY LAYOUT SIZE
-            ////////////////////////////////////////
-
-            const layoutSizeChanged =
-                this.applyChildLayout(
-                    child,
-                    options,
-                    childWidth,
-                    childHeight
-                );
-            
-            if (layoutSizeChanged) {
-                child.layout();
-            }
-
+        
+            const resolvedWidth =
+                childWidth ?? 0;
+        
+            const resolvedHeight =
+                childHeight ?? 0;
+        
             ////////////////////////////////////////
             // HORIZONTAL ALIGNMENT
             ////////////////////////////////////////
-
+        
             const outerWidth =
                 margin.left +
-                childWidth +
+                resolvedWidth +
                 margin.right;
-
+        
             let outerX;
-
+        
             switch (options.horizontalAlign) {
-
+        
                 case 'center':
-
+        
                     outerX =
                         this.padding.left +
                         (
-                            availableWidth -
+                            finalContentWidth -
                             outerWidth
                         ) / 2;
-
+        
                     break;
-
+        
                 case 'end':
-
+        
                     outerX =
-                        this.width -
+                        finalLayoutWidth -
                         this.padding.right -
                         outerWidth;
-
+        
                     break;
-
+        
                 case 'start':
                 default:
-
+        
                     outerX =
                         this.padding.left;
-
+        
                     break;
             }
-
+        
             ////////////////////////////////////////
             // VERTICAL ALIGNMENT
             ////////////////////////////////////////
-
+        
             const outerHeight =
                 margin.top +
-                childHeight +
+                resolvedHeight +
                 margin.bottom;
-
+        
             let outerY;
-
+        
             switch (options.verticalAlign) {
-
+        
                 case 'center':
-
+        
                     outerY =
                         this.padding.top +
                         (
-                            availableHeight -
+                            finalContentHeight -
                             outerHeight
                         ) / 2;
-
+        
                     break;
-
+        
                 case 'end':
-
+        
                     outerY =
-                        this.height -
+                        finalLayoutHeight -
                         this.padding.bottom -
                         outerHeight;
-
+        
                     break;
-
+        
                 case 'start':
                 default:
-
+        
                     outerY =
                         this.padding.top;
-
+        
                     break;
             }
-
+        
             ////////////////////////////////////////
-            // DEBUG
+            // REPOSITION
             ////////////////////////////////////////
-
-            Debug.drawLayoutBounds(
-                this,
-                outerX,
-                outerY,
-                outerWidth,
-                outerHeight,
-                Debug.layout.stack.borderColor
-            );
-
-            ////////////////////////////////////////
-            // REPOSITION CHILD
-            ////////////////////////////////////////
-
+        
             child.setPosition(
                 outerX + margin.left,
                 outerY + margin.top
             );
-
         }
 
-        this.layoutDirty = false;
-
-        Debug.updateBounds(this);
-
-        return this;
+        ////////////////////////////////////////
+        // 6. FINALIZE
+        ////////////////////////////////////////
+    
+        this.finishLayout();
     }
 }
-
 /*
 const stack = new Stack(this, {
 

@@ -13,6 +13,7 @@ import createMiscTests from './tests/miscTests.js';
 import createRowTests from './tests/rowTests.js';
 import createConstraintTests from './tests/constraintTests.js';
 import createScrollTests from './tests/scrollTests.js';
+import createStackTests from './tests/stackTests.js';
 
 export default class DebugButtons {
 
@@ -46,6 +47,8 @@ export default class DebugButtons {
     }
 
     setupButtons() {
+//******************************
+        this.addButton('STACK Tests', () => this.stackCycle());
 //******************************
         this.addButton('SCROLL Tests', () => this.scrollCycle());
 //******************************
@@ -148,11 +151,13 @@ export default class DebugButtons {
 
         };
 
+        // Stores layout state
         this.state = {};
     
         this.resetTest = () => {
             this.destroyTest();
         
+            // Deleting keys ensures no leftovers
             for (const key of Object.keys(this.state)) {
                 delete this.state[key];
             }
@@ -193,6 +198,9 @@ export default class DebugButtons {
 
         this.scrollTests =
             createScrollTests(this);
+        
+        this.stackTests =
+            createStackTests(this);
 
         // ==========================================
         // CYCLE
@@ -209,6 +217,9 @@ export default class DebugButtons {
         
         this.scrollCycle =
             this.createClickCycle(this.scrollTests);
+
+        this.stackCycle =
+            this.createClickCycle(this.stackTests);
 
     }
 
