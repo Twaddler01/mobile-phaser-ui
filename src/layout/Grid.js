@@ -176,7 +176,7 @@ export default class Grid extends Container {
         this.beginLayout();
 
         // ==================================
-        // MEASURE DIRTY CHILDREN
+        // 2. MEASURE DIRTY CHILDREN
         // ==================================
         
           for (const child of this.children) {
@@ -187,7 +187,7 @@ export default class Grid extends Container {
             }
 
         // ==================================
-        // 2. DETERMINE INITIAL TRACKS
+        // 3. DETERMINE INITIAL TRACKS
         // ==================================
     
         this.updateSize();
@@ -199,7 +199,7 @@ export default class Grid extends Container {
             this.getRowHeightsForLayout();
     
         // ==================================
-        // 3. ALLOCATE BOTH AXES
+        // 4. ALLOCATE BOTH AXES
         // ==================================
     
         const childCells =
@@ -266,7 +266,7 @@ export default class Grid extends Container {
                 );
                 
             // ==================================
-            // 4. CONSTRAIN
+            // 5. CONSTRAIN
             // ==================================
     
             const layoutSizeChanged =
@@ -278,7 +278,7 @@ export default class Grid extends Container {
                 );
     
             // ==================================
-            // 5. RESOLVE CHILD
+            // 6. RESOLVE CHILD
             // ==================================
     
             if (
@@ -290,14 +290,14 @@ export default class Grid extends Container {
         }
     
         // ==================================
-        // 6. MEASURE
+        // 7. MEASURE
         // ==================================
 
         const resolvedRowHeights =
             this.getResolvedRowHeights();
         
         // ==================================
-        // 7A. FINAL TRACKS
+        // 8. FINAL TRACKS
         // ==================================
         
         if (
@@ -330,7 +330,7 @@ export default class Grid extends Container {
         }
         
         // ==================================
-        // 7B. FINAL ALLOCATION
+        // 9. FINAL ALLOCATION
         // ==================================
         
         for (const child of this.children) {
@@ -403,7 +403,7 @@ export default class Grid extends Container {
                 child.layout();
             }
         }
-////
+
         const columns = this.getColumnCount();
         const rows = this.getRowCount();
 
@@ -436,7 +436,7 @@ export default class Grid extends Container {
         }
 
         ////////////////////////////////////////
-        // FINAL POSITIONING OF CHILDREN
+        // 10. FINAL POSITIONING OF CHILDREN
         ////////////////////////////////////////
         
         for (const child of this.children) {
@@ -591,6 +591,10 @@ export default class Grid extends Container {
 
         }
 
+        // ==================================
+        // 11. FINISH GRID
+        // ==================================
+    
         this.finishLayout();
     }
 

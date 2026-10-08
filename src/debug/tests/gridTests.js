@@ -9,6 +9,7 @@ import Button from '../../components/Button.js';
 import ScrollView from '../../layout/ScrollView.js';
 import Grid from '../../layout/Grid.js';
 import Section from '../../layout/Section.js';
+import Debug from '../../core/Debug.js';
 
 export default function createGridTests(debug) {
 
@@ -21,7 +22,110 @@ export default function createGridTests(debug) {
         addTest
     } = debug;
 
+    const debugCheck = () => {
+        Debug.tree(state.root);
+    };
+    //setTimeout(debugCheck, 2000);
+
     return [
+
+// ==================================
+// GRID INSIDE SCROLLVIEW
+// ==================================
+
+() => {
+
+    resetTest();
+
+    console.log(
+        'GRID INSIDE SCROLLVIEW'
+    );
+
+    console.log(
+        'Expected: Grid becomes larger than the viewport. ' +
+        'Both horizontal and vertical scrolling should be possible.'
+    );
+
+    const scroll =
+        new ScrollView(scene, {
+
+            width:
+                width,
+
+            height:
+                height / 2,
+
+            padding: 20,
+
+            direction:
+                'both'
+        });
+
+    addTest(scroll);
+
+    const grid =
+        new Grid(scene, {
+
+            columns: 4,
+
+            padding: 20,
+
+            gap: 20
+        });
+
+    scroll.add(grid, {
+
+        width: null,
+
+        height: null
+    });
+
+    for (let i = 1; i <= 24; i++) {
+
+        const card =
+            new Card(scene, {
+
+                width: 200,
+
+                height: 100,
+
+                style: {
+
+                    backgroundColor:
+                        i % 2 === 0
+                            ? 0xdddddd
+                            : 0xbbbbbb,
+
+                    radius: 8,
+
+                    stroke: 2,
+
+                    strokeColor: 0xffffff
+                }
+            });
+
+        const text =
+            new Text(scene, {
+
+                text:
+                    `Card ${i}`,
+
+                color:
+                    '0x000000'
+            });
+
+        card.add(text, {
+
+            horizontalAlign:
+                'center',
+
+            verticalAlign:
+                'center'
+        });
+
+        grid.add(card);
+    }
+},
 
 // ========================================
 // GRID — MEASUREMENT / ALLOCATION
@@ -98,6 +202,7 @@ export default function createGridTests(debug) {
     state.textA.setText(
         'First card now has substantially more text.'
     );
+
 },
 
 // 3. CHANGE SECOND CARD
@@ -106,6 +211,7 @@ export default function createGridTests(debug) {
     state.textB.setText(
         'Second card also has substantially more text.'
     );
+
 },
 
 // 4. CHANGE THIRD CARD
@@ -114,6 +220,7 @@ export default function createGridTests(debug) {
     state.textC.setText(
         'Third card becomes substantially taller and wider.'
     );
+
 },
 
 // 5. APPLY CARD FILL
@@ -139,6 +246,7 @@ export default function createGridTests(debug) {
             fill: true
         }
     );
+
 },
 
 // 6. CHANGE TEXT WHILE FILLED
