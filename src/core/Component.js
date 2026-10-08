@@ -16,6 +16,11 @@ export default class Component {
         this.layoutWidth = null;
         this.layoutHeight = null;
 
+        // Preserve intrinsic measurement while parent
+        // controls the effective layout size.
+        this.measuredWidth = this.width;
+        this.measuredHeight = this.height;
+
         this.id =
             config.id ?? null;
         
