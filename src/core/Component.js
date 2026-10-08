@@ -341,7 +341,7 @@ export default class Component {
     // height → use intrinsic height
 
     setLayoutSize(width = null, height = null) {
-
+    
         const changed =
             this.layoutWidth !== width ||
             this.layoutHeight !== height;
@@ -350,15 +350,41 @@ export default class Component {
             return false;
         }
     
+        // Capture intrinsic measurement before
+        // parent allocation replaces the effective size.
+        if (
+            this.layoutWidth === null &&
+            width !== null
+        ) {
+            this.measuredWidth = this.width;
+        }
+    
+        if (
+            this.layoutHeight === null &&
+            height !== null
+        ) {
+            this.measuredHeight = this.height;
+        }
+    
         this.layoutWidth = width;
         this.layoutHeight = height;
-
+    
+        // Returning to intrinsic sizing.
+        if (width === null) {
+            this.width = this.measuredWidth;
+        }
+    
+        if (height === null) {
+            this.height = this.measuredHeight;
+        }
+    
         this.markLayoutDirty();
     
         return true;
     }
 
     setMeasuredSize(width, height) {
+    
         const changed =
             this.width !== width ||
             this.height !== height;
@@ -370,9 +396,20 @@ export default class Component {
         this.width = width;
         this.height = height;
     
+        this.measuredWidth = width;
+        this.measuredHeight = height;
+    
         this.markLayoutDirty();
     
         return true;
+    }
+
+    getMeasuredWidth() {
+        return this.measuredWidth;
+    }
+    
+    getMeasuredHeight() {
+        return this.measuredHeight;
     }
 
     getLayoutConstraints() {

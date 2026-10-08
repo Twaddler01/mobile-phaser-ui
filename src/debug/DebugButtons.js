@@ -97,11 +97,7 @@ export default class DebugButtons {
     
             console.log('==== INSPECT ALL ====');
         
-            Debug.inspect(root, {
-                stats: true,
-                tree: true,
-                recursive: true
-            });
+            Debug.tree(root)
             console.log('========');
         
         });

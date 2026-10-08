@@ -607,7 +607,8 @@ class Debug {
             if (settings.showMeasured) {
             
                 details.push(
-                    `measured:${node.width}×${node.height}`
+                    `measured:${node.getMeasuredWidth()}×` +
+                    `${node.getMeasuredHeight()}`
                 );
             }
     
@@ -844,12 +845,10 @@ class Debug {
             ////////////////////////////////////////
             
             measured: {
-            
-                width:
-                    component.width,
-            
-                height:
-                    component.height
+
+                width: component.getMeasuredWidth(),
+                height: component.getMeasuredHeight()
+
             },
             
             ////////////////////////////////////////

@@ -24,6 +24,50 @@ export default function createStackTests(debug) {
 
     return [
 
+// 1. INITIAL (MEASUREMENT CHANGE)
+() => {
+    resetTest();
+
+    state.stack = new Stack(scene, {
+        width: 500,
+        height: 400
+    });
+
+    state.card = new Card(scene, {
+        width: 100,
+        height: 100
+    });
+
+    state.stack.add(state.card);
+
+    addTest(state.stack);
+
+},
+
+// 2. LIVE DIMENSION CHANGE
+() => {
+    state.card.setMeasuredSize(200, 150);
+},
+
+// 3. APPLY FILL
+() => {
+    state.stack.setChildOptions(state.card, {
+        fill: true
+    });
+},
+
+// 4. CHANGE INTRINSIC SIZE WHILE FILLED
+() => {
+    state.card.setMeasuredSize(300, 200);
+},
+
+// 5. CLEAR FILL
+() => {
+    state.stack.setChildOptions(state.card, {
+        fill: null
+    });
+},
+
 // ==================================
 // 7. STACK → LIVE FILL
 // ==================================
