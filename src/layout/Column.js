@@ -36,30 +36,36 @@ export default class Column extends Container {
 
     updateSize() {
     
-        // AUTO WIDTH
-        if (this.layoutWidth !== null) {
-
-            this.width = this.layoutWidth;
-
-        } else if (this.widthAuto) {
-
+        ////////////////////////////////////////
+        // 1. MEASURE INTRINSIC WIDTH
+        ////////////////////////////////////////
+    
+        let measuredWidth =
+            this.measuredWidth;
+    
+        if (
+            this.layoutWidth === null &&
+            this.widthAuto
+        ) {
+    
             const contentWidth =
                 this.children.reduce(
                     (max, child) => {
-
+    
                         const options =
                             this.childLayoutOptions.get(child);
-
+    
                         if (!options) {
                             return max;
                         }
-
+    
                         const childWidth =
                             options.width ??
                             child.getLayoutWidth();
-
-                        const { margin } = options;
-
+    
+                        const { margin } =
+                            options;
+    
                         return Math.max(
                             max,
                             margin.left +
@@ -69,17 +75,23 @@ export default class Column extends Container {
                     },
                     0
                 );
-
-            this.width =
+    
+            measuredWidth =
                 this.padding.left +
                 contentWidth +
                 this.padding.right;
         }
     
-        // AUTO HEIGHT
+        ////////////////////////////////////////
+        // 2. MEASURE INTRINSIC HEIGHT
+        ////////////////////////////////////////
+    
+        let measuredHeight =
+            this.measuredHeight;
+    
         if (
-            this.heightAuto &&
-            this.layoutHeight === null
+            this.layoutHeight === null &&
+            this.heightAuto
         ) {
     
             const contentHeight =
@@ -114,10 +126,46 @@ export default class Column extends Container {
                     this.children.length - 1
                 ) * this.gap;
     
-            this.height =
+            measuredHeight =
                 this.padding.top +
                 contentHeight +
                 this.padding.bottom;
+        }
+    
+        ////////////////////////////////////////
+        // 3. COMMIT MEASURED SIZE
+        ////////////////////////////////////////
+    
+        this.measuredWidth =
+            measuredWidth;
+    
+        this.measuredHeight =
+            measuredHeight;
+    
+        ////////////////////////////////////////
+        // 4. APPLY EFFECTIVE SIZE
+        ////////////////////////////////////////
+    
+        if (this.layoutWidth !== null) {
+    
+            this.width =
+                this.layoutWidth;
+    
+        } else {
+    
+            this.width =
+                measuredWidth;
+        }
+    
+        if (this.layoutHeight !== null) {
+    
+            this.height =
+                this.layoutHeight;
+    
+        } else {
+    
+            this.height =
+                measuredHeight;
         }
     
         return this;

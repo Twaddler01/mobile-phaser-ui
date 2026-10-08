@@ -86,174 +86,38 @@ export default class Card extends Container {
         return this;
     }
 
-updateSize() {
-
-    ////////////////////////////////////////
-    // 1. MEASURE INTRINSIC WIDTH
-    ////////////////////////////////////////
-
-    let measuredWidth =
-        this.measuredWidth;
-
-    if (
-        this.layoutWidth === null &&
-        this.widthAuto
-    ) {
-
-        let contentWidth = 0;
-
-        for (const child of this.children) {
-
-            const options =
-                this.childLayoutOptions.get(child);
-
-            if (!options) {
-                continue;
-            }
-
-            const childWidth =
-                options.width ??
-                child.getLayoutWidth();
-
-            const { margin } =
-                options;
-
-            contentWidth =
-                Math.max(
-                    contentWidth,
-                    margin.left +
-                    childWidth +
-                    margin.right
-                );
-        }
-
-        measuredWidth =
-            this.padding.left +
-            contentWidth +
-            this.padding.right;
-    }
-
-    ////////////////////////////////////////
-    // 2. MEASURE INTRINSIC HEIGHT
-    ////////////////////////////////////////
-
-    let measuredHeight =
-        this.measuredHeight;
-
-    if (
-        this.layoutHeight === null &&
-        this.heightAuto
-    ) {
-
-        let contentHeight = 0;
-
-        for (const child of this.children) {
-
-            const options =
-                this.childLayoutOptions.get(child);
-
-            if (!options) {
-                continue;
-            }
-
-            const childHeight =
-                options.height ??
-                child.getLayoutHeight();
-
-            const { margin } =
-                options;
-
-            contentHeight =
-                Math.max(
-                    contentHeight,
-                    margin.top +
-                    childHeight +
-                    margin.bottom
-                );
-        }
-
-        measuredHeight =
-            this.padding.top +
-            contentHeight +
-            this.padding.bottom;
-    }
-
-    ////////////////////////////////////////
-    // 3. COMMIT MEASURED SIZE
-    ////////////////////////////////////////
-
-    if (
-        measuredWidth !== this.measuredWidth ||
-        measuredHeight !== this.measuredHeight
-    ) {
-
-        this.measuredWidth =
-            measuredWidth;
-
-        this.measuredHeight =
-            measuredHeight;
-    }
-
-    ////////////////////////////////////////
-    // 4. APPLY EFFECTIVE SIZE
-    ////////////////////////////////////////
-
-    if (this.layoutWidth !== null) {
-
-        this.width =
-            this.layoutWidth;
-
-    } else {
-
-        this.width =
-            measuredWidth;
-    }
-
-    if (this.layoutHeight !== null) {
-
-        this.height =
-            this.layoutHeight;
-
-    } else {
-
-        this.height =
-            measuredHeight;
-    }
-
-    return this;
-}
-
-/*
     updateSize() {
-
+    
         ////////////////////////////////////////
-        // WIDTH
+        // 1. MEASURE INTRINSIC WIDTH
         ////////////////////////////////////////
     
-        if (this.layoutWidth !== null) {
-        
-            this.width =
-                this.layoutWidth;
-        
-        } else if (this.widthAuto) {
-        
+        let measuredWidth =
+            this.measuredWidth;
+    
+        if (
+            this.layoutWidth === null &&
+            this.widthAuto
+        ) {
+    
             let contentWidth = 0;
-        
+    
             for (const child of this.children) {
-        
+    
                 const options =
                     this.childLayoutOptions.get(child);
-        
+    
                 if (!options) {
                     continue;
                 }
-        
+    
                 const childWidth =
                     options.width ??
                     child.getLayoutWidth();
-        
-                const { margin } = options;
-        
+    
+                const { margin } =
+                    options;
+    
                 contentWidth =
                     Math.max(
                         contentWidth,
@@ -262,42 +126,43 @@ updateSize() {
                         margin.right
                     );
             }
-        
-            this.width =
+    
+            measuredWidth =
                 this.padding.left +
                 contentWidth +
                 this.padding.right;
         }
     
         ////////////////////////////////////////
-        // HEIGHT
+        // 2. MEASURE INTRINSIC HEIGHT
         ////////////////////////////////////////
     
-        if (this.layoutHeight !== null) {
-        
-            this.height =
-                this.layoutHeight;
-        
-        } else if (this.heightAuto) {
-        
+        let measuredHeight =
+            this.measuredHeight;
+    
+        if (
+            this.layoutHeight === null &&
+            this.heightAuto
+        ) {
+    
             let contentHeight = 0;
-        
+    
             for (const child of this.children) {
-        
+    
                 const options =
                     this.childLayoutOptions.get(child);
-        
+    
                 if (!options) {
                     continue;
                 }
-        
+    
                 const childHeight =
                     options.height ??
                     child.getLayoutHeight();
-        
+    
                 const { margin } =
                     options;
-        
+    
                 contentHeight =
                     Math.max(
                         contentHeight,
@@ -306,16 +171,58 @@ updateSize() {
                         margin.bottom
                     );
             }
-        
-            this.height =
+    
+            measuredHeight =
                 this.padding.top +
                 contentHeight +
                 this.padding.bottom;
         }
     
+        ////////////////////////////////////////
+        // 3. COMMIT MEASURED SIZE
+        ////////////////////////////////////////
+    
+        if (
+            measuredWidth !== this.measuredWidth ||
+            measuredHeight !== this.measuredHeight
+        ) {
+    
+            this.measuredWidth =
+                measuredWidth;
+    
+            this.measuredHeight =
+                measuredHeight;
+        }
+    
+        ////////////////////////////////////////
+        // 4. APPLY EFFECTIVE SIZE
+        ////////////////////////////////////////
+    
+        if (this.layoutWidth !== null) {
+    
+            this.width =
+                this.layoutWidth;
+    
+        } else {
+    
+            this.width =
+                measuredWidth;
+        }
+    
+        if (this.layoutHeight !== null) {
+    
+            this.height =
+                this.layoutHeight;
+    
+        } else {
+    
+            this.height =
+                measuredHeight;
+        }
+    
         return this;
     }
-*/
+
     layout() {
     
         this.beginLayout();

@@ -14,6 +14,7 @@ import createRowTests from './tests/rowTests.js';
 import createConstraintTests from './tests/constraintTests.js';
 import createScrollTests from './tests/scrollTests.js';
 import createStackTests from './tests/stackTests.js';
+import createColumnTests from './tests/columnTests.js';
 
 export default class DebugButtons {
 
@@ -47,6 +48,8 @@ export default class DebugButtons {
     }
 
     setupButtons() {
+//******************************
+        this.addButton('COLUMN Tests', () => this.columnCyle());
 //******************************
         this.addButton('STACK Tests', () => this.stackCycle());
 //******************************
@@ -95,10 +98,10 @@ export default class DebugButtons {
                 return;
             }
     
-            console.log('==== TREE ====');
+            //console.log('==== TREE ====');
         
             Debug.tree(root)
-            console.log('========');
+            //console.log('========');
         
         });
 //******************************
@@ -197,6 +200,9 @@ export default class DebugButtons {
         
         this.stackTests =
             createStackTests(this);
+            
+        this.columnTests =
+            createColumnTests(this);
 
         // ==========================================
         // CYCLE
@@ -216,6 +222,9 @@ export default class DebugButtons {
 
         this.stackCycle =
             this.createClickCycle(this.stackTests);
+        
+        this.columnCyle = 
+            this.createClickCycle(this.columnTests);
 
     }
 
