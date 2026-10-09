@@ -1,4 +1,5 @@
 // core/Debug.js
+import createComponentRegistry from "../builder/createComponentRegistry.js";
 
 class Debug {
     constructor(options = {}) {
@@ -937,6 +938,27 @@ class Debug {
 
             didDrag: component.didDrag
         };
+    }
+
+    ////////////////////////////////////////
+    // COMPONENT REGISTRY
+    ////////////////////////////////////////
+
+    componentRegistry() {
+        const registry = createComponentRegistry();
+        
+        console.table(
+            registry.getTypes().map(type => {
+                const descriptor = registry.get(type);
+        
+                return {
+                    type: descriptor.type,
+                    category: descriptor.category,
+                    properties: Object.keys(descriptor.properties).length,
+                    layoutOptions: Object.keys(descriptor.layoutOptions).length
+                };
+            })
+        );
     }
 
     ////////////////////////////////////////

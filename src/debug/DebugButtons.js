@@ -42,6 +42,8 @@ export default class DebugButtons {
 
     setupButtons() {
 //******************************
+        this.addButton('componentRegistry', () => Debug.componentRegistry(), { color: 0x001100 });
+//******************************
         this.addButton('GRID Tests', () => this.gridCycle(), { color: 0x004400 });
 //******************************
         this.addButton('COLUMN Tests', () => this.columnCyle(), { color: 0x004400 });

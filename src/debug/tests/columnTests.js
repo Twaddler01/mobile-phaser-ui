@@ -54,23 +54,21 @@ export default function createColumnTests(debug) {
 
     const cardA = new Card(scene, {
         id: 'cardA',
-        minHeight: 180
+        minHeight: 100
     });
-
+    
     const cardB = new Card(scene, {
         id: 'cardB',
-        minHeight: 0
+        maxHeight: 60
     });
-
-    // Inner Column children:
-    // Fill horizontally and vertically.
-    inner.add(cardA, {
-        fill: true
+    
+    const cardC = new Card(scene, {
+        id: 'cardC'
     });
-
-    inner.add(cardB, {
-        fill: true
-    });
+    
+    inner.add(cardA, { fill: true });
+    inner.add(cardB, { fill: true });
+    inner.add(cardC, { fill: true });
 
     // Outer Column children:
     outer.add(header, {
