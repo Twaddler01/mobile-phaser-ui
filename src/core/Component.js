@@ -1,60 +1,70 @@
-import Debug from './Debug.js';
-import LayoutConstraints from '../layout/LayoutConstraints.js';
+import Debug from "./Debug.js";
+import LayoutConstraints from "../layout/LayoutConstraints.js";
 
 export default class Component {
-
     constructor(scene, config = {}) {
-
         this.scene = scene;
 
-        this.defineLayoutProperties({
-            width: config.width ?? 0,
-            height: config.height ?? 0
-        });
+        this.requestedWidth = config.width ?? "auto";
 
-        // No parent has assigned this dimension
+        this.requestedHeight = config.height ?? "auto";
+
+        // Parent allocations; null means unallocated.
         this.layoutWidth = null;
         this.layoutHeight = null;
 
-        // Preserve intrinsic measurement while parent
-        // controls the effective layout size.
-        this.measuredWidth = this.width;
-        this.measuredHeight = this.height;
+        // Intrinsic measurements.
+        this.measuredWidth =
+            typeof this.requestedWidth === "number" ? this.requestedWidth : 0;
 
-        this.id =
-            config.id ?? null;
-        
-        this.name =
-            config.name ?? null;
+        this.measuredHeight =
+            typeof this.requestedHeight === "number" ? this.requestedHeight : 0;
 
-        this.widthAuto =
-            config.width === undefined;
-        
-        this.heightAuto =
-            config.height === undefined;
+        // Final numeric dimensions used internally.
+        this.resolvedWidth = this.measuredWidth;
+        this.resolvedHeight = this.measuredHeight;
 
-        this.minWidth =
-            config.minWidth ?? 0;
-        
-        this.maxWidth =
-            config.maxWidth ?? null;
-        
-        this.minHeight =
-            config.minHeight ?? 0;
-        
-        this.maxHeight =
-            config.maxHeight ?? null;
+        // Preserve numeric width/height compatibility for now.
+        this.defineLayoutProperties({
+            width: this.resolvedWidth,
+            height: this.resolvedHeight
+        });
+
+        Object.defineProperties(this, {
+            widthAuto: {
+                configurable: true,
+                enumerable: true,
+                get: () => this.requestedWidth === "auto"
+            },
+            heightAuto: {
+                configurable: true,
+                enumerable: true,
+                get: () => this.requestedHeight === "auto"
+            }
+        });
+
+        this.id = config.id ?? null;
+
+        this.name = config.name ?? null;
+
+        this.widthAuto = config.width === undefined;
+
+        this.heightAuto = config.height === undefined;
+
+        this.minWidth = config.minWidth ?? 0;
+
+        this.maxWidth = config.maxWidth ?? null;
+
+        this.minHeight = config.minHeight ?? 0;
+
+        this.maxHeight = config.maxHeight ?? null;
 
         // LAYOUT
         this.layoutParent = null;
 
         this.children = [];
 
-        this.container =
-            scene.add.container(
-                config.x ?? 0,
-                config.y ?? 0
-            );
+        this.container = scene.add.container(config.x ?? 0, config.y ?? 0);
 
         // For eventual dirty updates
         this.layoutDirty = true;
@@ -67,80 +77,60 @@ export default class Component {
     }
 
     defineLayoutProperties(properties) {
-    
         for (const [name, definition] of Object.entries(properties)) {
-    
             const isConfig =
                 definition &&
-                typeof definition === 'object' &&
-                Object.hasOwn(definition, 'value');
-    
-            const normalize =
-                isConfig
-                    ? definition.normalize
-                    : null;
-    
-            let value =
-                isConfig
-                    ? definition.value
-                    : definition;
-    
+                typeof definition === "object" &&
+                Object.hasOwn(definition, "value");
+
+            const normalize = isConfig ? definition.normalize : null;
+
+            let value = isConfig ? definition.value : definition;
+
             Object.defineProperty(this, name, {
-    
                 configurable: true,
                 enumerable: true,
-    
+
                 get() {
                     return value;
                 },
-    
+
                 set(next) {
-    
-                    const normalized =
-                        normalize
-                            ? normalize(next)
-                            : next;
-    
+                    const normalized = normalize ? normalize(next) : next;
+
                     if (value === normalized) {
                         return;
                     }
-    
+
                     value = normalized;
-    
+
                     this.markLayoutDirty();
                 }
             });
         }
-    
+
         return this;
     }
 
     get x() {
         return this.container.x;
     }
-    
+
     get y() {
         return this.container.y;
     }
-    
+
     getWorldX() {
-    
-        return this.container
-            .getWorldTransformMatrix()
-            .tx;
+        return this.container.getWorldTransformMatrix().tx;
     }
-    
+
     getWorldY() {
-    
-        return this.container
-            .getWorldTransformMatrix()
-            .ty;
+        return this.container.getWorldTransformMatrix().ty;
     }
 
     getWorldPosition() {
-        const matrix =
-            this.container.getWorldTransformMatrix();
-    
+        const matrix = this.container.getWorldTransformMatrix();
+
         return {
             x: matrix.tx,
             y: matrix.ty
@@ -149,20 +139,16 @@ export default class Component {
 
     // Ref name or id
     getChild(childOrId) {
-        if (typeof childOrId !== 'string') {
+        if (typeof childOrId !== "string") {
             return childOrId;
         }
-    
-        return this.children?.find(
-            child => child.id === childOrId
-        ) ?? null;
+
+        return this.children?.find(child => child.id === childOrId) ?? null;
     }
 
     // Copy only
     getChildren() {
-        return [
-            ...(this.children ?? [])
-        ];
+        return [...(this.children ?? [])];
     }
     /*
     for (const child of row.getChildren()) {
@@ -174,108 +160,81 @@ export default class Component {
         if (!id) {
             return null;
         }
-    
-        const trace =
-            options.trace ?? false;
-    
-        const path =
-            options.path ?? [];
+
+        const trace = options.trace ?? false;
+
+        const path = options.path ?? [];
 
         for (const child of this.children ?? []) {
+            const type = child.constructor.name;
 
-            const type =
-                child.constructor.name;
-            
-            const label =
-                child.id
-                    ? `${child.id}<${type}>`
-                    : `<${type}>`;
+            const label = child.id ? `${child.id}<${type}>` : `<${type}>`;
 
-            const currentPath = [
-                ...path,
-                label
-            ];
-    
+            const currentPath = [...path, label];
+
             if (child.id === id) {
-    
                 if (trace) {
-                
-                    Debug.trace(
-                        'FOUND',
-                        currentPath.join(' → ')
-                    );
+                    Debug.trace("FOUND", currentPath.join(" → "));
                 }
-    
+
                 return child;
             }
-    
-            const found =
-                child.getById?.(id, {
-                    trace,
-                    path: currentPath
-                });
-    
+
+            const found = child.getById?.(id, {
+                trace,
+                path: currentPath
+            });
+
             if (found) {
                 return found;
             }
         }
-    
+
         if (trace && !path.length) {
-        
-            Debug.traceWarn(
-                `Component not found: ${id}`
-            );
+            Debug.traceWarn(`Component not found: ${id}`);
         }
-    
+
         return null;
     }
 
     getByName(name) {
-    
         if (!name) {
             return null;
         }
-    
+
         // Check direct children first.
         for (const child of this.children ?? []) {
-    
             if (child.name === name) {
                 return child;
             }
-    
-            const found =
-                child.getByName?.(name);
-    
+
+            const found = child.getByName?.(name);
+
             if (found) {
                 return found;
             }
         }
-    
+
         return null;
     }
-    
+
     getAllByName(name) {
-    
         const results = [];
-    
+
         if (!name) {
             return results;
         }
-    
+
         for (const child of this.children ?? []) {
-    
             if (child.name === name) {
                 results.push(child);
             }
-    
-            if (typeof child.getAllByName === 'function') {
-    
-                results.push(
-                    ...child.getAllByName(name)
-                );
+
+            if (typeof child.getAllByName === "function") {
+                results.push(...child.getAllByName(name));
             }
         }
-    
+
         return results;
     }
 
@@ -283,24 +242,19 @@ export default class Component {
         if (!path) {
             return null;
         }
-    
-        const parts =
-            Array.isArray(path)
-                ? path
-                : path.split('.');
-    
+
+        const parts = Array.isArray(path) ? path : path.split(".");
+
         let current = this;
-    
+
         for (const id of parts) {
-    
-            current =
-                current.getChild(id);
-    
+            current = current.getChild(id);
+
             if (!current) {
                 return null;
             }
         }
-    
+
         return current;
     }
 
@@ -308,18 +262,16 @@ export default class Component {
         if (!this.layoutDirty) {
             this.layoutDirty = true;
         }
-    
+
         if (this.layoutParent) {
-    
             if (!this.layoutParent.layoutDirty) {
                 this.layoutParent.markLayoutDirty();
             }
-    
         } else {
             this.layoutScheduled = true;
             this.scene.layoutManager.markDirty(this);
         }
-    
+
         return this;
     }
 
@@ -333,123 +285,96 @@ export default class Component {
         return this;
     }
 
-    // child.setLayoutSize(null, null);
-    // return completely to intrinsic sizing
-    // 
-    // child.setLayoutSize(500, null);
-    // width  → parent-controlled: 500
-    // height → use intrinsic height
-
     setLayoutSize(width = null, height = null) {
-    
         const changed =
-            this.layoutWidth !== width ||
-            this.layoutHeight !== height;
-    
+            this.layoutWidth !== width || this.layoutHeight !== height;
+
         if (!changed) {
             return false;
         }
-    
-        // Capture intrinsic measurement before
-        // parent allocation replaces the effective size.
-        if (
-            this.layoutWidth === null &&
-            width !== null
-        ) {
-            this.measuredWidth = this.width;
-        }
-    
-        if (
-            this.layoutHeight === null &&
-            height !== null
-        ) {
-            this.measuredHeight = this.height;
-        }
-    
+
         this.layoutWidth = width;
         this.layoutHeight = height;
-    
-        // Returning to intrinsic sizing.
-        if (width === null) {
-            this.width = this.measuredWidth;
-        }
-    
-        if (height === null) {
-            this.height = this.measuredHeight;
-        }
-    
+
+        this.updateResolvedSize();
         this.markLayoutDirty();
-    
+
         return true;
     }
 
     setMeasuredSize(width, height) {
-    
         const changed =
-            this.width !== width ||
-            this.height !== height;
-    
+            this.measuredWidth !== width || this.measuredHeight !== height;
+
         if (!changed) {
             return false;
         }
-    
-        this.width = width;
-        this.height = height;
-    
+
         this.measuredWidth = width;
         this.measuredHeight = height;
-    
+
+        this.updateResolvedSize();
         this.markLayoutDirty();
-    
+
         return true;
+    }
+
+    updateResolvedSize() {
+        const width =
+            this.layoutWidth ??
+            (this.widthAuto ? this.measuredWidth : this.requestedWidth);
+
+        const height =
+            this.layoutHeight ??
+            (this.heightAuto ? this.measuredHeight : this.requestedHeight);
+
+        this.resolvedWidth = width;
+        this.resolvedHeight = height;
+
+        // Keep existing numeric reads working during migration.
+        this.width = width;
+        this.height = height;
+
+        return this;
     }
 
     getMeasuredWidth() {
         return this.measuredWidth;
     }
-    
+
     getMeasuredHeight() {
         return this.measuredHeight;
     }
 
     getLayoutConstraints() {
-    
         return new LayoutConstraints({
-    
-            width:
-                this.getLayoutWidth(),
-    
-            height:
-                this.getLayoutHeight(),
-    
-            minWidth:
-                this.minWidth,
-    
-            maxWidth:
-                this.maxWidth,
-    
-            minHeight:
-                this.minHeight,
-    
-            maxHeight:
-                this.maxHeight,
-    
-            padding:
-                this.padding
+            width: this.getLayoutWidth(),
+
+            height: this.getLayoutHeight(),
+
+            minWidth: this.minWidth,
+
+            maxWidth: this.maxWidth,
+
+            minHeight: this.minHeight,
+
+            maxHeight: this.maxHeight,
+
+            padding: this.padding
         });
     }
 
     getLayoutWidth() {
-        return this.layoutWidth ?? this.width;
+        return this.layoutWidth ?? this.resolvedWidth;
     }
     
     getLayoutHeight() {
-        return this.layoutHeight ?? this.height;
+        return this.layoutHeight ?? this.resolvedHeight;
     }
 
     requestLayout() {
         this.markLayoutDirty();
-    
+
         return this;
     }
 
@@ -469,17 +394,14 @@ export default class Component {
     }
 
     add(component) {
-    
-        this.container.add(
-            component.container
-        );
-    
+        this.container.add(component.container);
+
         return this;
     }
 
     remove(component) {
         this.container.remove(component.container);
-    
+
         return this;
     }
 
@@ -488,59 +410,30 @@ export default class Component {
     ////////////////////////////////////////
 
     getContentBounds() {
-
         let left = 0;
         let top = 0;
 
-        let right =
-            this.getLayoutWidth();
-        let bottom =
-            this.getLayoutHeight();
+        let right = this.getLayoutWidth();
+        let bottom = this.getLayoutHeight();
 
         for (const child of this.children ?? []) {
+            const bounds = child.getContentBounds();
 
-            const bounds =
-                child.getContentBounds();
+            const childLeft = child.x + bounds.x;
 
-            const childLeft =
-                child.x +
-                bounds.x;
+            const childTop = child.y + bounds.y;
 
-            const childTop =
-                child.y +
-                bounds.y;
+            const childRight = childLeft + bounds.width;
 
-            const childRight =
-                childLeft +
-                bounds.width;
+            const childBottom = childTop + bounds.height;
 
-            const childBottom =
-                childTop +
-                bounds.height;
+            left = Math.min(left, childLeft);
 
-            left =
-                Math.min(
-                    left,
-                    childLeft
-                );
+            top = Math.min(top, childTop);
 
-            top =
-                Math.min(
-                    top,
-                    childTop
-                );
+            right = Math.max(right, childRight);
 
-            right =
-                Math.max(
-                    right,
-                    childRight
-                );
-
-            bottom =
-                Math.max(
-                    bottom,
-                    childBottom
-                );
+            bottom = Math.max(bottom, childBottom);
         }
 
         return {
@@ -555,7 +448,7 @@ export default class Component {
         if (this.destroyed) {
             return this;
         }
-    
+
         this.destroyed = true;
 
         Debug.destroy(this);
@@ -563,20 +456,20 @@ export default class Component {
         if (this.layoutParent) {
             this.layoutParent.remove(this);
         }
-    
+
         for (const child of [...this.children]) {
             child.destroy();
         }
-    
+
         this.children = [];
-    
+
         if (this.container) {
             this.container.destroy();
             this.container = null;
         }
-    
+
         this.layoutParent = null;
-    
+
         return this;
     }
 }
