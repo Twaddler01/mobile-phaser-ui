@@ -65,7 +65,7 @@ export default function createColumnTests(debug) {
 
 () => {
 
-    state.card.width = 60;
+    state.root.setLayoutSize(300, 400);
 
 },
 
@@ -75,7 +75,7 @@ export default function createColumnTests(debug) {
 
 () => {
 
-    state.root.width = undefined;
+    state.root.setLayoutSize(null, null);
 
 },
 //// temp

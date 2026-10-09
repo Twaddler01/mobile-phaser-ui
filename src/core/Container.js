@@ -1,24 +1,20 @@
-import Debug from './Debug.js';
-import Component from './Component.js';
+import Debug from "./Debug.js";
+import Component from "./Component.js";
 
 export default class Container extends Component {
-
     constructor(scene, config = {}) {
-    
         super(scene, config);
-    
+
         this.defineLayoutProperties({
             padding: {
                 value: this.getPadding(config.padding),
                 normalize: value => this.getPadding(value)
             }
         });
-    
-        this.children = [];
-    
-        this.childLayoutOptions =
-            new Map();
 
+        this.children = [];
+
+        this.childLayoutOptions = new Map();
     }
 
     beginLayout() {
@@ -37,22 +33,15 @@ export default class Container extends Component {
     //////////////////////////////////////////
 
     getChild(childOrId) {
-
-        if (typeof childOrId !== 'string') {
+        if (typeof childOrId !== "string") {
             return childOrId;
         }
 
-        return this.children?.find(
-            child => child.id === childOrId
-        ) ?? null;
+        return this.children?.find(child => child.id === childOrId) ?? null;
     }
 
-
     getChildren() {
-
-        return [
-            ...(this.children ?? [])
-        ];
+        return [...(this.children ?? [])];
     }
 
     //////////////////////////////////////////
@@ -60,16 +49,13 @@ export default class Container extends Component {
     //////////////////////////////////////////
 
     setChildOptions(childOrId, options = {}) {
-
-        const child =
-            this.getChild(childOrId);
+        const child = this.getChild(childOrId);
 
         if (!child) {
             return this;
         }
 
-        const current =
-            this.childLayoutOptions.get(child) ?? {};
+        const current = this.childLayoutOptions.get(child) ?? {};
 
         if (options.width !== undefined) {
             current.width = options.width;
@@ -84,25 +70,18 @@ export default class Container extends Component {
         }
 
         if (options.margin !== undefined) {
-            current.margin = this.getMargin(
-                options.margin
-            );
+            current.margin = this.getMargin(options.margin);
         }
 
         if (options.horizontalAlign !== undefined) {
-            current.horizontalAlign =
-                options.horizontalAlign;
+            current.horizontalAlign = options.horizontalAlign;
         }
 
         if (options.verticalAlign !== undefined) {
-            current.verticalAlign =
-                options.verticalAlign;
+            current.verticalAlign = options.verticalAlign;
         }
 
-        this.childLayoutOptions.set(
-            child,
-            current
-        );
+        this.childLayoutOptions.set(child, current);
 
         this.markLayoutDirty();
 
@@ -110,17 +89,13 @@ export default class Container extends Component {
     }
 
     getChildOptions(childOrId) {
-
-        const child =
-            this.getChild(childOrId);
+        const child = this.getChild(childOrId);
 
         if (!child) {
             return null;
         }
 
-        return this.childLayoutOptions.get(
-            child
-        ) ?? {};
+        return this.childLayoutOptions.get(child) ?? {};
     }
 
     //////////////////////////////////////////
@@ -128,50 +103,28 @@ export default class Container extends Component {
     //////////////////////////////////////////
 
     isFillWidth(options) {
-
         return (
             options.width === null &&
-            (
-                options.fill === true ||
-                options.fill === 'horizontal'
-            )
+            (options.fill === true || options.fill === "horizontal")
         );
     }
 
-
     isFillHeight(options) {
-
         return (
             options.height === null &&
-            (
-                options.fill === true ||
-                options.fill === 'vertical'
-            )
+            (options.fill === true || options.fill === "vertical")
         );
     }
 
     getChildWidth(child, options) {
-        return (
-            options.width ??
-            child.getLayoutWidth()
-        );
+        return options.width ?? child.getLayoutWidth();
     }
 
     getChildHeight(child, options) {
-        return (
-            options.height ??
-            child.getLayoutHeight()
-        );
+        return options.height ?? child.getLayoutHeight();
     }
 
-
-    resolveChildWidth(
-        child,
-        options,
-        availableWidth = null,
-        fillWidth = null
-    ) {
-
+    resolveChildWidth(child, options, availableWidth = null, fillWidth = null) {
         // Explicit width takes priority.
         if (options.width !== null) {
             return options.width;
@@ -179,7 +132,6 @@ export default class Container extends Component {
 
         // Fill children receive their share.
         if (this.isFillWidth(options)) {
-
             if (fillWidth !== null) {
                 return fillWidth;
             }
@@ -187,9 +139,7 @@ export default class Container extends Component {
             if (availableWidth !== null) {
                 return Math.max(
                     0,
-                    availableWidth -
-                    options.margin.left -
-                    options.margin.right
+                    availableWidth - options.margin.left - options.margin.right
                 );
             }
 
@@ -200,23 +150,18 @@ export default class Container extends Component {
         // Columns can offer the full available width.
         // Rows must preserve intrinsic child widths.
         if (
-            this.constructor.name === 'Column' &&
+            this.constructor.name === "Column" &&
             child.usesAvailableWidth?.() &&
             availableWidth !== null
         ) {
             return Math.max(
                 0,
-                availableWidth -
-                options.margin.left -
-                options.margin.right
+                availableWidth - options.margin.left - options.margin.right
             );
         }
 
         // All other children retain intrinsic sizing.
-        return this.getChildWidth(
-            child,
-            options
-        );
+        return this.getChildWidth(child, options);
     }
 
     resolveChildHeight(
@@ -225,96 +170,58 @@ export default class Container extends Component {
         availableHeight = null,
         fillHeight = null
     ) {
-
         if (this.isFillHeight(options)) {
-
             if (fillHeight !== null) {
                 return fillHeight;
             }
 
             if (availableHeight !== null) {
-
                 return Math.max(
                     0,
-                    availableHeight -
-                    options.margin.top -
-                    options.margin.bottom
+                    availableHeight - options.margin.top - options.margin.bottom
                 );
             }
-            
+
             // No vertical allocation exists yet.
             return null;
         }
 
-        return this.getChildHeight(
-            child,
-            options
-        );
+        return this.getChildHeight(child, options);
     }
 
-    getHorizontalFillAllocation(
-        availableWidth
-    ) {
-
+    getHorizontalFillAllocation(availableWidth) {
         let fixedWidth = 0;
         let fillCount = 0;
         let fillMargins = 0;
 
         for (const child of this.children) {
-
-            const options =
-                this.childLayoutOptions.get(child);
+            const options = this.childLayoutOptions.get(child);
 
             if (!options) {
                 continue;
             }
 
-            const {
-                margin
-            } = options;
+            const { margin } = options;
 
-            const childWidth =
-                this.getChildWidth(
-                    child,
-                    options
-                );
+            const childWidth = this.getChildWidth(child, options);
 
             if (this.isFillWidth(options)) {
-
                 fillCount++;
 
-                fillMargins +=
-                    margin.left +
-                    margin.right;
-
+                fillMargins += margin.left + margin.right;
             } else {
-
-                fixedWidth +=
-                    margin.left +
-                    childWidth +
-                    margin.right;
+                fixedWidth += margin.left + childWidth + margin.right;
             }
         }
 
-        const totalGaps =
-            Math.max(
-                0,
-                this.children.length - 1
-            ) * this.gap;
+        const totalGaps = Math.max(0, this.children.length - 1) * this.gap;
 
-        const fillSpace =
-            Math.max(
-                0,
-                availableWidth -
-                fixedWidth -
-                fillMargins -
-                totalGaps
-            );
+        const fillSpace = Math.max(
+            0,
+            availableWidth - fixedWidth - fillMargins - totalGaps
+        );
 
-        const fillWidth =
-            fillCount > 0
-                ? fillSpace / fillCount
-                : 0;
+        const fillWidth = fillCount > 0 ? fillSpace / fillCount : 0;
 
         return {
             fixedWidth,
@@ -326,70 +233,39 @@ export default class Container extends Component {
         };
     }
 
-
-    getVerticalFillAllocation(
-        availableHeight
-    ) {
-
+    getVerticalFillAllocation(availableHeight) {
         let fixedHeight = 0;
         let fillCount = 0;
         let fillMargins = 0;
 
         for (const child of this.children) {
-
-            const options =
-                this.childLayoutOptions.get(child);
+            const options = this.childLayoutOptions.get(child);
 
             if (!options) {
                 continue;
             }
 
-            const {
-                margin
-            } = options;
+            const { margin } = options;
 
-            const childHeight =
-                this.getChildHeight(
-                    child,
-                    options
-                );
+            const childHeight = this.getChildHeight(child, options);
 
             if (this.isFillHeight(options)) {
-
                 fillCount++;
 
-                fillMargins +=
-                    margin.top +
-                    margin.bottom;
-
+                fillMargins += margin.top + margin.bottom;
             } else {
-
-                fixedHeight +=
-                    margin.top +
-                    childHeight +
-                    margin.bottom;
+                fixedHeight += margin.top + childHeight + margin.bottom;
             }
         }
 
-        const totalGaps =
-            Math.max(
-                0,
-                this.children.length - 1
-            ) * this.gap;
+        const totalGaps = Math.max(0, this.children.length - 1) * this.gap;
 
-        const fillSpace =
-            Math.max(
-                0,
-                availableHeight -
-                fixedHeight -
-                fillMargins -
-                totalGaps
-            );
+        const fillSpace = Math.max(
+            0,
+            availableHeight - fixedHeight - fillMargins - totalGaps
+        );
 
-        const fillHeight =
-            fillCount > 0
-                ? fillSpace / fillCount
-                : 0;
+        const fillHeight = fillCount > 0 ? fillSpace / fillCount : 0;
 
         return {
             fixedHeight,
@@ -401,30 +277,20 @@ export default class Container extends Component {
         };
     }
 
-    getChildLayoutWidth(
-        child,
-        options,
-        resolvedWidth
-    ) {
-    
+    getChildLayoutWidth(child, options, resolvedWidth) {
         if (
             options.width !== null ||
             this.isFillWidth(options) ||
-            (
-                this.constructor.name === 'Column' &&
+            (this.constructor.name === "Column" &&
                 child.usesAvailableWidth?.() &&
-                (
-                    !this.widthAuto ||
-                    this.layoutWidth !== null
-                )
-            )
+                (!this.widthAuto || this.layoutWidth !== null))
         ) {
             return resolvedWidth;
         }
-    
+
         return null;
     }
-/*
+    /*
     getChildLayoutWidth(
         child,
         options,
@@ -445,56 +311,65 @@ export default class Container extends Component {
         return null;
     }
 */
-    getChildLayoutHeight(
-        child,
-        options,
-        resolvedHeight
-    ) {
-    
-        if (
-            options.height !== null ||
-            this.isFillHeight(options)
-        ) {
+    getChildLayoutHeight(child, options, resolvedHeight) {
+        if (options.height !== null || this.isFillHeight(options)) {
             return resolvedHeight;
         }
-    
+
         return null;
     }
 
-    applyChildLayout(
-        child,
-        options,
-        width,
-        height
-    ) {
-    
-        const layoutWidth =
-            this.getChildLayoutWidth(
-                child,
-                options,
-                width
-            );
-    
-        const layoutHeight =
-            this.getChildLayoutHeight(
-                child,
-                options,
-                height
-            );
+    getChildAvailableWidth(child, options, availableWidth = null) {
+        // An explicit child width or fill allocation
+        // is handled by actual layout allocation.
+        if (options.width !== null || this.isFillWidth(options)) {
+            return null;
+        }
 
-        const constraints =
-            child.getLayoutConstraints();
-        
-        const size =
-            constraints.constrainSize(
-                layoutWidth,
-                layoutHeight
-            );
-        
-        return child.setLayoutSize(
-            size.width,
-            size.height
+        if (availableWidth === null) {
+            return null;
+        }
+
+        const available = Math.max(
+            0,
+            availableWidth - options.margin.left - options.margin.right
         );
+
+        // Respect the child's own configured maximum.
+        return child.maxWidth === null
+            ? available
+            : Math.min(available, child.maxWidth);
+    }
+
+    getChildAvailableHeight(child, options, availableHeight = null) {
+        if (
+            options.height !== null ||
+            this.isFillHeight(options) ||
+            availableHeight === null
+        ) {
+            return null;
+        }
+
+        const available = Math.max(
+            0,
+            availableHeight - options.margin.top - options.margin.bottom
+        );
+
+        return child.maxHeight === null
+            ? available
+            : Math.min(available, child.maxHeight);
+    }
+
+    applyChildLayout(child, options, width, height) {
+        const layoutWidth = this.getChildLayoutWidth(child, options, width);
+
+        const layoutHeight = this.getChildLayoutHeight(child, options, height);
+
+        const constraints = child.getLayoutConstraints();
+
+        const size = constraints.constrainSize(layoutWidth, layoutHeight);
+
+        return child.setLayoutSize(size.width, size.height);
     }
 
     resolveChildren(
@@ -503,48 +378,60 @@ export default class Container extends Component {
         fillWidth = null,
         fillHeight = null
     ) {
-    
         for (const child of this.children) {
-    
-            const options =
-                this.childLayoutOptions.get(child);
-    
+            const options = this.childLayoutOptions.get(child);
+
             if (!options) {
                 continue;
             }
-    
-            const childWidth =
-                this.resolveChildWidth(
-                    child,
-                    options,
-                    availableWidth,
-                    fillWidth
-                );
-    
-            const childHeight =
-                this.resolveChildHeight(
-                    child,
-                    options,
-                    availableHeight,
-                    fillHeight
-                );
-    
-            const layoutSizeChanged =
-                this.applyChildLayout(
-                    child,
-                    options,
-                    childWidth,
-                    childHeight
-                );
-    
+
+            const childWidth = this.resolveChildWidth(
+                child,
+                options,
+                availableWidth,
+                fillWidth
+            );
+
+            const childHeight = this.resolveChildHeight(
+                child,
+                options,
+                availableHeight,
+                fillHeight
+            );
+
+            const availableMaxWidth = this.getChildAvailableWidth(
+                child,
+                options,
+                availableWidth
+            );
+
+            const availableMaxHeight = this.getChildAvailableHeight(
+                child,
+                options,
+                availableHeight
+            );
+
+            const availableSizeChanged = child.setAvailableSize(
+                availableMaxWidth,
+                availableMaxHeight
+            );
+
+            const layoutSizeChanged = this.applyChildLayout(
+                child,
+                options,
+                childWidth,
+                childHeight
+            );
+
             if (
                 layoutSizeChanged ||
+                availableSizeChanged ||
                 child.layoutDirty
             ) {
                 child.layout();
             }
         }
-    
+
         return this;
     }
 
@@ -561,29 +448,18 @@ export default class Container extends Component {
     // ***
 
     _createChildOptions(options = {}) {
-    
         return {
-            width:
-                options.width ?? null,
-    
-            height:
-                options.height ?? null,
-    
-            fill:
-                options.fill ?? null,
-    
-            margin:
-                this.getMargin(
-                    options.margin
-                ),
-    
-            horizontalAlign:
-                options.horizontalAlign ??
-                'start',
-    
-            verticalAlign:
-                options.verticalAlign ??
-                'start'
+            width: options.width ?? null,
+
+            height: options.height ?? null,
+
+            fill: options.fill ?? null,
+
+            margin: this.getMargin(options.margin),
+
+            horizontalAlign: options.horizontalAlign ?? "start",
+
+            verticalAlign: options.verticalAlign ?? "start"
         };
     }
 
@@ -592,49 +468,37 @@ export default class Container extends Component {
     //////////////////////////////////////////
 
     add(child, options = {}) {
-
         if (Array.isArray(child)) {
-        
-                for (const item of child) {
-                    this.add(item, options);
-                }
-        
-                return this;
+            for (const item of child) {
+                this.add(item, options);
             }
+
+            return this;
+        }
 
         if (!child) {
             return this;
         }
 
         if (this.children.includes(child)) {
-            this.setChildOptions(
-                child,
-                options
-            );
+            this.setChildOptions(child, options);
 
             return this;
         }
 
-        if (
-            child.layoutParent &&
-            child.layoutParent !== this
-        ) {
-        
+        if (child.layoutParent && child.layoutParent !== this) {
             if (Debug.enabled) {
                 console.warn(
-                    'Cannot add child: component already belongs to another layout.'
+                    "Cannot add child: component already belongs to another layout."
                 );
             }
-        
+
             return this;
         }
 
         this.children.push(child);
 
-        this.childLayoutOptions.set(
-            child,
-            this._createChildOptions(options)
-        );
+        this.childLayoutOptions.set(child, this._createChildOptions(options));
 
         super.add(child);
 
@@ -650,75 +514,59 @@ export default class Container extends Component {
     //////////////////////////////////////////
 
     insertBefore(child, beforeChild) {
-    
         if (!child) {
             return this;
         }
-    
+
         if (this.children.includes(child)) {
-    
             if (Debug.enabled) {
                 console.warn(
-                    'Cannot insert child: component is already in this layout.'
+                    "Cannot insert child: component is already in this layout."
                 );
             }
-    
+
             return this;
         }
-    
-        if (
-            child.layoutParent &&
-            child.layoutParent !== this
-        ) {
-    
+
+        if (child.layoutParent && child.layoutParent !== this) {
             if (Debug.enabled) {
                 console.warn(
-                    'Cannot insert child: component already belongs to another layout.'
+                    "Cannot insert child: component already belongs to another layout."
                 );
             }
-    
+
             return this;
         }
-    
-        const reference =
-            this.getChild(beforeChild);
-    
+
+        const reference = this.getChild(beforeChild);
+
         if (!reference) {
-    
             if (Debug.enabled) {
                 console.warn(
-                    'Cannot insert child: reference component was not found.'
+                    "Cannot insert child: reference component was not found."
                 );
             }
-    
+
             return this;
         }
-    
-        const index =
-            this.children.indexOf(reference);
-    
-        this.children.splice(
-            index,
-            0,
-            child
-        );
+
+        const index = this.children.indexOf(reference);
+
+        this.children.splice(index, 0, child);
 
         // Inserted children need default
         // layout options just like add().
-        this.childLayoutOptions.set(
-            child,
-            this._createChildOptions()
-        );
+        this.childLayoutOptions.set(child, this._createChildOptions());
 
         child.layoutParent = this;
-    
+
         super.add(child);
-    
+
         // Keep Phaser's display order synchronized.
         this.syncDisplayOrder();
-    
+
         this.markLayoutDirty();
-    
+
         return this;
     }
 
@@ -727,75 +575,59 @@ export default class Container extends Component {
     //////////////////////////////////////////
 
     insertAfter(child, afterChild) {
-    
         if (!child) {
             return this;
         }
-    
+
         if (this.children.includes(child)) {
-    
             if (Debug.enabled) {
                 console.warn(
-                    'Cannot insert child: component is already in this layout.'
+                    "Cannot insert child: component is already in this layout."
                 );
             }
-    
+
             return this;
         }
-    
-        if (
-            child.layoutParent &&
-            child.layoutParent !== this
-        ) {
-    
+
+        if (child.layoutParent && child.layoutParent !== this) {
             if (Debug.enabled) {
                 console.warn(
-                    'Cannot insert child: component already belongs to another layout.'
+                    "Cannot insert child: component already belongs to another layout."
                 );
             }
-    
+
             return this;
         }
-    
-        const reference =
-            this.getChild(afterChild);
-    
+
+        const reference = this.getChild(afterChild);
+
         if (!reference) {
-    
             if (Debug.enabled) {
                 console.warn(
-                    'Cannot insert child: reference component was not found.'
+                    "Cannot insert child: reference component was not found."
                 );
             }
-    
+
             return this;
         }
-    
-        const index =
-            this.children.indexOf(reference) + 1;
-    
-        this.children.splice(
-            index,
-            0,
-            child
-        );
+
+        const index = this.children.indexOf(reference) + 1;
+
+        this.children.splice(index, 0, child);
 
         // Inserted children need default
         // layout options just like add().
-        this.childLayoutOptions.set(
-            child,
-            this._createChildOptions()
-        );
+        this.childLayoutOptions.set(child, this._createChildOptions());
 
         child.layoutParent = this;
-    
+
         super.add(child);
-    
+
         // Keep Phaser's display order synchronized.
         this.syncDisplayOrder();
-    
+
         this.markLayoutDirty();
-    
+
         return this;
     }
 
@@ -804,40 +636,30 @@ export default class Container extends Component {
     //////////////////////////////////////////
 
     remove(childOrId) {
-        const child =
-            this.getChild(childOrId);
-    
+        const child = this.getChild(childOrId);
+
         if (!child) {
             return this;
         }
-    
-        const index =
-            this.children.indexOf(child);
-    
+
+        const index = this.children.indexOf(child);
+
         if (index !== -1) {
-            this.children.splice(
-                index,
-                1
-            );
+            this.children.splice(index, 1);
         }
-    
-        this.childLayoutOptions.delete(
-            child
-        );
-    
+
+        this.childLayoutOptions.delete(child);
+
         super.remove(child);
-    
+
         child.layoutParent = null;
-    
+
         // Return the child to its
         // intrinsic dimensions.
-        child.setLayoutSize(
-            null,
-            null
-        );
-    
+        child.setLayoutSize(null, null);
+
         this.markLayoutDirty();
-    
+
         return this;
     }
 
@@ -847,23 +669,19 @@ export default class Container extends Component {
 
     clear() {
         for (const child of this.children) {
-    
             super.remove(child);
-    
+
             child.layoutParent = null;
-    
-            child.setLayoutSize(
-                null,
-                null
-            );
+
+            child.setLayoutSize(null, null);
         }
-    
+
         this.children.length = 0;
-    
+
         this.childLayoutOptions.clear();
-    
+
         this.markLayoutDirty();
-    
+
         return this;
     }
 
@@ -872,49 +690,31 @@ export default class Container extends Component {
     //////////////////////////////////////////
 
     move(childOrId, destination) {
-
-        const child =
-            this.getChild(childOrId);
+        const child = this.getChild(childOrId);
 
         if (!child) {
             return this;
         }
 
-        const currentIndex =
-            this.children.indexOf(child);
+        const currentIndex = this.children.indexOf(child);
 
         if (currentIndex === -1) {
             return this;
         }
 
-        this.children.splice(
-            currentIndex,
-            1
-        );
+        this.children.splice(currentIndex, 1);
 
         let index;
 
-        if (typeof destination === 'number') {
-
+        if (typeof destination === "number") {
             index = destination;
-
         } else {
+            const destinationChild = this.getChild(destination);
 
-            const destinationChild =
-                this.getChild(destination);
-
-            const destinationIndex =
-                this.children.indexOf(
-                    destinationChild
-                );
+            const destinationIndex = this.children.indexOf(destinationChild);
 
             if (destinationIndex === -1) {
-
-                this.children.splice(
-                    currentIndex,
-                    0,
-                    child
-                );
+                this.children.splice(currentIndex, 0, child);
 
                 return this;
             }
@@ -922,20 +722,9 @@ export default class Container extends Component {
             index = destinationIndex;
         }
 
-        index =
-            Math.max(
-                0,
-                Math.min(
-                    index,
-                    this.children.length
-                )
-            );
+        index = Math.max(0, Math.min(index, this.children.length));
 
-        this.children.splice(
-            index,
-            0,
-            child
-        );
+        this.children.splice(index, 0, child);
 
         this.syncDisplayOrder();
 
@@ -949,24 +738,18 @@ export default class Container extends Component {
     //////////////////////////////////////////
 
     syncDisplayOrder() {
-    
         for (const child of this.children) {
-    
             if (!child?.container) {
                 continue;
             }
-    
-            if (!this.container.list.includes(
-                child.container
-            )) {
+
+            if (!this.container.list.includes(child.container)) {
                 continue;
             }
-    
-            this.container.bringToTop(
-                child.container
-            );
+
+            this.container.bringToTop(child.container);
         }
-    
+
         return this;
     }
 
@@ -975,9 +758,7 @@ export default class Container extends Component {
     //////////////////////////////////////////
 
     getPadding(padding = 0) {
-    
-        if (typeof padding === 'number') {
-    
+        if (typeof padding === "number") {
             return {
                 top: padding,
                 right: padding,
@@ -985,7 +766,7 @@ export default class Container extends Component {
                 left: padding
             };
         }
-    
+
         return {
             top: padding.top ?? 0,
             right: padding.right ?? 0,
@@ -999,9 +780,7 @@ export default class Container extends Component {
     //////////////////////////////////////////
 
     getMargin(margin = 0) {
-
-        if (typeof margin === 'number') {
-
+        if (typeof margin === "number") {
             return {
                 top: margin,
                 right: margin,

@@ -157,6 +157,24 @@ export default class Card extends Container {
 
         const { contentWidth, contentHeight } = constraints;
 
+        // Actual content width is based on the Card's
+        // resolved dimensions. Available width is the
+        // maximum its parent permits.
+        const hasAllocatedWidth =
+            !this.widthAuto || this.layoutWidth !== null;
+        
+        const availableContentWidth =
+            hasAllocatedWidth
+                ? contentWidth
+                : this.availableMaxWidth !== null
+                    ? Math.max(
+                        0,
+                        this.availableMaxWidth
+                            - this.padding.left
+                            - this.padding.right
+                    )
+                    : null;
+
         ////////////////////////////////////////
         // 2–3. ALLOCATE + RESOLVE CHILDREN
         ////////////////////////////////////////
@@ -166,7 +184,7 @@ export default class Card extends Container {
 
         const availableHeight = hasAllocatedHeight ? contentHeight : null;
 
-        this.resolveChildren(contentWidth, availableHeight);
+        this.resolveChildren(availableContentWidth, availableHeight);
 
         ////////////////////////////////////////
         // 4. MEASURE FINAL SIZE
@@ -205,7 +223,6 @@ export default class Card extends Container {
             ////////////////////////////////////////
 
             const childWidth = child.getLayoutWidth();
-
             const childHeight = child.getLayoutHeight();
 
             ////////////////////////////////////////
@@ -228,7 +245,6 @@ export default class Card extends Container {
                         this.padding.left +
                         (finalContentWidth - outerWidth) / 2 +
                         margin.left;
-
                     break;
 
                 case "end":
@@ -237,13 +253,11 @@ export default class Card extends Container {
                         this.padding.right -
                         outerWidth +
                         margin.left;
-
                     break;
 
                 case "start":
                 default:
                     x = this.padding.left + margin.left;
-
                     break;
             }
 
@@ -259,7 +273,6 @@ export default class Card extends Container {
                         this.padding.top +
                         (finalContentHeight - outerHeight) / 2 +
                         margin.top;
-
                     break;
 
                 case "end":
@@ -268,13 +281,11 @@ export default class Card extends Container {
                         this.padding.bottom -
                         outerHeight +
                         margin.top;
-
                     break;
 
                 case "start":
                 default:
                     y = this.padding.top + margin.top;
-
                     break;
             }
 

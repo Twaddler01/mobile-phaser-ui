@@ -13,6 +13,11 @@ export default class Component {
         this.layoutWidth = null;
         this.layoutHeight = null;
 
+        // Incoming constraints from the parent.
+        // null means the parent has not bounded this dimension.
+        this.availableMaxWidth = null;
+        this.availableMaxHeight = null;
+
         // Intrinsic measurements.
         this.measuredWidth =
             typeof this.requestedWidth === "number" ? this.requestedWidth : 0;
@@ -298,6 +303,23 @@ export default class Component {
         return true;
     }
 
+    setAvailableSize(maxWidth = null, maxHeight = null) {
+        const changed =
+            this.availableMaxWidth !== maxWidth ||
+            this.availableMaxHeight !== maxHeight;
+
+        if (!changed) {
+            return false;
+        }
+
+        this.availableMaxWidth = maxWidth;
+        this.availableMaxHeight = maxHeight;
+
+        this.markLayoutDirty();
+
+        return true;
+    }
+
     setMeasuredSize(width, height) {
         const changed =
             this.measuredWidth !== width || this.measuredHeight !== height;
@@ -352,6 +374,16 @@ export default class Component {
     }
 
     getLayoutConstraints() {
+        const maxWidth =
+            this.availableMaxWidth === null
+                ? this.maxWidth
+                : Math.min(this.maxWidth ?? Infinity, this.availableMaxWidth);
+
+        const maxHeight =
+            this.availableMaxHeight === null
+                ? this.maxHeight
+                : Math.min(this.maxHeight ?? Infinity, this.availableMaxHeight);
+
         return new LayoutConstraints({
             width: this.getLayoutWidth(),
 
@@ -359,11 +391,11 @@ export default class Component {
 
             minWidth: this.minWidth,
 
-            maxWidth: this.maxWidth,
+            maxWidth,
 
             minHeight: this.minHeight,
 
-            maxHeight: this.maxHeight,
+            maxHeight,
 
             padding: this.padding
         });

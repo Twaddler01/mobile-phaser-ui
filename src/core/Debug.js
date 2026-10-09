@@ -704,16 +704,30 @@ class Debug {
                 node.constructor.name === 'Text' &&
                 settings.showText
             ) {
-            
-                const wrap =
-                    node.wordWrapWidth !== undefined
-                        ? `wrap:${node.wordWrapWidth}`
-                        : node.layoutWidth
-                            ? `autoWrap:${node.layoutWidth}`
-                            : 'wrap:none';
-            
+
+                const wrapMode =
+                    node.getWrapMode?.() ?? 'unknown';
+
+                let wrap;
+
+                if (wrapMode === 'explicit') {
+
+                    wrap =
+                        `wrap:explicit(${node.wordWrapWidth})`;
+
+                } else if (wrapMode === 'auto') {
+
+                    wrap =
+                        `wrap:auto(max:${node.availableMaxWidth})`;
+
+                } else {
+
+                    wrap = 'wrap:none';
+                }
+
                 details.push(wrap);
             }
+
 
             if (settings.showDirty) {
     
@@ -941,26 +955,30 @@ class Debug {
             heightAuto:
                 component.heightAuto,
 
+
             ////////////////////////////////////////
             // TEXT
             ////////////////////////////////////////
-            
+
             text:
                 component.textValue,
-            
-            wordWrapWidth:
-                component.layoutWidth,
-            
+
             wrap:
                 typeof component.getWrapMode === 'function'
                     ? component.getWrapMode()
-                    : component.wrapMode,
+                    : null,
 
-            textWidth:
-                component.text?.width,
-            
-            textHeight:
-                component.text?.height,
+            explicitWordWrapWidth:
+                component.wordWrapWidth ?? null,
+
+            availableMaxWidth:
+                component.availableMaxWidth ?? null,
+
+            phaserTextWidth:
+                component.text?.width ?? null,
+
+            phaserTextHeight:
+                component.text?.height ?? null,
 
             ////////////////////////////////////////
             // LAYOUT STATE
