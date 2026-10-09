@@ -24,6 +24,60 @@ export default function createStackTests(debug) {
 
     return [
 
+() => {
+console.log('TEST 1');
+    resetTest();
+
+    state.root =
+        new Stack(scene, {
+            x: 100,
+            y: 100,
+        });
+
+    state.card =
+        new Card(scene, {
+            //padding: 20
+            height: 200,
+            width: 200
+        });
+
+    state.text =
+        new Text(scene, {
+            //text: 'Initial text'
+        });
+
+    state.card.add(state.text);
+
+    state.root.add(state.card);
+
+    addTest(state.root);
+},
+
+/*() => {
+    state.addedChild =
+        new Card(scene, {
+            width: 50,
+            height: 50
+        });
+    state.root.add(state.addedChild);
+},
+
+() => {
+    state.root.remove(state.card);
+    state.card.destroy();
+},
+*/
+() => {
+console.log('setLayoutSize(300, null)');
+    state.root.setLayoutSize(300, null);
+},
+
+() => {
+console.log('getChildren()[0].width = 100');
+    state.root.getChildren()[0].width = 100;
+    state.root.requestLayout();
+},
+
 // ==================================
 // NESTED MEASUREMENT / ALLOCATION
 // ==================================

@@ -47,10 +47,6 @@ export default class Component {
 
         this.name = config.name ?? null;
 
-        this.widthAuto = config.width === undefined;
-
-        this.heightAuto = config.height === undefined;
-
         this.minWidth = config.minWidth ?? 0;
 
         this.maxWidth = config.maxWidth ?? null;
@@ -319,6 +315,20 @@ export default class Component {
         return true;
     }
 
+    setResolvedSize(width, height) {
+        const changed =
+            this.resolvedWidth !== width || this.resolvedHeight !== height;
+
+        if (!changed) {
+            return false;
+        }
+
+        this.resolvedWidth = width;
+        this.resolvedHeight = height;
+
+        return true;
+    }
+
     updateResolvedSize() {
         const width =
             this.layoutWidth ??
@@ -328,12 +338,7 @@ export default class Component {
             this.layoutHeight ??
             (this.heightAuto ? this.measuredHeight : this.requestedHeight);
 
-        this.resolvedWidth = width;
-        this.resolvedHeight = height;
-
-        // Keep existing numeric reads working during migration.
-        this.width = width;
-        this.height = height;
+        this.setResolvedSize(width, height);
 
         return this;
     }
@@ -367,7 +372,7 @@ export default class Component {
     getLayoutWidth() {
         return this.layoutWidth ?? this.resolvedWidth;
     }
-    
+
     getLayoutHeight() {
         return this.layoutHeight ?? this.resolvedHeight;
     }

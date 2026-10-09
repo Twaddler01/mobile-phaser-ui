@@ -1,120 +1,90 @@
-import Debug from '../core/Debug.js';
-import Container from '../core/Container.js';
+import Debug from "../core/Debug.js";
+import Container from "../core/Container.js";
 
 export default class Stack extends Container {
-
     constructor(scene, config = {}) {
-
         super(scene, config);
-
     }
 
     updateSize() {
+        let measuredWidth = this.measuredWidth;
 
+        let measuredHeight = this.measuredHeight;
+
+        ////////////////////////////////////////
         // WIDTH
-        if (this.layoutWidth !== null) {
-            this.width = this.layoutWidth;
-        
-        } else if (this.widthAuto) {
+        ////////////////////////////////////////
 
-            const contentWidth =
-                this.children.reduce(
-                    (max, child) => {
+        if (this.widthAuto && this.layoutWidth === null) {
+            const contentWidth = this.children.reduce((max, child) => {
+                const options = this.childLayoutOptions.get(child);
 
-                        const options =
-                            this.childLayoutOptions.get(child);
+                if (!options) {
+                    return max;
+                }
 
-                        if (!options) {
-                            return max;
-                        }
+                const childWidth = options.width ?? child.getLayoutWidth();
 
-                        const childWidth =
-                            options.width ??
-                            child.getLayoutWidth();
+                const { margin } = options;
 
-                        const { margin } =
-                            options;
+                return Math.max(max, margin.left + childWidth + margin.right);
+            }, 0);
 
-                        return Math.max(
-                            max,
-                            margin.left +
-                            childWidth +
-                            margin.right
-                        );
-                    },
-                    0
-                );
-
-            this.width =
-                this.padding.left +
-                contentWidth +
-                this.padding.right;
+            measuredWidth =
+                this.padding.left + contentWidth + this.padding.right;
         }
 
+        ////////////////////////////////////////
         // HEIGHT
-        if (
-            this.heightAuto &&
-            this.layoutHeight === null
-        ) {
+        ////////////////////////////////////////
 
-            const contentHeight =
-                this.children.reduce(
-                    (max, child) => {
+        if (this.heightAuto && this.layoutHeight === null) {
+            const contentHeight = this.children.reduce((max, child) => {
+                const options = this.childLayoutOptions.get(child);
 
-                        const options =
-                            this.childLayoutOptions.get(child);
+                if (!options) {
+                    return max;
+                }
 
-                        if (!options) {
-                            return max;
-                        }
+                const childHeight = options.height ?? child.getLayoutHeight();
 
-                        const childHeight =
-                            options.height ??
-                            child.getLayoutHeight();
+                const { margin } = options;
 
-                        const { margin } =
-                            options;
+                return Math.max(max, margin.top + childHeight + margin.bottom);
+            }, 0);
 
-                        return Math.max(
-                            max,
-                            margin.top +
-                            childHeight +
-                            margin.bottom
-                        );
-                    },
-                    0
-                );
-
-            this.height =
-                this.padding.top +
-                contentHeight +
-                this.padding.bottom;
+            measuredHeight =
+                this.padding.top + contentHeight + this.padding.bottom;
         }
+
+        ////////////////////////////////////////
+        // COMMIT INTRINSIC MEASUREMENTS
+        ////////////////////////////////////////
+
+        this.setMeasuredSize(measuredWidth, measuredHeight);
 
         return this;
     }
 
     layout() {
-    
         this.beginLayout();
-    
+
         ////////////////////////////////////////
         // 1. GET CONSTRAINTS
         //
         // Determine the dimensions this Stack
         // already knows from itself / its parent.
         ////////////////////////////////////////
-    
-        const constraints =
-            this.getLayoutConstraints();
-    
+
+        const constraints = this.getLayoutConstraints();
+
         const {
             width: layoutWidth,
             height: layoutHeight,
             contentWidth,
             contentHeight
         } = constraints;
-    
+
         ////////////////////////////////////////
         // 2. ALLOCATE CHILD CONSTRAINTS
         //
@@ -124,13 +94,11 @@ export default class Stack extends Container {
         // No sequential allocation occurs.
         // Each child resolves independently.
         ////////////////////////////////////////
-        
-        const availableWidth =
-            contentWidth;
-        
-        const availableHeight =
-            contentHeight;
-            
+
+        const availableWidth = contentWidth;
+
+        const availableHeight = contentHeight;
+
         ////////////////////////////////////////
         // 3. RESOLVE CHILDREN
         //
@@ -140,11 +108,8 @@ export default class Stack extends Container {
         // that child immediately so its final measured
         // size is available to this Stack.
         ////////////////////////////////////////
-        
-        this.resolveChildren(
-            availableWidth,
-            availableHeight
-        );
+
+        this.resolveChildren(availableWidth, availableHeight);
 
         ////////////////////////////////////////
         // 4. MEASURE FINAL SIZE
@@ -153,26 +118,25 @@ export default class Stack extends Container {
         // constraints, so Stack can measure itself
         // using their final dimensions.
         ////////////////////////////////////////
-    
+
         this.updateSize();
-    
+
         ////////////////////////////////////////
         // RE-CAPTURE FINAL DIMENSIONS
         //
         // updateSize() may have changed this Stack's
         // intrinsic width/height.
         ////////////////////////////////////////
-    
-        const finalConstraints =
-            this.getLayoutConstraints();
-    
+
+        const finalConstraints = this.getLayoutConstraints();
+
         const {
             width: finalLayoutWidth,
             height: finalLayoutHeight,
             contentWidth: finalContentWidth,
             contentHeight: finalContentHeight
         } = finalConstraints;
-    
+
         ////////////////////////////////////////
         // 5. POSITION CHILDREN
         //
@@ -180,136 +144,100 @@ export default class Stack extends Container {
         // area and is positioned according to its
         // own alignment and margins.
         ////////////////////////////////////////
-        
+
         for (const child of this.children) {
-        
-            const options =
-                this.childLayoutOptions.get(child);
-        
+            const options = this.childLayoutOptions.get(child);
+
             if (!options) {
                 continue;
             }
-        
+
             const { margin } = options;
-        
-            const childWidth =
-                this.resolveChildWidth(
-                    child,
-                    options,
-                    finalContentWidth
-                );
-        
-            const childHeight =
-                this.resolveChildHeight(
-                    child,
-                    options,
-                    finalContentHeight
-                );
-        
-            const resolvedWidth =
-                childWidth ?? 0;
-        
-            const resolvedHeight =
-                childHeight ?? 0;
-        
+
+            const childWidth = this.resolveChildWidth(
+                child,
+                options,
+                finalContentWidth
+            );
+
+            const childHeight = this.resolveChildHeight(
+                child,
+                options,
+                finalContentHeight
+            );
+
+            const resolvedWidth = childWidth ?? 0;
+
+            const resolvedHeight = childHeight ?? 0;
+
             ////////////////////////////////////////
             // HORIZONTAL ALIGNMENT
             ////////////////////////////////////////
-        
-            const outerWidth =
-                margin.left +
-                resolvedWidth +
-                margin.right;
-        
+
+            const outerWidth = margin.left + resolvedWidth + margin.right;
+
             let outerX;
-        
+
             switch (options.horizontalAlign) {
-        
-                case 'center':
-        
+                case "center":
                     outerX =
                         this.padding.left +
-                        (
-                            finalContentWidth -
-                            outerWidth
-                        ) / 2;
-        
+                        (finalContentWidth - outerWidth) / 2;
+
                     break;
-        
-                case 'end':
-        
-                    outerX =
-                        finalLayoutWidth -
-                        this.padding.right -
-                        outerWidth;
-        
+
+                case "end":
+                    outerX = finalLayoutWidth - this.padding.right - outerWidth;
+
                     break;
-        
-                case 'start':
+
+                case "start":
                 default:
-        
-                    outerX =
-                        this.padding.left;
-        
+                    outerX = this.padding.left;
+
                     break;
             }
-        
+
             ////////////////////////////////////////
             // VERTICAL ALIGNMENT
             ////////////////////////////////////////
-        
-            const outerHeight =
-                margin.top +
-                resolvedHeight +
-                margin.bottom;
-        
+
+            const outerHeight = margin.top + resolvedHeight + margin.bottom;
+
             let outerY;
-        
+
             switch (options.verticalAlign) {
-        
-                case 'center':
-        
+                case "center":
                     outerY =
                         this.padding.top +
-                        (
-                            finalContentHeight -
-                            outerHeight
-                        ) / 2;
-        
+                        (finalContentHeight - outerHeight) / 2;
+
                     break;
-        
-                case 'end':
-        
+
+                case "end":
                     outerY =
-                        finalLayoutHeight -
-                        this.padding.bottom -
-                        outerHeight;
-        
+                        finalLayoutHeight - this.padding.bottom - outerHeight;
+
                     break;
-        
-                case 'start':
+
+                case "start":
                 default:
-        
-                    outerY =
-                        this.padding.top;
-        
+                    outerY = this.padding.top;
+
                     break;
             }
-        
+
             ////////////////////////////////////////
             // REPOSITION
             ////////////////////////////////////////
-        
-            child.setPosition(
-                outerX + margin.left,
-                outerY + margin.top
-            );
+
+            child.setPosition(outerX + margin.left, outerY + margin.top);
         }
 
         ////////////////////////////////////////
         // 6. FINALIZE
         ////////////////////////////////////////
-    
+
         this.finishLayout();
     }
 }
