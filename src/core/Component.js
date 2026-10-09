@@ -360,7 +360,13 @@ export default class Component {
             this.layoutHeight ??
             (this.heightAuto ? this.measuredHeight : this.requestedHeight);
 
-        this.setResolvedSize(width, height);
+        // Apply this component's size constraints
+        // to the resolved dimensions.
+        const constraints = this.getLayoutConstraints();
+
+        const size = constraints.constrainSize(width, height);
+
+        this.setResolvedSize(size.width, size.height);
 
         return this;
     }

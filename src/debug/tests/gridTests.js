@@ -69,7 +69,7 @@ export default function createGridTests(debug) {
         padding: 10
     });
     state.cardB.add(new Text(scene, {
-        text: 'Maximum height: 60'
+        text: 'Maximum height: 60. '.repeat(8)
     }));
 
     state.cardC = new Card(scene, {
