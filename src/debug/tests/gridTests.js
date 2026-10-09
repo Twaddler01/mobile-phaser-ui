@@ -30,6 +30,198 @@ export default function createGridTests(debug) {
     return [
 
 
+() => {
+    resetTest();
+
+    console.log(
+        '[Grid Test 3] Child constraints'
+    );
+
+    console.log(
+        'Expected: Grid tracks stay 125 × 135. ' +
+        'Card A should respect minHeight 80. ' +
+        'Card B should respect maxHeight 60. ' +
+        'Inspect whether constraints are respected ' +
+        'without moving children outside their cells.'
+    );
+
+    state.grid = new Grid(scene, {
+        x: 100,
+        y: 100,
+        width: 280,
+        height: 300,
+        columns: 2,
+        rows: 2,
+        padding: 10,
+        gap: 10
+    });
+
+    state.cardA = new Card(scene, {
+        minHeight: 80,
+        padding: 10
+    });
+    state.cardA.add(new Text(scene, {
+        text: 'Minimum height: 80'
+    }));
+
+    state.cardB = new Card(scene, {
+        maxHeight: 60,
+        padding: 10
+    });
+    state.cardB.add(new Text(scene, {
+        text: 'Maximum height: 60'
+    }));
+
+    state.cardC = new Card(scene, {
+        minWidth: 150,
+        padding: 10
+    });
+    state.cardC.add(new Text(scene, {
+        text: 'Minimum width: 150'
+    }));
+
+    state.cardD = new Card(scene, {
+        maxWidth: 90,
+        padding: 10
+    });
+    state.cardD.add(new Text(scene, {
+        text: 'Maximum width: 90'
+    }));
+
+    state.grid.add(state.cardA);
+    state.grid.add(state.cardB);
+    state.grid.add(state.cardC);
+    state.grid.add(state.cardD);
+
+    addTest(state.grid);
+},
+
+() => {
+    resetTest();
+
+    console.log(
+        '[Grid Test 2] Fixed dimensions'
+    );
+
+    console.log(
+        'Expected: Grid is 280 × 300. ' +
+        'With 10px padding and 10px gaps, ' +
+        'each of 2 columns is 125px wide, ' +
+        'and each of 2 rows is 135px high.'
+    );
+
+    state.root = new Column(scene, {
+        x: 100,
+        y: 100,
+        width: 300,
+        padding: 10
+    });
+
+    state.grid = new Grid(scene, {
+        width: 280,
+        height: 300,
+        columns: 2,
+        rows: 2,
+        padding: 10,
+        gap: 10
+    });
+
+    const labels = [
+        'A — short',
+        'B — taller content',
+        'C — bottom left',
+        'D — bottom right'
+    ];
+
+    state.cards = [];
+
+    for (const label of labels) {
+        const card = new Card(scene, {
+            padding: 10
+        });
+
+        card.add(new Text(scene, {
+            text: label
+        }));
+
+        state.grid.add(card);
+        state.cards.push(card);
+    }
+
+    state.root.add(state.grid);
+    addTest(state.root);
+},
+
+
+() => {
+    resetTest();
+
+    console.log(
+        '[Grid Test 1] Unequal row heights'
+    );
+
+    console.log(
+        'Expected: Row 1 height is determined by ' +
+        'the taller Card. Row 2 begins below Row 1 ' +
+        'plus the Grid gap.'
+    );
+
+    state.root = new Column(scene, {
+        x: 100,
+        y: 100,
+        width: 300,
+        padding: 10,
+        gap: 10
+    });
+
+    state.grid = new Grid(scene, {
+        columns: 2,
+        padding: 10,
+        gap: 10
+    });
+
+    state.cardA = new Card(scene, {
+        padding: 10
+    });
+    state.cardA.add(new Text(scene, {
+        text: 'Short'
+    }));
+
+    state.cardB = new Card(scene, {
+        padding: 10
+    });
+    state.cardB.add(new Text(scene, {
+        text:
+            'This is a much longer sentence that ' +
+            'should wrap onto several lines inside ' +
+            'the Card.'
+    }));
+
+    state.cardC = new Card(scene, {
+        padding: 10
+    });
+    state.cardC.add(new Text(scene, {
+        text: 'Bottom left'
+    }));
+
+    state.cardD = new Card(scene, {
+        padding: 10
+    });
+    state.cardD.add(new Text(scene, {
+        text: 'Bottom right'
+    }));
+
+    state.grid.add(state.cardA);
+    state.grid.add(state.cardB);
+    state.grid.add(state.cardC);
+    state.grid.add(state.cardD);
+
+    state.root.add(state.grid);
+
+    addTest(state.root);
+},
+
+
  // ==================================
  // 2. GRID CONSTRAINT PROPAGATION
  // ==================================
