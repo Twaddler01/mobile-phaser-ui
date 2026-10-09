@@ -25,6 +25,304 @@ export default function createRowTests(debug) {
 
     return [
 
+
+
+
+() => {
+
+    resetTest();
+
+    console.log(
+        '[ROW 1] EXPECT: Auto-width Text stays at natural width. ' +
+        'No automatic wrapping just because Row has a fixed width.'
+    );
+
+    state.root = new Row(scene, {
+        x: 100,
+        y: 100,
+        width: 300,
+        padding: 10,
+        gap: 10
+    });
+
+    state.textA = new Text(scene, {
+        text: 'This is a long description that should remain naturally wide.'
+    });
+
+    state.root.add(state.textA);
+
+    addTest(state.root);
+
+    console.log('Row:', state.root.getLayoutWidth());
+    console.log('Text:', state.textA.getWrapState());
+    console.log('Text width:', state.textA.getLayoutWidth());
+    console.log('Text height:', state.textA.getLayoutHeight());
+},
+
+// ========================================
+// 2. EXPLICIT TEXT WIDTH — WRAPPING
+// ========================================
+
+() => {
+
+    resetTest();
+
+    console.log(
+        '[ROW 2] EXPECT: Text wraps within 150px. ' +
+        'Measured height increases to fit its lines.'
+    );
+
+    state.root = new Row(scene, {
+        x: 100,
+        y: 100,
+        width: 400,
+        padding: 10,
+        gap: 10
+    });
+
+    state.textA = new Text(scene, {
+        text: 'This description has enough words to wrap across several lines.',
+        width: 150
+    });
+
+    state.root.add(state.textA);
+
+    addTest(state.root);
+
+    console.log('Wrap state:', state.textA.getWrapState());
+    console.log('Text width:', state.textA.getLayoutWidth());
+    console.log('Text height:', state.textA.getLayoutHeight());
+},
+
+// ========================================
+// 3. AVAILABLE MAX WIDTH ONLY
+// ========================================
+
+() => {
+
+    resetTest();
+
+    console.log(
+        '[ROW 3] EXPECT: Text keeps natural width. ' +
+        'availableMaxWidth alone must not trigger wrapping.'
+    );
+
+    state.root = new Row(scene, {
+        x: 100,
+        y: 100,
+        width: 280,
+        padding: 10
+    });
+
+    state.textA = new Text(scene, {
+        text: 'This is deliberately long text that exceeds the Row width.'
+    });
+
+    state.root.add(state.textA);
+
+    addTest(state.root);
+
+    console.log({
+        availableMaxWidth: state.textA.availableMaxWidth,
+        layoutWidth: state.textA.layoutWidth,
+        measuredWidth: state.textA.measuredWidth,
+        measuredHeight: state.textA.measuredHeight,
+        wrap: state.textA.getWrapState()
+    });
+},
+
+// ========================================
+// 4. FILL ALLOCATION — WRAPPING
+// ========================================
+
+() => {
+
+    resetTest();
+
+    console.log(
+        '[ROW 4] EXPECT: First child keeps intrinsic width. ' +
+        'Text receives the remaining Row width, wraps, and grows taller.'
+    );
+
+    state.root = new Row(scene, {
+        x: 100,
+        y: 100,
+        width: 320,
+        padding: 10,
+        gap: 10
+    });
+
+    state.label = new Text(scene, {
+        text: 'Description:'
+    });
+
+    state.textA = new Text(scene, {
+        text: 'This long description should wrap into the space remaining after the label.'
+    });
+
+    state.root.add(state.label);
+
+    state.root.add(state.textA, {
+        fill: 'horizontal'
+    });
+
+    addTest(state.root);
+
+    console.log('Label width:', state.label.getLayoutWidth());
+    console.log('Text allocation:', state.textA.layoutWidth);
+    console.log('Text measured height:', state.textA.measuredHeight);
+    console.log('Text wrap:', state.textA.getWrapState());
+},
+
+// ========================================
+// 5. CHANGE ALLOCATED WIDTH
+// ========================================
+
+() => {
+
+    console.log(
+        '[ROW 5] EXPECT: Narrower allocation means more lines; ' +
+        'wider allocation means fewer lines. Height should recalculate.'
+    );
+
+    state.root.setLayoutSize(260, null);
+},
+
+// ========================================
+// 6. CHANGE ALLOCATED WIDTH AGAIN
+// ========================================
+
+() => {
+
+    console.log(
+        '[ROW 6] EXPECT: Text reflows at the wider allocation. ' +
+        'No stale height or previous wrap width.'
+    );
+
+    state.root.setLayoutSize(420, null);
+},
+
+// ========================================
+// 7. NESTED COLUMN → ROW → TEXT
+// ========================================
+
+() => {
+
+    resetTest();
+
+    console.log(
+        '[ROW 7] EXPECT: Column constrains the Row. ' +
+        'The Row does not automatically wrap its natural-width Text child.'
+    );
+
+    state.root = new Column(scene, {
+        x: 100,
+        y: 100,
+        width: 320,
+        padding: 10,
+        gap: 10
+    });
+
+    state.row = new Row(scene, {
+        gap: 10
+    });
+
+    state.textA = new Text(scene, {
+        text: 'A naturally wide text child inside a nested Row.'
+    });
+
+    state.row.add(state.textA);
+    state.root.add(state.row);
+
+    addTest(state.root);
+
+    console.log('Column width:', state.root.getLayoutWidth());
+    console.log('Row width:', state.row.getLayoutWidth());
+    console.log('Text width:', state.textA.getLayoutWidth());
+    console.log('Text wrap:', state.textA.getWrapState());
+},
+
+// ========================================
+// 8. NESTED COLUMN → TEXT
+// ========================================
+
+() => {
+
+    resetTest();
+
+    console.log(
+        '[ROW 8] EXPECT: Auto-width Text directly inside Column ' +
+        'wraps to the Column content width.'
+    );
+
+    state.root = new Column(scene, {
+        x: 100,
+        y: 100,
+        width: 260,
+        padding: 10,
+        gap: 10
+    });
+
+    state.textA = new Text(scene, {
+        text: 'This text should wrap because the Column assigns its content width.'
+    });
+
+    state.root.add(state.textA);
+
+    addTest(state.root);
+
+    console.log('Column width:', state.root.getLayoutWidth());
+    console.log('Text allocation:', state.textA.layoutWidth);
+    console.log('Text measured size:', {
+        width: state.textA.measuredWidth,
+        height: state.textA.measuredHeight
+    });
+},
+
+// ========================================
+// 9. TEXT CHANGE — HEIGHT PROPAGATION
+// ========================================
+
+() => {
+
+    console.log(
+        '[ROW 9] EXPECT: Changing the text updates its measurements ' +
+        'and marks the parent layout dirty.'
+    );
+
+    state.textA.setText(
+        'This is a much longer replacement description that should take several lines and increase the measured height of the text component.'
+    );
+
+    console.log('Text measured size:', {
+        width: state.textA.measuredWidth,
+        height: state.textA.measuredHeight
+    });
+
+    console.log('Row dirty:', state.root.layoutDirty);
+},
+
+// ========================================
+// 10. RESET WIDTH TO AUTO
+// ========================================
+
+() => {
+
+    console.log(
+        '[ROW 10] EXPECT: Removing the allocated width restores ' +
+        'natural-width behavior for the auto-width Text.'
+    );
+
+    state.root.width = 'auto';
+},
+
+
+
+
+
+
+
+
 // ========================================
 // ROW — MEASUREMENT / ALLOCATION
 // ========================================

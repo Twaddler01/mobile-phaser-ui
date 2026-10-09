@@ -72,33 +72,23 @@ export default class Text extends Component {
         let width;
         let height;
 
-        ////////////////////////////////////////
         // WIDTH
-        ////////////////////////////////////////
-
         if (!this.widthAuto) {
             width = this.requestedWidth;
         } else if (wrapMode === "explicit") {
             width = Math.min(this.wordWrapWidth, this.text.width);
         } else if (wrapMode === "auto") {
-            width = this.availableMaxWidth;
+            width = this.getWrapWidth();
         } else {
             width = this.text.width;
         }
 
-        ////////////////////////////////////////
         // HEIGHT
-        ////////////////////////////////////////
-
         if (!this.heightAuto) {
             height = this.requestedHeight;
         } else {
             height = this.text.height;
         }
-
-        ////////////////////////////////////////
-        // COMMIT MEASURED SIZE
-        ////////////////////////////////////////
 
         this.setMeasuredSize(width, height);
 
@@ -112,20 +102,11 @@ export default class Text extends Component {
     ////////////////////////////////////////
 
     layout() {
-        const wrapMode = this.getWrapMode();
-
-        if (wrapMode === "explicit") {
-            this.text.setWordWrapWidth(this.wordWrapWidth);
-        } else if (wrapMode === "auto") {
-            this.text.setWordWrapWidth(this.availableMaxWidth);
-        } else {
-            this.text.setWordWrapWidth(0);
-        }
+        this.text.setWordWrapWidth(this.getWrapWidth());
 
         this.updateSize();
 
         this.layoutDirty = false;
-
         return this;
     }
 
@@ -154,10 +135,17 @@ export default class Text extends Component {
             return "explicit";
         }
 
-        if (this.widthAuto && Number.isFinite(this.availableMaxWidth)) {
+        // An actual parent allocation takes priority.
+        if (Number.isFinite(this.layoutWidth)) {
             return "auto";
         }
 
+        // A fixed width requested by the component also wraps.
+        if (!this.widthAuto && Number.isFinite(this.requestedWidth)) {
+            return "auto";
+        }
+
+        // availableMaxWidth alone does not force wrapping.
         return "none";
     }
 
@@ -263,6 +251,22 @@ export default class Text extends Component {
     ////////////////////////////////////////
     // WORD WRAP
     ////////////////////////////////////////
+
+    getWrapWidth() {
+        if (this.getWrapMode() === "explicit") {
+            return this.wordWrapWidth;
+        }
+
+        if (this.layoutWidth !== null) {
+            return this.layoutWidth;
+        }
+
+        if (!this.widthAuto && Number.isFinite(this.requestedWidth)) {
+            return this.requestedWidth;
+        }
+
+        return 0;
+    }
 
     setWordWrapWidth(width) {
         this.wordWrapWidth = width;
