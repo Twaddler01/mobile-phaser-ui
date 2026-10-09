@@ -56,6 +56,27 @@ export default class DebugButtons {
 //******************************
         this.addButton('MISC Tests', () => this.miscCycle(), { color: 0x440000 });
 //******************************
+        this.addButton('DEBUG SIZE', () => {
+
+            const root =
+                this.testComponents[0];
+        
+            if (!root) {
+                console.warn(
+                    'No test component to debug.'
+                );
+                return;
+            }
+        
+            console.log('==== DEBUG SIZE ====');
+
+            Debug.size(root, {
+                recursive: true
+            });
+
+            console.log('========');
+        });
+//******************************
         this.addButton('INSPECT SCROLL', () => {
 
             const scroll =

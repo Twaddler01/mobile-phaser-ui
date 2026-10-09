@@ -29,12 +29,6 @@ export default class Component {
         this.resolvedWidth = this.measuredWidth;
         this.resolvedHeight = this.measuredHeight;
 
-        // Preserve numeric width/height compatibility for now.
-        this.defineLayoutProperties({
-            width: this.resolvedWidth,
-            height: this.resolvedHeight
-        });
-
         Object.defineProperties(this, {
             widthAuto: {
                 configurable: true,
@@ -109,6 +103,68 @@ export default class Component {
                 }
             });
         }
+
+        return this;
+    }
+
+    get width() {
+        return this.resolvedWidth;
+    }
+
+    set width(value) {
+        this.setWidth(value);
+    }
+
+    get height() {
+        return this.resolvedHeight;
+    }
+
+    set height(value) {
+        this.setHeight(value);
+    }
+
+    setWidth(width) {
+        if (
+            width !== "auto" &&
+            (typeof width !== "number" || !Number.isFinite(width) || width < 0)
+        ) {
+            throw new TypeError(
+                'Width must be a non-negative number or "auto".'
+            );
+        }
+
+        if (this.requestedWidth === width) {
+            return this;
+        }
+
+        this.requestedWidth = width;
+
+        this.updateResolvedSize();
+        this.markLayoutDirty();
+
+        return this;
+    }
+
+    setHeight(height) {
+        if (
+            height !== "auto" &&
+            (typeof height !== "number" ||
+                !Number.isFinite(height) ||
+                height < 0)
+        ) {
+            throw new TypeError(
+                'Height must be a non-negative number or "auto".'
+            );
+        }
+
+        if (this.requestedHeight === height) {
+            return this;
+        }
+
+        this.requestedHeight = height;
+
+        this.updateResolvedSize();
+        this.markLayoutDirty();
 
         return this;
     }

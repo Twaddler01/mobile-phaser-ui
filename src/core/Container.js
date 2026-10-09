@@ -170,7 +170,12 @@ export default class Container extends Component {
         availableHeight = null,
         fillHeight = null
     ) {
+        // Fill children receive their individual allocation.
         if (this.isFillHeight(options)) {
+            if (fillHeight instanceof Map) {
+                return fillHeight.get(child) ?? 0;
+            }
+
             if (fillHeight !== null) {
                 return fillHeight;
             }
@@ -235,8 +240,9 @@ export default class Container extends Component {
 
     getVerticalFillAllocation(availableHeight) {
         let fixedHeight = 0;
-        let fillCount = 0;
         let fillMargins = 0;
+
+        const fillChildren = [];
 
         for (const child of this.children) {
             const options = this.childLayoutOptions.get(child);
@@ -250,7 +256,16 @@ export default class Container extends Component {
             const childHeight = this.getChildHeight(child, options);
 
             if (this.isFillHeight(options)) {
-                fillCount++;
+                const constraints = child.getLayoutConstraints();
+
+                fillChildren.push({
+                    child,
+                    options,
+                    minHeight: constraints.minHeight ?? 0,
+                    maxHeight: constraints.maxHeight ?? Infinity,
+                    height: 0,
+                    margin: margin.top + margin.bottom
+                });
 
                 fillMargins += margin.top + margin.bottom;
             } else {
@@ -265,15 +280,68 @@ export default class Container extends Component {
             availableHeight - fixedHeight - fillMargins - totalGaps
         );
 
-        const fillHeight = fillCount > 0 ? fillSpace / fillCount : 0;
+        // Begin with an equal share for every fill child.
+        let remainingSpace = fillSpace;
+        let remainingChildren = [...fillChildren];
+
+        while (remainingChildren.length > 0) {
+            const share = remainingSpace / remainingChildren.length;
+
+            const constrainedChildren = remainingChildren.filter(
+                item => share < item.minHeight || share > item.maxHeight
+            );
+
+            // All remaining children can accept an equal share.
+            if (constrainedChildren.length === 0) {
+                for (const item of remainingChildren) {
+                    item.height = share;
+                }
+
+                break;
+            }
+
+            // Fix children whose equal share violates a constraint.
+            for (const item of constrainedChildren) {
+                item.height = Math.max(
+                    item.minHeight,
+                    Math.min(share, item.maxHeight)
+                );
+
+                remainingSpace -= item.height;
+            }
+
+            const constrainedSet = new Set(constrainedChildren);
+
+            remainingChildren = remainingChildren.filter(
+                item => !constrainedSet.has(item)
+            );
+
+            // If constraints cause overflow, keep allocating
+            // the remaining children at their minimums.
+            if (remainingSpace < 0) {
+                for (const item of remainingChildren) {
+                    item.height = item.minHeight;
+                }
+
+                break;
+            }
+        }
+
+        const fillHeight = fillChildren.length > 0 ? fillChildren[0].height : 0;
 
         return {
             fixedHeight,
-            fillCount,
+            fillCount: fillChildren.length,
             fillMargins,
             totalGaps,
             fillSpace,
-            fillHeight
+            fillHeight,
+
+            // Individual allocations are needed because
+            // constrained children may have different heights.
+            fillHeights: new Map(
+                fillChildren.map(item => [item.child, item.height])
+            )
         };
     }
 

@@ -130,9 +130,13 @@ export default class Column extends Container {
 
         const availableHeight = hasAllocatedHeight ? contentHeight : null;
 
-        const { fillHeight } = hasAllocatedHeight
-            ? this.getVerticalFillAllocation(availableHeight)
-            : { fillHeight: null };
+        const fillAllocation =
+            hasAllocatedHeight
+                ? this.getVerticalFillAllocation(availableHeight)
+                : null;
+        
+        const fillHeight =
+            fillAllocation?.fillHeights ?? null;
 
         ////////////////////////////////////////
         // 3. RESOLVE CHILDREN
@@ -176,19 +180,23 @@ export default class Column extends Container {
             contentHeight: finalContentHeight
         } = finalConstraints;
 
+        const hasFinalAllocatedHeight =
+            !this.heightAuto || this.layoutHeight !== null;
+
         const finalAvailableHeight =
-            this.layoutHeight !== null ? finalContentHeight : null;
+            hasFinalAllocatedHeight ? finalContentHeight : null;
 
         ////////////////////////////////////////
         // FINAL VERTICAL ALLOCATION
         ////////////////////////////////////////
 
-        const hasFinalAllocatedHeight =
-            !this.heightAuto || this.layoutHeight !== null;
+        const finalFillAllocation =
+            hasFinalAllocatedHeight
+                ? this.getVerticalFillAllocation(finalContentHeight)
+                : null;
 
-        const { fillHeight: finalFillHeight } = hasFinalAllocatedHeight
-            ? this.getVerticalFillAllocation(finalContentHeight)
-            : { fillHeight: null };
+        const finalFillHeight =
+            finalFillAllocation?.fillHeights ?? null;
 
         ////////////////////////////////////////
         // FINAL CHILD HEIGHTS
