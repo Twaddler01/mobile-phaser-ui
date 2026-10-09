@@ -145,7 +145,12 @@ export default class Text extends Component {
             return "auto";
         }
 
-        // availableMaxWidth alone does not force wrapping.
+        // A finite available maximum also enables automatic wrapping.
+        if (Number.isFinite(this.availableMaxWidth)) {
+            return "auto";
+        }
+
+        // No width constraint: use natural text width.
         return "none";
     }
 
@@ -263,6 +268,10 @@ export default class Text extends Component {
 
         if (!this.widthAuto && Number.isFinite(this.requestedWidth)) {
             return this.requestedWidth;
+        }
+
+        if (Number.isFinite(this.availableMaxWidth)) {
+            return this.availableMaxWidth;
         }
 
         return 0;

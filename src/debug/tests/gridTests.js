@@ -29,6 +29,74 @@ export default function createGridTests(debug) {
 
     return [
 
+
+ // ==================================
+ // 2. GRID CONSTRAINT PROPAGATION
+ // ==================================
+
+() => {
+
+    resetTest();
+
+    state.root =
+        new Column(scene, {
+            x: 100,
+            y: 100,
+
+            width: 300,
+
+            padding: 10,
+            gap: 10
+        });
+
+    state.grid =
+        new Grid(scene, {
+            columns: 2,
+
+            padding: 10,
+            gap: 10
+        });
+
+    state.cardA =
+        new Card(scene, {
+            padding: 10
+        });
+
+    state.textA =
+        new Text(scene, {
+            text: 'This is a longer sentence that should wrap inside its Grid cell.'
+        });
+
+    state.cardA.add(state.textA);
+
+    state.cardB =
+        new Card(scene, {
+            padding: 10
+        });
+
+    state.textB =
+        new Text(scene, {
+            text: 'This is another long sentence that should wrap.'
+        });
+
+    state.cardB.add(state.textB);
+
+    state.grid.add(state.cardA);
+    state.grid.add(state.cardB);
+
+    state.root.add(state.grid);
+
+    addTest(state.root);
+
+    console.log(
+        'GRID CONSTRAINT PROPAGATION\n' +
+        'Expected: the parent limits Grid width; ' +
+        'auto-width Text wraps within its cell; ' +
+        'Card and Grid heights update to fit the wrapped text.'
+    );
+},
+
+
 // ==================================
 // GRID INSIDE SCROLLVIEW
 // ==================================
