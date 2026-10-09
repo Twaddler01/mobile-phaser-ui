@@ -65,7 +65,19 @@ export default function createColumnTests(debug) {
 
 () => {
 
-    state.root.setLayoutSize(300, 400);
+    state.root.setLayoutSize(300, null);
+
+},
+
+() => {
+
+    state.root.setLayoutSize(100, null);
+
+},
+
+() => {
+
+    state.root.setLayoutSize(400, null);
 
 },
 
