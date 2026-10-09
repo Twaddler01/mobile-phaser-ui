@@ -290,27 +290,7 @@ export default class Container extends Component {
 
         return null;
     }
-    /*
-    getChildLayoutWidth(
-        child,
-        options,
-        resolvedWidth
-    ) {
 
-        if (
-            options.width !== null ||
-            this.isFillWidth(options) ||
-            (
-                this.constructor.name === 'Column' &&
-                child.usesAvailableWidth?.()
-            )
-        ) {
-            return resolvedWidth;
-        }
-
-        return null;
-    }
-*/
     getChildLayoutHeight(child, options, resolvedHeight) {
         if (options.height !== null || this.isFillHeight(options)) {
             return resolvedHeight;

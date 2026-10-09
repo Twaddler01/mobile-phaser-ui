@@ -123,16 +123,7 @@ export default class Text extends Component {
         }
 
         this.updateSize();
-console.log(
-    "[Text layout]",
-    this.getWrapState(),
-    {
-        measuredWidth: this.measuredWidth,
-        measuredHeight: this.measuredHeight,
-        phaserWidth: this.text.width,
-        phaserHeight: this.text.height
-    }
-);
+
         this.layoutDirty = false;
 
         return this;
@@ -170,15 +161,14 @@ console.log(
         return "none";
     }
 
-getWrapState() {
-    return {
-        mode: this.getWrapMode(),
-        availableMaxWidth: this.availableMaxWidth,
-        explicitWordWrapWidth: this.wordWrapWidth,
-        phaserWordWrapWidth:
-            this.text.style?.wordWrapWidth ?? null
-    };
-}
+    getWrapState() {
+        return {
+            mode: this.getWrapMode(),
+            availableMaxWidth: this.availableMaxWidth,
+            explicitWordWrapWidth: this.wordWrapWidth,
+            phaserWordWrapWidth: this.text.style?.wordWrapWidth ?? null
+        };
+    }
 
     usesAvailableWidth() {
         return this.widthAuto && this.wordWrapWidth === undefined;

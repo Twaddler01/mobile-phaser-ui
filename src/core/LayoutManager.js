@@ -1,5 +1,4 @@
 export default class LayoutManager {
-
     constructor(scene) {
         this.scene = scene;
         this.dirtyRoots = new Set();
@@ -12,6 +11,13 @@ export default class LayoutManager {
 
     update() {
         for (const root of this.dirtyRoots) {
+            if (!root) continue;
+
+            // Skip components that have been destroyed or detached.
+            if (root.destroyed || root.container?.scene !== this.scene) {
+                root.layoutScheduled = false;
+                continue;
+            }
 
             if (root.layoutDirty) {
                 root.layout();
@@ -21,5 +27,10 @@ export default class LayoutManager {
         }
 
         this.dirtyRoots.clear();
+    }
+
+    remove(component) {
+        this.dirtyRoots.delete(component);
+        return this;
     }
 }
