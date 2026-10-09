@@ -16,11 +16,306 @@ export default function createMiscTests(debug) {
         scene,
         width,
         height,
-        destroyTest,
+        state,
+        resetTest,
         addTest
     } = debug;
 
     return [
+
+
+
+        // =========================================
+        // CARD 1 — AUTO SIZE WITH TEXT
+        // =========================================
+        () => {
+            resetTest();
+
+            state.card = new Card(scene, {
+                padding: 20
+            });
+
+            state.text = new Text(scene, {
+                text: 'ohkfg jkgg gijv hj'
+            });
+
+            state.card.add(state.text);
+
+            console.log(
+                'CARD 1 — AUTO SIZE',
+                'Expect: requested auto × auto; allocated null × null; resolved follows measured. Check that text fits inside the 20px padding.'
+            );
+
+            addTest(state.card);
+        },
+
+        // =========================================
+        // CARD 2 — FIXED SIZE
+        // =========================================
+        () => {
+            resetTest();
+
+            state.card = new Card(scene, {
+                width: 300,
+                height: 160,
+                padding: 20
+            });
+
+            state.text = new Text(scene, {
+                text: 'Fixed Card: 300 × 160'
+            });
+
+            state.card.add(state.text);
+
+            console.log(
+                'CARD 2 — FIXED SIZE',
+                'Expect: requested 300 × 160; allocated null × null; resolved 300 × 160. Measured may differ from resolved.'
+            );
+
+            addTest(state.card);
+        },
+
+        // =========================================
+        // CARD 3 — EMPTY AUTO SIZE
+        // =========================================
+        () => {
+            resetTest();
+
+            state.card = new Card(scene, {
+                padding: {
+                    top: 10,
+                    right: 20,
+                    bottom: 30,
+                    left: 40
+                }
+            });
+
+            console.log(
+                'CARD 3 — EMPTY AUTO SIZE',
+                'Expect: measured and resolved equal padding totals: width 60, height 40. Watch for stale dimensions or an unexpected minimum size.'
+            );
+
+            addTest(state.card);
+        },
+
+        // =========================================
+        // CARD 4 — WIDTH ALLOCATION
+        // =========================================
+        () => {
+            resetTest();
+
+            state.card = new Card(scene, {
+                padding: 20
+            });
+
+            state.text = new Text(scene, {
+                text: 'Width allocation test'
+            });
+
+            state.card.add(state.text);
+
+            console.log(
+                'CARD 4 — INITIAL AUTO SIZE',
+                'Record measured and resolved before applying an allocation.'
+            );
+
+            addTest(state.card);
+        },
+
+        () => {
+            state.card.setLayoutSize(300, null);
+
+            console.log(
+                'CARD 4 — ALLOCATE WIDTH',
+                'Expect: allocated width 300; resolved width 300. Height remains intrinsic if it is not allocated.'
+            );
+        },
+
+        () => {
+            state.card.setLayoutSize(null, null);
+
+            console.log(
+                'CARD 4 — RELEASE ALLOCATION',
+                'Expect: allocated width and height return to null; resolved dimensions return to intrinsic sizing.'
+            );
+        },
+
+        // =========================================
+        // CARD 5 — HEIGHT ALLOCATION
+        // =========================================
+        () => {
+            resetTest();
+
+            state.card = new Card(scene, {
+                padding: 20
+            });
+
+            state.text = new Text(scene, {
+                text: 'Height allocation test'
+            });
+
+            state.card.add(state.text);
+
+            console.log(
+                'CARD 5 — INITIAL AUTO SIZE',
+                'Start with both dimensions unallocated.'
+            );
+
+            addTest(state.card);
+        },
+
+        () => {
+            state.card.setLayoutSize(null, 180);
+
+            console.log(
+                'CARD 5 — ALLOCATE HEIGHT',
+                'Expect: allocated height 180; resolved height 180. Width should remain intrinsic.'
+            );
+        },
+
+        () => {
+            state.card.setLayoutSize(null, null);
+
+            console.log(
+                'CARD 5 — RELEASE HEIGHT',
+                'Expect: resolved height returns to its measured intrinsic height.'
+            );
+        },
+
+        // =========================================
+        // CARD 6 — ALLOCATE BOTH DIMENSIONS
+        // =========================================
+        () => {
+            resetTest();
+
+            state.card = new Card(scene, {
+                padding: 20
+            });
+
+            state.text = new Text(scene, {
+                text: 'Both dimensions allocated'
+            });
+
+            state.card.add(state.text);
+
+            console.log(
+                'CARD 6 — INITIAL AUTO SIZE',
+                'Record the initial measured size before allocation.'
+            );
+
+            addTest(state.card);
+        },
+
+        () => {
+            state.card.setLayoutSize(320, 200);
+
+            console.log(
+                'CARD 6 — ALLOCATE BOTH',
+                'Expect: allocated 320 × 200; resolved 320 × 200. Check that the background matches the resolved size.'
+            );
+        },
+
+        () => {
+            state.card.setLayoutSize(null, null);
+
+            console.log(
+                'CARD 6 — RELEASE BOTH',
+                'Expect: both allocations return to null and resolved dimensions return to intrinsic sizing.'
+            );
+        },
+
+        // =========================================
+        // CARD 7 — NESTED AUTO CARDS
+        // =========================================
+        () => {
+            resetTest();
+
+            state.outerCard = new Card(scene, {
+                padding: 20
+            });
+
+            state.innerCard = new Card(scene, {
+                padding: 15
+            });
+
+            state.text = new Text(scene, {
+                text: 'Nested Card'
+            });
+
+            state.innerCard.add(state.text);
+            state.outerCard.add(state.innerCard);
+
+            console.log(
+                'CARD 7 — NESTED AUTO CARDS',
+                'Expect: inner Card measures from its text and padding; outer Card measures from the inner Card and its own padding. Watch for a stale or zero outer measurement.'
+            );
+
+            addTest(state.outerCard);
+        },
+
+        // =========================================
+        // CARD 8 — FIXED OUTER, AUTO INNER
+        // =========================================
+        () => {
+            resetTest();
+
+            state.outerCard = new Card(scene, {
+                width: 360,
+                height: 220,
+                padding: 20
+            });
+
+            state.innerCard = new Card(scene, {
+                padding: 15
+            });
+
+            state.text = new Text(scene, {
+                text: 'Auto-sized inner Card'
+            });
+
+            state.innerCard.add(state.text);
+            state.outerCard.add(state.innerCard);
+
+            console.log(
+                'CARD 8 — FIXED OUTER, AUTO INNER',
+                'Expect: outer resolved size stays 360 × 220. Inner Card should measure intrinsically unless its parent layout allocates a size.'
+            );
+
+            addTest(state.outerCard);
+        },
+
+
+
+
+
+
+
+
+() => {
+    resetTest();
+    
+    state.card = new Card(scene, {
+        padding: 20
+    });
+    
+    state.text = new Text(scene, {
+        text: 'ohkfg jkgg gijv hj'
+    });
+    
+    state.card.add(state.text);
+
+    addTest(state.card);
+},
+
+() => {
+state.card.setLayoutSize(300, null);
+},
+() => {
+state.card.setLayoutSize(null, null);
+},
+
+
+
 
 // ==================================
 // 12. ROW WIDTH DISTRIBUTION
@@ -28,7 +323,7 @@ export default function createMiscTests(debug) {
 
 () => {
 
-    destroyTest();
+    resetTest();
 
     // ----------------------------------
     // ROOT ROW
@@ -139,7 +434,7 @@ export default function createMiscTests(debug) {
 
         () => {
 
-            destroyTest();
+            resetTest();
 
             console.log(
                 'GRID REFACTOR TEST'
@@ -186,7 +481,7 @@ export default function createMiscTests(debug) {
 
         () => {
 
-            destroyTest();
+            resetTest();
 
             console.log(
                 'FIXED WIDTH — EQUAL GRID COLUMNS'
@@ -230,7 +525,7 @@ export default function createMiscTests(debug) {
 
         () => {
         
-            destroyTest();
+            resetTest();
         
             console.log(
                 'GRID REFACTOR TEST'
@@ -299,7 +594,7 @@ export default function createMiscTests(debug) {
         
         () => {
         
-            destroyTest();
+            resetTest();
         
             console.log(
                 '19 — MIXED LAYOUT STRESS'
@@ -500,7 +795,7 @@ export default function createMiscTests(debug) {
         
         () => {
         
-            destroyTest();
+            resetTest();
         
             console.log(
                 '11 — AUTO HEIGHT CASCADE'
@@ -571,7 +866,7 @@ export default function createMiscTests(debug) {
         
         () => {
         
-            destroyTest();
+            resetTest();
         
             console.log(
                 '11 — AUTO WIDTH CASCADE'
@@ -641,7 +936,7 @@ export default function createMiscTests(debug) {
         
         () => {
         
-            destroyTest();
+            resetTest();
         
             console.log(
                 '12 — AUTO WIDTH CASCADE'
@@ -678,7 +973,7 @@ export default function createMiscTests(debug) {
         
         () => {
         
-            destroyTest();
+            resetTest();
         
             console.log(
                 '13 — LIVE CONSTRAINT CHANGE'
@@ -714,7 +1009,7 @@ export default function createMiscTests(debug) {
         
         () => {
         
-            destroyTest();
+            resetTest();
         
             console.log(
                 '15 — MIXED CHILD DEPENDENCIES'
@@ -792,7 +1087,7 @@ export default function createMiscTests(debug) {
         
         () => {
         
-            destroyTest();
+            resetTest();
         
             console.log(
                 '16 — EMPTY CONTAINERS'
@@ -828,7 +1123,7 @@ export default function createMiscTests(debug) {
         
         () => {
         
-            destroyTest();
+            resetTest();
         
             console.log(
                 '18 — MARGINS + FILL + ALIGNMENT'
@@ -881,7 +1176,7 @@ export default function createMiscTests(debug) {
 
         () => {
         
-            destroyTest();
+            resetTest();
         
             console.log(
                 'TEXT — INTRINSIC'
@@ -913,7 +1208,7 @@ export default function createMiscTests(debug) {
         
         () => {
         
-            destroyTest();
+            resetTest();
         
             console.log(
                 'TEXT — EXPLICIT WRAP'
@@ -946,7 +1241,7 @@ export default function createMiscTests(debug) {
         
         () => {
         
-            destroyTest();
+            resetTest();
         
             console.log(
                 'TEXT — AUTO WRAP'
@@ -983,7 +1278,7 @@ export default function createMiscTests(debug) {
         // ==================================
         () => {
         
-            destroyTest();
+            resetTest();
         
             console.log(
                 '1. SECTION INITIAL'
@@ -1136,7 +1431,7 @@ export default function createMiscTests(debug) {
         // ==================================
         () => {
         
-            destroyTest();
+            resetTest();
         
             console.log(
                 'STACK'
@@ -1195,7 +1490,7 @@ export default function createMiscTests(debug) {
         
         () => {
         
-            destroyTest();
+            resetTest();
         
             console.log(
                 '0 SETUP'
@@ -1235,7 +1530,7 @@ export default function createMiscTests(debug) {
         
         () => {
         
-            destroyTest();
+            resetTest();
         
             console.log(
                 '0 SETUP'
@@ -1282,7 +1577,7 @@ export default function createMiscTests(debug) {
         // ==================================
         () => {
         
-            destroyTest();
+            resetTest();
         
             console.log(
                 'A — THREE SCROLLVIEWS IN COLUMN'
@@ -1378,7 +1673,7 @@ export default function createMiscTests(debug) {
         // ==================================
         () => {
         
-            destroyTest();
+            resetTest();
         
             console.log(
                 '1 — TWO SCROLLVIEWS'
@@ -1590,7 +1885,7 @@ export default function createMiscTests(debug) {
         
         () => {
         
-            destroyTest();
+            resetTest();
         
             console.log(
                 '2 — INTRINSIC GRID / 3 ROWS'
@@ -1672,7 +1967,7 @@ export default function createMiscTests(debug) {
         
         () => {
         
-            destroyTest();
+            resetTest();
         
             console.log(
                 '3 — DEFAULT GRID / ONE COLUMN'
@@ -1747,7 +2042,7 @@ export default function createMiscTests(debug) {
         
         () => {
         
-            destroyTest();
+            resetTest();
         
             console.log(
                 '4 — FIXED WIDTH / EQUAL GRID COLUMNS'
@@ -1834,7 +2129,7 @@ export default function createMiscTests(debug) {
         
         () => {
         
-            destroyTest();
+            resetTest();
         
             console.log(
                 '5 — FIXED HEIGHT / EQUAL GRID ROWS'
@@ -1923,7 +2218,7 @@ export default function createMiscTests(debug) {
         
         () => {
         
-            destroyTest();
+            resetTest();
         
             console.log(
                 '6 — FILL HORIZONTAL'
@@ -2012,7 +2307,7 @@ export default function createMiscTests(debug) {
         
         () => {
         
-            destroyTest();
+            resetTest();
         
             console.log(
                 '7 — FILL BOTH'
@@ -2101,7 +2396,7 @@ export default function createMiscTests(debug) {
         // 8. EXPLICIT ROW / COLUMN
         // ==================================
         () => {
-            destroyTest();
+            resetTest();
         
             console.log(
                 '8 EXPLICIT ROW / COLUMN'
@@ -2185,7 +2480,7 @@ export default function createMiscTests(debug) {
         // ==================================
         () => {
         
-            destroyTest();
+            resetTest();
         
             console.log(
                 '9 — GRID INSIDE COLUMN'
@@ -2375,7 +2670,7 @@ export default function createMiscTests(debug) {
         
         () => {
         
-            destroyTest();
+            resetTest();
         
             console.log(
                 '10 — GRID INSIDE SCROLLVIEW'

@@ -1,60 +1,46 @@
-import Debug from '../core/Debug.js';
-import Container from '../core/Container.js';
+import Debug from "../core/Debug.js";
+import Container from "../core/Container.js";
 
 export default class Card extends Container {
-
     constructor(scene, config = {}) {
-    
         super(scene, config);
-    
-        this.padding =
-            this.getPadding(config.padding);
-    
+
+        this.padding = this.getPadding(config.padding);
+
         // STYLE
         this.style = {
-            backgroundColor:
-                config.style?.backgroundColor ?? 0x222222,
-    
-            radius:
-                config.style?.radius ?? 12,
-    
-            stroke:
-                config.style?.stroke,
-    
-            strokeColor:
-                config.style?.strokeColor
+            backgroundColor: config.style?.backgroundColor ?? 0x222222,
+
+            radius: config.style?.radius ?? 12,
+
+            stroke: config.style?.stroke,
+
+            strokeColor: config.style?.strokeColor
         };
-    
+
         this.build();
         this.updateBackground();
     }
 
     build() {
-        this.background =
-            this.scene.add.graphics();
-    
-        this.container.add(
-            this.background
-        );
-    
+        this.background = this.scene.add.graphics();
+
+        this.container.add(this.background);
+
         return this;
     }
 
     updateVisuals() {
         this.updateBackground();
-    
+
         return this;
     }
 
     updateBackground() {
-    
         this.background.clear();
-    
-        this.background.fillStyle(
-            this.style.backgroundColor,
-            1
-        );
-    
+
+        this.background.fillStyle(this.style.backgroundColor, 1);
+
         this.background.fillRoundedRect(
             0,
             0,
@@ -62,18 +48,17 @@ export default class Card extends Container {
             this.getLayoutHeight(),
             this.style.radius
         );
-    
+
         if (
             this.style.stroke !== undefined &&
             this.style.strokeColor !== undefined
         ) {
-    
             this.background.lineStyle(
                 this.style.stroke,
                 this.style.strokeColor,
                 1
             );
-    
+
             this.background.strokeRoundedRect(
                 0,
                 0,
@@ -82,367 +67,254 @@ export default class Card extends Container {
                 this.style.radius
             );
         }
-    
+
         return this;
     }
 
     updateSize() {
-    
+        let measuredWidth = this.measuredWidth;
+        let measuredHeight = this.measuredHeight;
+
         ////////////////////////////////////////
         // 1. MEASURE INTRINSIC WIDTH
         ////////////////////////////////////////
-    
-        let measuredWidth =
-            this.measuredWidth;
-    
-        if (
-            this.layoutWidth === null &&
-            this.widthAuto
-        ) {
-    
+
+        if (this.layoutWidth === null && this.widthAuto) {
             let contentWidth = 0;
-    
+
             for (const child of this.children) {
-    
-                const options =
-                    this.childLayoutOptions.get(child);
-    
+                const options = this.childLayoutOptions.get(child);
+
                 if (!options) {
                     continue;
                 }
-    
-                const childWidth =
-                    options.width ??
-                    child.getLayoutWidth();
-    
-                const { margin } =
-                    options;
-    
-                contentWidth =
-                    Math.max(
-                        contentWidth,
-                        margin.left +
-                        childWidth +
-                        margin.right
-                    );
+
+                const childWidth = options.width ?? child.getLayoutWidth();
+
+                const { margin } = options;
+
+                contentWidth = Math.max(
+                    contentWidth,
+                    margin.left + childWidth + margin.right
+                );
             }
-    
+
             measuredWidth =
-                this.padding.left +
-                contentWidth +
-                this.padding.right;
+                this.padding.left + contentWidth + this.padding.right;
         }
-    
+
         ////////////////////////////////////////
         // 2. MEASURE INTRINSIC HEIGHT
         ////////////////////////////////////////
-    
-        let measuredHeight =
-            this.measuredHeight;
-    
-        if (
-            this.layoutHeight === null &&
-            this.heightAuto
-        ) {
-    
+
+        if (this.layoutHeight === null && this.heightAuto) {
             let contentHeight = 0;
-    
+
             for (const child of this.children) {
-    
-                const options =
-                    this.childLayoutOptions.get(child);
-    
+                const options = this.childLayoutOptions.get(child);
+
                 if (!options) {
                     continue;
                 }
-    
-                const childHeight =
-                    options.height ??
-                    child.getLayoutHeight();
-    
-                const { margin } =
-                    options;
-    
-                contentHeight =
-                    Math.max(
-                        contentHeight,
-                        margin.top +
-                        childHeight +
-                        margin.bottom
-                    );
+
+                const childHeight = options.height ?? child.getLayoutHeight();
+
+                const { margin } = options;
+
+                contentHeight = Math.max(
+                    contentHeight,
+                    margin.top + childHeight + margin.bottom
+                );
             }
-    
+
             measuredHeight =
-                this.padding.top +
-                contentHeight +
-                this.padding.bottom;
+                this.padding.top + contentHeight + this.padding.bottom;
         }
-    
+
         ////////////////////////////////////////
         // 3. COMMIT MEASURED SIZE
         ////////////////////////////////////////
-    
-        if (
-            measuredWidth !== this.measuredWidth ||
-            measuredHeight !== this.measuredHeight
-        ) {
-    
-            this.measuredWidth =
-                measuredWidth;
-    
-            this.measuredHeight =
-                measuredHeight;
-        }
-    
+
+        this.setMeasuredSize(measuredWidth, measuredHeight);
+
         ////////////////////////////////////////
-        // 4. APPLY EFFECTIVE SIZE
+        // 4. RESOLVE EFFECTIVE SIZE
         ////////////////////////////////////////
-    
-        if (this.layoutWidth !== null) {
-    
-            this.width =
-                this.layoutWidth;
-    
-        } else {
-    
-            this.width =
-                measuredWidth;
-        }
-    
-        if (this.layoutHeight !== null) {
-    
-            this.height =
-                this.layoutHeight;
-    
-        } else {
-    
-            this.height =
-                measuredHeight;
-        }
-    
+
+        this.updateResolvedSize();
+
         return this;
     }
 
     layout() {
-    
         this.beginLayout();
-    
+
         ////////////////////////////////////////
         // 1. GET CONSTRAINTS
         ////////////////////////////////////////
-    
-        const constraints =
-            this.getLayoutConstraints();
-    
-        const {
-            contentWidth,
-            contentHeight
-        } = constraints;
-    
+
+        const constraints = this.getLayoutConstraints();
+
+        const { contentWidth, contentHeight } = constraints;
+
         ////////////////////////////////////////
         // 2–3. ALLOCATE + RESOLVE CHILDREN
         ////////////////////////////////////////
 
         const hasAllocatedHeight =
-            !this.heightAuto ||
-            this.layoutHeight !== null;
-        
-        const availableHeight =
-            hasAllocatedHeight
-                ? contentHeight
-                : null;
-        
-        this.resolveChildren(
-            contentWidth,
-            availableHeight
-        );
+            !this.heightAuto || this.layoutHeight !== null;
+
+        const availableHeight = hasAllocatedHeight ? contentHeight : null;
+
+        this.resolveChildren(contentWidth, availableHeight);
 
         ////////////////////////////////////////
         // 4. MEASURE FINAL SIZE
         ////////////////////////////////////////
-    
+
         this.updateSize();
-    
+
         ////////////////////////////////////////
         // RE-CAPTURE FINAL DIMENSIONS
         ////////////////////////////////////////
-    
-        const finalConstraints =
-            this.getLayoutConstraints();
-    
+
+        const finalConstraints = this.getLayoutConstraints();
+
         const {
             width: finalLayoutWidth,
             height: finalLayoutHeight,
             contentWidth: finalContentWidth,
             contentHeight: finalContentHeight
         } = finalConstraints;
-    
+
         ////////////////////////////////////////
         // 5. POSITION CHILDREN
         ////////////////////////////////////////
-    
+
         for (const child of this.children) {
-    
-            const options =
-                this.childLayoutOptions.get(child);
-    
+            const options = this.childLayoutOptions.get(child);
+
             if (!options) {
                 continue;
             }
-    
-            const {
-                margin,
-                horizontalAlign,
-                verticalAlign
-            } = options;
-    
+
+            const { margin, horizontalAlign, verticalAlign } = options;
+
             ////////////////////////////////////////
             // CHILD SIZE
             ////////////////////////////////////////
-    
-            const childWidth =
-                child.getLayoutWidth();
-    
-            const childHeight =
-                child.getLayoutHeight();
-    
+
+            const childWidth = child.getLayoutWidth();
+
+            const childHeight = child.getLayoutHeight();
+
             ////////////////////////////////////////
             // OUTER CHILD AREA
             ////////////////////////////////////////
-    
-            const outerWidth =
-                margin.left +
-                childWidth +
-                margin.right;
-    
-            const outerHeight =
-                margin.top +
-                childHeight +
-                margin.bottom;
-    
+
+            const outerWidth = margin.left + childWidth + margin.right;
+
+            const outerHeight = margin.top + childHeight + margin.bottom;
+
             ////////////////////////////////////////
             // HORIZONTAL POSITION
             ////////////////////////////////////////
-    
+
             let x;
-    
+
             switch (horizontalAlign) {
-    
-                case 'center':
-    
+                case "center":
                     x =
                         this.padding.left +
-                        (
-                            finalContentWidth -
-                            outerWidth
-                        ) / 2 +
+                        (finalContentWidth - outerWidth) / 2 +
                         margin.left;
-    
+
                     break;
-    
-                case 'end':
-    
+
+                case "end":
                     x =
                         finalLayoutWidth -
                         this.padding.right -
                         outerWidth +
                         margin.left;
-    
+
                     break;
-    
-                case 'start':
+
+                case "start":
                 default:
-    
-                    x =
-                        this.padding.left +
-                        margin.left;
-    
+                    x = this.padding.left + margin.left;
+
                     break;
             }
-    
+
             ////////////////////////////////////////
             // VERTICAL POSITION
             ////////////////////////////////////////
-    
+
             let y;
-    
+
             switch (verticalAlign) {
-    
-                case 'center':
-    
+                case "center":
                     y =
                         this.padding.top +
-                        (
-                            finalContentHeight -
-                            outerHeight
-                        ) / 2 +
+                        (finalContentHeight - outerHeight) / 2 +
                         margin.top;
-    
+
                     break;
-    
-                case 'end':
-    
+
+                case "end":
                     y =
                         finalLayoutHeight -
                         this.padding.bottom -
                         outerHeight +
                         margin.top;
-    
+
                     break;
-    
-                case 'start':
+
+                case "start":
                 default:
-    
-                    y =
-                        this.padding.top +
-                        margin.top;
-    
+                    y = this.padding.top + margin.top;
+
                     break;
             }
-    
-            child.setPosition(
-                x,
-                y
-            );
+
+            child.setPosition(x, y);
         }
-    
+
         ////////////////////////////////////////
         // UPDATE VISUALS
         ////////////////////////////////////////
-    
+
         this.updateVisuals();
-    
+
         ////////////////////////////////////////
         // 6. FINALIZE
         ////////////////////////////////////////
-    
+
         this.finishLayout();
     }
 
     setPadding(padding = 0) {
-    
-        this.padding =
-            this.getPadding(padding);
-    
+        this.padding = this.getPadding(padding);
+
         this.markLayoutDirty();
-    
+
         return this;
     }
-    
+
     setStyle(style = {}) {
-    
         this.style = {
             ...this.style,
             ...style
         };
-    
+
         this.markLayoutDirty();
-    
+
         return this;
     }
 
     getPadding(padding = 0) {
-        if (typeof padding === 'number') {
+        if (typeof padding === "number") {
             return {
                 top: padding,
                 right: padding,
@@ -450,7 +322,7 @@ export default class Card extends Container {
                 left: padding
             };
         }
-    
+
         return {
             top: padding.top ?? 0,
             right: padding.right ?? 0,

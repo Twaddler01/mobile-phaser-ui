@@ -151,19 +151,22 @@ class Debug {
         
             showPosition:
                 options.tree?.showPosition ?? true,
-        
+
+            showRequested:
+                options.tree?.showRequested ?? true,
+            
             showMeasured:
                 options.tree?.showMeasured ?? true,
             
             showAllocated:
                 options.tree?.showAllocated ?? true,
             
+            showResolved:
+                options.tree?.showResolved ?? true,
+
             showConstraints:
                 options.tree?.showConstraints ?? true,
-            
-            showEffective:
-                options.tree?.showEffective ?? true,
-            
+
             showLayoutOptions:
                 options.tree?.showLayoutOptions ?? true,
             
@@ -604,25 +607,28 @@ class Debug {
                 );
             }
     
-            if (settings.showMeasured) {
+            if (settings.showRequested) {
+                details.push(
+                    `requested:${node.requestedWidth}×${node.requestedHeight}`
+                );
+            }
             
+            if (settings.showMeasured) {
                 details.push(
                     `measured:${node.getMeasuredWidth()}×` +
                     `${node.getMeasuredHeight()}`
                 );
             }
-    
-            if (settings.showAllocated) {
             
+            if (settings.showAllocated) {
                 details.push(
                     `allocated:${node.layoutWidth}×${node.layoutHeight}`
                 );
             }
-
-            if (settings.showEffective) {
             
+            if (settings.showResolved) {
                 details.push(
-                    `effective:${node.getLayoutWidth()}×${node.getLayoutHeight()}`
+                    `resolved:${node.resolvedWidth}×${node.resolvedHeight}`
                 );
             }
 
@@ -841,14 +847,21 @@ class Debug {
                 component.getWorldY(),
     
             ////////////////////////////////////////
+            // REQUESTED
+            ////////////////////////////////////////
+            
+            requested: {
+                width: component.requestedWidth,
+                height: component.requestedHeight
+            },
+            
+            ////////////////////////////////////////
             // MEASURED
             ////////////////////////////////////////
             
             measured: {
-
                 width: component.getMeasuredWidth(),
                 height: component.getMeasuredHeight()
-
             },
             
             ////////////////////////////////////////
@@ -856,14 +869,19 @@ class Debug {
             ////////////////////////////////////////
             
             allocated: {
-            
-                width:
-                    component.layoutWidth,
-            
-                height:
-                    component.layoutHeight
+                width: component.layoutWidth,
+                height: component.layoutHeight
             },
             
+            ////////////////////////////////////////
+            // RESOLVED
+            ////////////////////////////////////////
+            
+            resolved: {
+                width: component.resolvedWidth,
+                height: component.resolvedHeight
+            },
+
             ////////////////////////////////////////
             // CONSTRAINTS
             ////////////////////////////////////////
@@ -905,19 +923,6 @@ class Debug {
                 };
 
             })(),
-
-            ////////////////////////////////////////
-            // EFFECTIVE
-            ////////////////////////////////////////
-            
-            effective: {
-            
-                width:
-                    component.getLayoutWidth(),
-            
-                height:
-                    component.getLayoutHeight()
-            },
 
             ////////////////////////////////////////
             // LAYOUT OPTIONS
