@@ -34,25 +34,27 @@ export default class DebugButtons {
         this.buttonHeight = 60;
         this.spacing = 10;
 
+        this.builderRoot = options.builderRoot ?? null;
+
         this.create();
         this.setupButtons();
     }
 
     setupButtons() {
 //******************************
-        this.addButton('GRID Tests', () => this.gridCycle());
+        this.addButton('GRID Tests', () => this.gridCycle(), { color: 0x004400 });
 //******************************
-        this.addButton('COLUMN Tests', () => this.columnCyle());
+        this.addButton('COLUMN Tests', () => this.columnCyle(), { color: 0x004400 });
 //******************************
-        this.addButton('STACK Tests', () => this.stackCycle());
+        this.addButton('STACK Tests', () => this.stackCycle(), { color: 0x004400 });
 //******************************
-        this.addButton('SCROLL Tests', () => this.scrollCycle());
+        this.addButton('SCROLL Tests', () => this.scrollCycle(), { color: 0x004400 });
 //******************************
-        this.addButton('ROW Tests', () => this.rowCycle());
+        this.addButton('ROW Tests', () => this.rowCycle(), { color: 0x004400 });
 //******************************
-        this.addButton('CONSTRAINT Tests', () => this.constraintCycle());
+        this.addButton('CONSTRAINT Tests', () => this.constraintCycle(), { color: 0x004400 });
 //******************************
-        this.addButton('MISC Tests', () => this.miscCycle());
+        this.addButton('MISC Tests', () => this.miscCycle(), { color: 0x440000 });
 //******************************
         this.addButton('INSPECT SCROLL', () => {
 
@@ -126,7 +128,13 @@ export default class DebugButtons {
                 this.newCycleLoop();
             }
         });
-
+//******************************
+        this.addButton('debug builder', () => {
+                Debug.inspect(this.builderRoot, {
+                tree: true,
+                recursive: true
+            });
+        });
 
 
 
@@ -317,13 +325,13 @@ export default class DebugButtons {
         this.y += this.buttonHeight + this.spacing;
     }
 
-    addButton(label, onClick) {
+    addButton(label, onClick, options = {}) {
 
         const bg = this.scene.add.rectangle(
             0, 0,
             this.buttonWidth,
             this.buttonHeight,
-            0x333333
+            options.color ?? 0x333333
         )
         .setOrigin(0)
         .setInteractive({ useHandCursor: true });

@@ -51,8 +51,6 @@ function escapeHTML(value) {
     return div.innerHTML;
 }
 
-import { DEBUG } from '../../config.js';
-
 function startConsole() { // CONSOLE START
 
 document.getElementById('consoleLog').innerHTML = `
@@ -650,6 +648,4 @@ function range(a,b) {
 
 } // CONSOLE END
 
-if (DEBUG) {
-    startConsole();
-}
+startConsole();

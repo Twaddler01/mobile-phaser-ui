@@ -226,14 +226,33 @@ export default class Column extends Container {
         // that child immediately so its final measured
         // size is available to this Column.
         ////////////////////////////////////////
-    
+
+const hasAllocatedWidth =
+    !this.widthAuto ||
+    this.layoutWidth !== null;
+
+const availableWidth =
+    hasAllocatedWidth
+        ? contentWidth
+        : null;
+
+this.resolveChildren(
+    availableWidth,
+    availableHeight,
+    null,
+    fillHeight
+);
+
+
+
+/*
         this.resolveChildren(
             contentWidth,
             availableHeight,
             null,
             fillHeight
         );
-
+*/
         ////////////////////////////////////////
         // 4. MEASURE FINAL SIZE
         //

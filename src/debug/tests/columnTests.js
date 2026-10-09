@@ -24,6 +24,159 @@ export default function createColumnTests(debug) {
 
     return [
 
+
+//// temp
+// ==================================
+// 1. COLUMN WIDTH BASELINE
+// ==================================
+
+() => {
+
+    resetTest();
+
+    state.root =
+        new Column(scene, {
+            x: 100,
+            y: 100,
+
+            padding: 20,
+            gap: 10
+        });
+
+    state.card =
+        new Card(scene, {
+            //width: 100
+        });
+
+    state.text =
+        new Text(scene, {
+            text: 'This text should initially determine the width of its automatic-width parent column.'
+        });
+
+    state.card.add(state.text)
+    state.root.add(state.card);
+
+    addTest(state.root);
+},
+
+// ==================================
+// 2. FIX THE COLUMN WIDTH
+// ==================================
+
+() => {
+
+    state.card.width = 60;
+
+},
+
+// ==================================
+// 3. RESTORE AUTOMATIC WIDTH
+// ==================================
+
+() => {
+
+    state.root.width = undefined;
+
+},
+//// temp
+
+
+// ==========================================
+// COLUMN + TEXT — WIDTH REGRESSION TESTS
+// ==========================================
+
+() => {
+console.log('INIT');
+    // 1. INITIAL SHORT TEXT
+    resetTest();
+
+    state.root = new Column(scene, {
+        x: 100,
+        y: 100,
+        padding: 20,
+        gap: 10
+    });
+
+    state.text = new Text(scene, {
+        text: 'First'
+    });
+
+    state.root.add(state.text);
+
+    addTest(state.root);
+
+},
+
+() => {
+console.log('2');
+    // 2. LIVE UPDATE TO LONGER TEXT
+    state.text.setText(
+        'This text is now substantially longer.'
+    );
+
+},
+
+() => {
+console.log('3');
+    // 3. REPLACE WITH SHORT TEXT AGAIN
+    state.text.setText('Short');
+
+},
+
+() => {
+console.log('4');
+    // 4. LONG TEXT ON INITIAL CREATION
+    resetTest();
+
+    state.root = new Column(scene, {
+        x: 100,
+        y: 100,
+        padding: 20,
+        gap: 10
+    });
+
+    state.text = new Text(scene, {
+        text: 'This text starts substantially longer than the original.'
+    });
+
+    state.root.add(state.text);
+
+    addTest(state.root);
+
+},
+
+() => {
+console.log('5');
+    // 5. FIXED-WIDTH COLUMN + AUTO-WRAPPING TEXT
+    resetTest();
+
+    state.root = new Column(scene, {
+        x: 100,
+        y: 100,
+        width: 300,
+        padding: 20,
+        gap: 10
+    });
+
+    state.text = new Text(scene, {
+        text: 'This text should wrap automatically within the fixed width of the Column.'
+    });
+
+    state.root.add(state.text);
+
+    addTest(state.root);
+
+},
+
+() => {
+console.log('6');
+    // 6. LIVE UPDATE INSIDE FIXED-WIDTH COLUMN
+    state.text.setText(
+        'This updated text is longer still. It should continue wrapping inside the same fixed-width Column without expanding the Column itself.'
+    );
+
+},
+
 // ==================================
 // COLUMN NESTED MEASUREMENT / ALLOCATION
 // ==================================

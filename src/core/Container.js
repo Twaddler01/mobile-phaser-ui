@@ -406,6 +406,30 @@ export default class Container extends Component {
         options,
         resolvedWidth
     ) {
+    
+        if (
+            options.width !== null ||
+            this.isFillWidth(options) ||
+            (
+                this.constructor.name === 'Column' &&
+                child.usesAvailableWidth?.() &&
+                (
+                    !this.widthAuto ||
+                    this.layoutWidth !== null
+                )
+            )
+        ) {
+            return resolvedWidth;
+        }
+    
+        return null;
+    }
+/*
+    getChildLayoutWidth(
+        child,
+        options,
+        resolvedWidth
+    ) {
 
         if (
             options.width !== null ||
@@ -420,7 +444,7 @@ export default class Container extends Component {
 
         return null;
     }
-
+*/
     getChildLayoutHeight(
         child,
         options,
