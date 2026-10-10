@@ -1,0 +1,24 @@
+What changed:
+
+- Helpers (ui.js): Column, Row, Grid, ScrollView, Card, Text, and Spacer return the same { id, type, props, layout, children } objects as before. Children can be nested arrays or false, so items.map(...) and cond && Text("x") work. defineContainer("Stack") makes a helper for any type you register later.
+- Optional IDs: nodes without an id get path IDs (root, root.0, root.0.1). These shift when siblings change, so give an explicit id to anything looked up or patched.
+- Validation: validateLayoutDefinition(def, { registry, warnings }) now checks types, prop values against registry metadata (min, options, nullable), and layout options. It also rejects children on non-containers like Text. Unknown props only produce warnings for now.
+- Builder: build() now validates before destroying the old tree, so a bad definition leaves current UI intact. It also resolves "@name" event props from the handlers option. For saving layouts, createLayoutDocument(root) wraps the definition in { schema: 1, root }.
+
+// Example
+
+import { Column, Card, Text, Spacer } from "../src/builder/ui.js";
+
+this.layoutBuilder = new LayoutBuilder(this, createComponentRegistry(), {
+    handlers: { startGame: () => console.log("start") }
+});
+
+this.layoutBuilder.build(
+    Column({ id: "root", padding: 20, gap: 12 }, [
+        Card({ padding: 16 }, [
+            Text("Hello world", { fontSize: "24px" }, { horizontalAlign: "center" })
+        ]),
+        Spacer({ height: 20 })
+    ])
+);
+
