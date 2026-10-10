@@ -97,6 +97,36 @@ export default class Console {
                 margin-right: 2em;
                 opacity: 0.8;
             }
+            #js-console .table {
+                overflow-x: auto;
+            }
+            
+            #js-console .table table {
+                border-collapse: collapse;
+                width: max-content;
+                min-width: 100%;
+                font: inherit;
+            }
+            
+            #js-console .table th,
+            #js-console .table td {
+                padding: 4px 8px;
+                border: 1px solid #555;
+                text-align: left;
+                vertical-align: top;
+                white-space: pre-wrap;
+            }
+            
+            #js-console .table th {
+                background: #222;
+                font-weight: bold;
+            }
+            
+            #js-console .table td:first-child,
+            #js-console .table th:first-child {
+                color: #bbb;
+                white-space: nowrap;
+            }
         </style>
     `;
 

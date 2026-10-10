@@ -91,60 +91,31 @@ window.showFatalError = function(title, error) {
 // --------------------------------------------------
 
 window.addEventListener('error', event => {
+    const title = event.error
+        ? 'JavaScript Runtime Error'
+        : 'JavaScript / Module / Resource Load Error';
 
-    let title = 'JavaScript Runtime Error';
-    let error;
-
-    // Resource-loading errors usually have no event.error.
-    if (!event.error) {
-
-        title = 'JavaScript / Module / Resource Load Error';
-
-        error = {
-            message:
-                event.message ||
-                'A script, module, or other resource failed to load.',
-
-            filename:
-                event.filename || null,
-
-            line:
-                event.lineno || null,
-
-            column:
-                event.colno || null,
-
-            target:
-                event.target?.src ||
-                event.target?.href ||
-                event.target?.tagName ||
-                null
-        };
-
-    } else {
-
-        error = {
-            message: event.message,
-
-            filename:
-                event.filename || null,
-
-            line:
-                event.lineno || null,
-
-            column:
-                event.colno || null,
-
-            stack:
-                event.error?.stack || null
-        };
-
-    }
+    const error = event.error || {
+        message:
+            event.message ||
+            'A script, module, or other resource failed to load.',
+        filename: event.filename || null,
+        line: event.lineno || null,
+        column: event.colno || null,
+        target:
+            event.target?.src ||
+            event.target?.href ||
+            event.target?.tagName ||
+            null
+    };
 
     if (window.devConsole) {
+        // The main console is running: use it exclusively.
         window.devConsole.error(error);
+        return;
     }
 
+    // The main console is unavailable: use the fallback.
     window.showFatalError(title, error);
 
 }, true);
@@ -154,31 +125,15 @@ window.addEventListener('error', event => {
 // --------------------------------------------------
 
 window.addEventListener('unhandledrejection', event => {
-
     if (window.devConsole) {
         window.devConsole.error(event.reason);
-    } else {
-        window.showFatalError(
-            'Unhandled Promise Error',
-            event.reason
-        );
+        return;
     }
 
+    window.showFatalError(
+        'Unhandled Promise Error',
+        event.reason
+    );
 });
 
-// --------------------------------------------------
-// UNHANDLED PROMISE ERRORS
-// --------------------------------------------------
-
-window.addEventListener(
-    'unhandledrejection',
-    event => {
-
-        window.showFatalError(
-            'Unhandled Promise Error',
-            event.reason
-        );
-
-    }
-);
 })();

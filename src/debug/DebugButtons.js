@@ -27,6 +27,7 @@ export default class DebugButtons {
         // Override Y
         this.y = this.height / 2;
 
+        this.buttonCnt = 0;
         this.buttonWidth = 250;
         this.buttonHeight = 60;
         this.spacing = 10;
@@ -258,7 +259,7 @@ export default class DebugButtons {
 
     addTitle(label) {
         const bg = this.scene.add
-            .rectangle(0, 0, this.buttonWidth, this.buttonHeight, 0x333333)
+            .rectangle(0, 0, this.buttonWidth * 2 + 10, this.buttonHeight, 0x333333)
             .setOrigin(0)
             .setInteractive({ useHandCursor: true });
 
@@ -308,6 +309,7 @@ export default class DebugButtons {
     }
 
     addButton(label, onClick, options = {}) {
+        this.buttonCnt++;
         const bg = this.scene.add
             .rectangle(
                 0,
@@ -340,7 +342,11 @@ export default class DebugButtons {
         container.add([bg, border, text]);
 
         this.container.add(container);
-
+        
+        if (this.buttonCnt > 8) {
+            this.x = this.spacing + this.buttonWidth + 20;
+            this.y = (this.buttonHeight + this.spacing) * (this.buttonCnt + 1) + 5;
+        }
         this.y += this.buttonHeight + this.spacing;
     }
 
