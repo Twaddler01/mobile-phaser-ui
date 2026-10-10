@@ -1,16 +1,15 @@
-import Debug from '../core/Debug.js';
-import createMiscTests from './tests/miscTests.js';
-import createRowTests from './tests/rowTests.js';
-import createConstraintTests from './tests/constraintTests.js';
-import createScrollTests from './tests/scrollTests.js';
-import createStackTests from './tests/stackTests.js';
-import createColumnTests from './tests/columnTests.js';
-import createGridTests from './tests/gridTests.js';
+import Debug from "../core/Debug.js";
+import createMiscTests from "./tests/miscTests.js";
+import createRowTests from "./tests/rowTests.js";
+import createConstraintTests from "./tests/constraintTests.js";
+import createScrollTests from "./tests/scrollTests.js";
+import createStackTests from "./tests/stackTests.js";
+import createColumnTests from "./tests/columnTests.js";
+import createGridTests from "./tests/gridTests.js";
+import createBuilderTests from "./tests/builderTests.js";
 
 export default class DebugButtons {
-
     constructor(scene, options = {}) {
-
         this.scene = scene;
 
         this.container = this.scene.add.container();
@@ -20,10 +19,8 @@ export default class DebugButtons {
         this.x = options.x ?? 50;
         this.y = options.y ?? 150;
 
-        this.width =
-            this.scene.width;
-        this.height = 
-            this.scene.height;
+        this.width = this.scene.width;
+        this.height = this.scene.height;
 
         this.testComponents = [];
 
@@ -41,166 +38,159 @@ export default class DebugButtons {
     }
 
     setupButtons() {
-//******************************
-        this.addButton('componentRegistry', () => Debug.componentRegistry(), { color: 0x001100 });
-//******************************
-        this.addButton('GRID Tests', () => this.gridCycle(), { color: 0x004400 });
-//******************************
-        this.addButton('COLUMN Tests', () => this.columnCyle(), { color: 0x004400 });
-//******************************
-        this.addButton('STACK Tests', () => this.stackCycle(), { color: 0x004400 });
-//******************************
-        this.addButton('SCROLL Tests', () => this.scrollCycle(), { color: 0x004400 });
-//******************************
-        this.addButton('ROW Tests', () => this.rowCycle(), { color: 0x004400 });
-//******************************
-        this.addButton('CONSTRAINT Tests', () => this.constraintCycle(), { color: 0x004400 });
-//******************************
-        this.addButton('MISC Tests', () => this.miscCycle(), { color: 0x440000 });
-//******************************
-        this.addButton('DEBUG SIZE', () => {
+        //******************************
+        this.addButton("componentRegistry", () => Debug.componentRegistry(), {
+            color: 0x002200
+        });
+        //******************************
+        this.addButton("BUILDER Tests", () => this.builderCycle(), {
+            color: 0x002200
+        });
+        //******************************
+        this.addButton("GRID Tests", () => this.gridCycle(), {
+            color: 0x004400
+        });
+        //******************************
+        this.addButton("COLUMN Tests", () => this.columnCyle(), {
+            color: 0x004400
+        });
+        //******************************
+        this.addButton("STACK Tests", () => this.stackCycle(), {
+            color: 0x004400
+        });
+        //******************************
+        this.addButton("SCROLL Tests", () => this.scrollCycle(), {
+            color: 0x004400
+        });
+        //******************************
+        this.addButton("ROW Tests", () => this.rowCycle(), { color: 0x004400 });
+        //******************************
+        this.addButton("CONSTRAINT Tests", () => this.constraintCycle(), {
+            color: 0x004400
+        });
+        //******************************
+        this.addButton("MISC Tests", () => this.miscCycle(), {
+            color: 0x440000
+        });
+        //******************************
+        this.addButton("DEBUG SIZE", () => {
+            const root = this.testComponents[0];
 
-            const root =
-                this.testComponents[0];
-        
             if (!root) {
-                console.warn(
-                    'No test component to debug.'
-                );
+                console.warn("No test component to debug.");
                 return;
             }
-        
-            console.log('==== DEBUG SIZE ====');
+
+            console.log("==== DEBUG SIZE ====");
 
             Debug.size(root, {
                 recursive: true
             });
 
-            console.log('========');
+            console.log("========");
         });
-//******************************
-        this.addButton('INSPECT SCROLL', () => {
+        //******************************
+        this.addButton("INSPECT SCROLL", () => {
+            const scroll = this.testComponents[0];
 
-            const scroll =
-                this.testComponents[0];
-        
             if (!scroll) {
-                console.warn(
-                    'No test component to inspect.'
-                );
+                console.warn("No test component to inspect.");
                 return;
             }
-        
-            console.log('==== INSPECT SCROLL ====');
+
+            console.log("==== INSPECT SCROLL ====");
 
             Debug.inspect(scroll, {
                 stats: true,
                 scroll: true
             });
-            
+
             Debug.tree(scroll);
 
-            console.log('========');
+            console.log("========");
         });
-//******************************
-        this.addButton('DEBUG STATS', () => {
-        
-            const root =
-                this.testComponents[0];
-        
+        //******************************
+        this.addButton("DEBUG STATS", () => {
+            const root = this.testComponents[0];
+
             if (!root) {
-                console.warn(
-                    'No test component to inspect.'
-                );
+                console.warn("No test component to inspect.");
                 return;
             }
-    
+
             //console.log('==== TREE ====');
-        
+
             Debug.inspect(root, {
                 tree: true,
                 recursive: true
             });
             //console.log('========');
-        
         });
-//******************************
-        this.addButton('DEBUG TREE', () => {
-        
-            const root =
-                this.testComponents[0];
-        
+        //******************************
+        this.addButton("DEBUG TREE", () => {
+            const root = this.testComponents[0];
+
             if (!root) {
-                console.warn(
-                    'No test component to inspect.'
-                );
+                console.warn("No test component to inspect.");
                 return;
             }
-    
+
             //console.log('==== TREE ====');
-        
+
             Debug.tree(root);
             //console.log('========');
-        
         });
-//******************************
-        this.addButton('newCycleLoop()', () => {
+        //******************************
+        this.addButton("newCycleLoop()", () => {
             if (!this.createLoopTest_isSetup) {
                 this.createLoopTest();
             } else {
                 this.newCycleLoop();
             }
         });
-//******************************
-        this.addButton('debug builder', () => {
-                Debug.inspect(this.builderRoot, {
+        //******************************
+        this.addButton("debug builder", () => {
+            Debug.inspect(this.builderRoot, {
                 tree: true,
                 recursive: true
             });
         });
-
-
-
     }
 
     create() {
-
-        this.addTitle('DEBUG BUTTONS:');
+        this.addTitle("DEBUG BUTTONS:");
 
         // ==========================================
         // LAYOUT TEST AREA
         // ==========================================
-        
+
         // This container is completely separate from
         // the debug button container.
-        this.testContainer =
-            this.scene.add.container();
-        
+        this.testContainer = this.scene.add.container();
+
         this.testContainer.setDepth(1);
-        
+
         // ------------------------------------------
         // DESTROY CURRENT TEST
         // ------------------------------------------
-        
-        this.destroyTest = () => {
 
+        this.destroyTest = () => {
             this.createLoopTest_isSetup = false;
 
-            for (const component of this.testComponents) {  
-                component.destroy();  
+            for (const component of this.testComponents) {
+                component.destroy();
             }
-            
-            this.testComponents = [];  
-            this.testContainer.removeAll(false);
 
+            this.testComponents = [];
+            this.testContainer.removeAll(false);
         };
 
         // Stores layout state
         this.state = {};
-    
+
         this.resetTest = () => {
             this.destroyTest();
-        
+
             // Deleting keys ensures no leftovers
             for (const key of Object.keys(this.state)) {
                 delete this.state[key];
@@ -210,193 +200,144 @@ export default class DebugButtons {
         // ------------------------------------------
         // ADD COMPONENT TO TEST CONTAINER
         // ------------------------------------------
-        
-        this.addTest = (component) => {
-        
-            if (!component) {  
-                return;  
-            }  
-            
-            this.testComponents.push(component);  
-            
-            this.testContainer.add(  
-                component.container  
-            );  
-            
+
+        this.addTest = component => {
+            if (!component) {
+                return;
+            }
+
+            this.testComponents.push(component);
+
+            this.testContainer.add(component.container);
+
             return component;
-        
         };
-        
+
         // ==========================================
         // TEST GROUPS
         // ==========================================
-        
-        this.miscTests =
-            createMiscTests(this);
 
-        this.constraintTests =
-            createConstraintTests(this);
-            
-        this.rowTests =
-            createRowTests(this);
+        this.miscTests = createMiscTests(this);
 
-        this.scrollTests =
-            createScrollTests(this);
-        
-        this.stackTests =
-            createStackTests(this);
-            
-        this.columnTests =
-            createColumnTests(this);
-        
-        this.gridTests =
-            createGridTests(this);
+        this.constraintTests = createConstraintTests(this);
+
+        this.rowTests = createRowTests(this);
+
+        this.scrollTests = createScrollTests(this);
+
+        this.stackTests = createStackTests(this);
+
+        this.columnTests = createColumnTests(this);
+
+        this.gridTests = createGridTests(this);
+
+        this.builderTests = createBuilderTests(this);
 
         // ==========================================
         // CYCLE
         // ==========================================
-        
-        this.miscCycle =
-            this.createClickCycle(this.miscTests);
 
-        this.constraintCycle =
-            this.createClickCycle(this.constraintTests);
+        this.miscCycle = this.createClickCycle(this.miscTests);
 
-        this.rowCycle =
-            this.createClickCycle(this.rowTests);
-        
-        this.scrollCycle =
-            this.createClickCycle(this.scrollTests);
+        this.constraintCycle = this.createClickCycle(this.constraintTests);
 
-        this.stackCycle =
-            this.createClickCycle(this.stackTests);
-        
-        this.columnCyle = 
-            this.createClickCycle(this.columnTests);
-        
-        this.gridCycle =
-            this.createClickCycle(this.gridTests);
+        this.rowCycle = this.createClickCycle(this.rowTests);
 
+        this.scrollCycle = this.createClickCycle(this.scrollTests);
+
+        this.stackCycle = this.createClickCycle(this.stackTests);
+
+        this.columnCyle = this.createClickCycle(this.columnTests);
+
+        this.gridCycle = this.createClickCycle(this.gridTests);
+        
+        this.builderCycle = this.createClickCycle(this.builderTests, {
+            loop: false
+        } );
     }
 
     addTitle(label) {
-        const bg = this.scene.add.rectangle(
-            0, 0,
-            this.buttonWidth,
-            this.buttonHeight,
-            0x333333
-        )
-        .setOrigin(0)
-        .setInteractive({ useHandCursor: true });
-    
-    
-        const text = this.scene.add.text(
-            10,
-            this.buttonHeight / 2,
-            label,
-            {
-                fontSize: '20px',
-                color: '#fff',
-                fontStyle: 'bold'
-            }
-        )
-        .setOrigin(0, 0.5);
-    
-    
-        const container = this.scene.add.container(
-            this.x,
-            this.y
-        );
-    
+        const bg = this.scene.add
+            .rectangle(0, 0, this.buttonWidth, this.buttonHeight, 0x333333)
+            .setOrigin(0)
+            .setInteractive({ useHandCursor: true });
+
+        const text = this.scene.add
+            .text(10, this.buttonHeight / 2, label, {
+                fontSize: "20px",
+                color: "#fff",
+                fontStyle: "bold"
+            })
+            .setOrigin(0, 0.5);
+
+        const container = this.scene.add.container(this.x, this.y);
+
         container.add([bg, text]);
-    
+
         this.container.add(container);
-    
+
         // =========================
         // DRAG DEBUG PANEL
         // =========================
-    
-        bg.on('pointerdown', (pointer) => {
-    
+
+        bg.on("pointerdown", pointer => {
             this.dragStartX = pointer.x;
             this.dragStartY = pointer.y;
-    
+
             this.panelStartX = this.container.x;
             this.panelStartY = this.container.y;
-    
+
             this.dragging = true;
         });
-    
-    
-        this.scene.input.on('pointermove', (pointer) => {
-    
+
+        this.scene.input.on("pointermove", pointer => {
             if (!this.dragging) return;
-    
+
             const dx = pointer.x - this.dragStartX;
             const dy = pointer.y - this.dragStartY;
-    
+
             this.container.x = this.panelStartX + dx;
             this.container.y = this.panelStartY + dy;
         });
-    
-    
-        this.scene.input.on('pointerup', () => {
+
+        this.scene.input.on("pointerup", () => {
             this.dragging = false;
         });
-    
-    
+
         this.y += this.buttonHeight + this.spacing;
     }
 
     addButton(label, onClick, options = {}) {
+        const bg = this.scene.add
+            .rectangle(
+                0,
+                0,
+                this.buttonWidth,
+                this.buttonHeight,
+                options.color ?? 0x333333
+            )
+            .setOrigin(0)
+            .setInteractive({ useHandCursor: true });
 
-        const bg = this.scene.add.rectangle(
-            0, 0,
-            this.buttonWidth,
-            this.buttonHeight,
-            options.color ?? 0x333333
-        )
-        .setOrigin(0)
-        .setInteractive({ useHandCursor: true });
-
-        bg.on('pointerdown', () => {
+        bg.on("pointerdown", () => {
             onClick?.();
         });
-
 
         const border = this.scene.add.graphics();
 
         border.lineStyle(2, 0xffffff);
-        border.strokeRect(
-            0,
-            0,
-            this.buttonWidth,
-            this.buttonHeight
-        );
+        border.strokeRect(0, 0, this.buttonWidth, this.buttonHeight);
 
+        const text = this.scene.add
+            .text(10, this.buttonHeight / 2, label, {
+                fontSize: "20px",
+                color: "#fff"
+            })
+            .setOrigin(0, 0.5);
 
-        const text = this.scene.add.text(
-            10,
-            this.buttonHeight / 2,
-            label,
-            {
-                fontSize: '20px',
-                color: '#fff'
-            }
-        )
-        .setOrigin(0, 0.5);
+        const container = this.scene.add.container(this.x, this.y);
 
-
-        const container = this.scene.add.container(
-            this.x,
-            this.y
-        );
-
-        container.add([
-            bg,
-            border,
-            text
-        ]);
+        container.add([bg, border, text]);
 
         this.container.add(container);
 
@@ -405,38 +346,35 @@ export default class DebugButtons {
 
     // DEBUG BUTTON HELPERS
     getUnlockIds() {
-        let cards = 
-            this.stageProgress.getAllCardIds();
+        let cards = this.stageProgress.getAllCardIds();
 
-        cards = cards.map(item => ({
+        cards = cards
+            .map(item => ({
                 id: item.id,
                 title: item.title,
                 tab: item.tab
-            })).filter(item => item.tab !== 'discover');
-        
+            }))
+            .filter(item => item.tab !== "discover");
+
         return cards;
     }
 
     getObjectiveUnlockIds() {
-        let cards = 
-            this.objectivesManager.getAllObjectives();
+        let cards = this.objectivesManager.getAllObjectives();
 
         cards = cards.map(item => ({
-                id: item.id,
-                title: item.title,
-            }));
-        
+            id: item.id,
+            title: item.title
+        }));
+
         return cards;
     }
 
     addSelectButton(label, options, onSelect) {
         const button = this.addButton(label, () => {
-            this.showSelect(
-                options,
-                onSelect
-            );
+            this.showSelect(options, onSelect);
         });
-    
+
         return button;
     }
 
@@ -446,58 +384,38 @@ export default class DebugButtons {
             this.closeSelect();
             return;
         }
-    
-        const container = this.scene.add.container(
-            20,
-            300
-        );
-    
+
+        const container = this.scene.add.container(20, 300);
+
         this.activeSelect = container;
         this.activeSelect.setDepth(99999);
         this.scene.children.bringToTop(this.activeSelect);
 
         options.forEach((option, index) => {
-    
             const rows = 21;
             const column = Math.floor(index / rows);
             const row = index % rows;
-        
+
             const x = column * 305;
             const y = row * 45;
 
-            const background =
-                this.scene.add.rectangle(
-                    x,
-                    y,
-                    300,
-                    40,
-                    0x222222
-                )
+            const background = this.scene.add
+                .rectangle(x, y, 300, 40, 0x222222)
                 .setOrigin(0)
                 .setInteractive();
-    
-            const text =
-                this.scene.add.text(
-                    x + 10,
-                    y + 10,
-                    option.title,
-                    {
-                        fontSize: '18px',
-                        color: '#ffffff'
-                    }
-                );
-    
-            background.on('pointerdown', () => {
-    
+
+            const text = this.scene.add.text(x + 10, y + 10, option.title, {
+                fontSize: "18px",
+                color: "#ffffff"
+            });
+
+            background.on("pointerdown", () => {
                 onSelect(option.id);
-    
+
                 this.closeSelect();
             });
-    
-            container.add([
-                background,
-                text
-            ]);
+
+            container.add([background, text]);
         });
     }
 
@@ -505,217 +423,173 @@ export default class DebugButtons {
         this.activeSelect?.destroy();
         this.activeSelect = null;
     }
-    
+
     createClickCycle(calls, options = {}) {
-    
         let index = 0;
-    
-        const loop =
-            options.loop ?? true;
-    
+
+        const loop = options.loop ?? true;
+
         return () => {
-    
             if (calls.length === 0) {
                 return;
             }
-    
-            if (
-                !loop &&
-                index >= calls.length
-            ) {
+
+            if (!loop && index >= calls.length) {
                 return;
             }
-    
-            const currentIndex =
-                index % calls.length;
-    
+
+            const currentIndex = index % calls.length;
+
             calls[currentIndex](currentIndex);
-    
+
             index++;
         };
     }
 
     createLoopTest() {
-
         this.destroyTest();
-        
-        console.log(
-            '17 — JUSTIFY EDGE CASES'
-        );
-        
-        console.log(
-            'Expected: all justify modes position children correctly.'
-        );
-        
+
+        console.log("17 — JUSTIFY EDGE CASES");
+
+        console.log("Expected: all justify modes position children correctly.");
+
         this.modes = [
-            'start',
-            'center',
-            'end',
-            'space-between',
-            'space-around',
-            'space-evenly'
+            "start",
+            "center",
+            "end",
+            "space-between",
+            "space-around",
+            "space-evenly"
         ];
 
-        this.parent =
-            new Row(this.scene, {
-                x: 100,
-                y: 100,
-                height: 600,
-                width: 1200
-            });
+        this.parent = new Row(this.scene, {
+            x: 100,
+            y: 100,
+            height: 600,
+            width: 1200
+        });
         //
 
-        this.column =
-            new Column(this.scene, {
-                x: 100,
-                y: 100,
-        
-                width: 500,
-                height: 600,
-        
-                padding: 30,
-                gap: 15,
-        
-                justify: this.modes[0]
-            });
+        this.column = new Column(this.scene, {
+            x: 100,
+            y: 100,
+
+            width: 500,
+            height: 600,
+
+            padding: 30,
+            gap: 15,
+
+            justify: this.modes[0]
+        });
         //
-        
-        this.row =
-            new Row(this.scene, {
-                x: 100,
-                y: 100,
-        
-                width: 600,
-                height: 500,
-        
-                padding: 30,
-                gap: 15,
-        
-                justify: this.modes[0]
-            });
+
+        this.row = new Row(this.scene, {
+            x: 100,
+            y: 100,
+
+            width: 600,
+            height: 500,
+
+            padding: 30,
+            gap: 15,
+
+            justify: this.modes[0]
+        });
         //
-        
-        const createCard =
-            (label, height) => {
-        
-                const card =
-                    new Card(this.scene, {
-                        width: null,
-                        height,
-        
-                        style: {
-                            backgroundColor: 0x444444,
-                            radius: 8
-                        }
-                    });
-                //
-        
-                card.add(
-                    new Text(this.scene, {
-                        text: label,
-                        fontSize: '24px'
-                    }),
-                    {
-                        horizontalAlign: 'center',
-                        verticalAlign: 'center'
-                    }
-                );
-        
-                return card;
-            };
 
-        const createCard2 =
-            (label, width) => {
-        
-                const card =
-                    new Card(this.scene, {
-                        width,
-                        height: null,
-        
-                        style: {
-                            backgroundColor: 0x444444,
-                            radius: 8
-                        }
-                    });
-                //
-        
-                card.add(
-                    new Text(this.scene, {
-                        text: label,
-                        fontSize: '24px'
-                    }),
-                    {
-                        horizontalAlign: 'center',
-                        verticalAlign: 'center'
-                    }
-                );
-        
-                return card;
-            };
-        
+        const createCard = (label, height) => {
+            const card = new Card(this.scene, {
+                width: null,
+                height,
 
-        this.column.add(
-            createCard('ONE', 60),
-            {
-                fill: 'horizontal'
-            }
-        );
-        
-        this.row.add(
-            createCard2('ONE', 60),
-            {
-                fill: 'vertical'
-            }
-        );
-        
-        this.column.add(
-            createCard('TWO', 80),
-            {
-                fill: 'horizontal'
-            }
-        );
+                style: {
+                    backgroundColor: 0x444444,
+                    radius: 8
+                }
+            });
+            //
 
-        this.row.add(
-            createCard2('TWO', 80),
-            {
-                fill: 'vertical'
-            }
-        );
-        
-        this.column.add(
-            createCard('THREE', 100),
-            {
-                fill: 'horizontal'
-            }
-        );
+            card.add(
+                new Text(this.scene, {
+                    text: label,
+                    fontSize: "24px"
+                }),
+                {
+                    horizontalAlign: "center",
+                    verticalAlign: "center"
+                }
+            );
 
-        this.row.add(
-            createCard2('THREE', 100),
-            {
-                fill: 'vertical'
-            }
-        );
+            return card;
+        };
+
+        const createCard2 = (label, width) => {
+            const card = new Card(this.scene, {
+                width,
+                height: null,
+
+                style: {
+                    backgroundColor: 0x444444,
+                    radius: 8
+                }
+            });
+            //
+
+            card.add(
+                new Text(this.scene, {
+                    text: label,
+                    fontSize: "24px"
+                }),
+                {
+                    horizontalAlign: "center",
+                    verticalAlign: "center"
+                }
+            );
+
+            return card;
+        };
+
+        this.column.add(createCard("ONE", 60), {
+            fill: "horizontal"
+        });
+
+        this.row.add(createCard2("ONE", 60), {
+            fill: "vertical"
+        });
+
+        this.column.add(createCard("TWO", 80), {
+            fill: "horizontal"
+        });
+
+        this.row.add(createCard2("TWO", 80), {
+            fill: "vertical"
+        });
+
+        this.column.add(createCard("THREE", 100), {
+            fill: "horizontal"
+        });
+
+        this.row.add(createCard2("THREE", 100), {
+            fill: "vertical"
+        });
 
         this.parent.add(this.column);
         this.parent.add(this.row);
-        
+
         this.addTest(this.parent);
-        
-        this.newCycleLoop =
-            this.createClickCycle(
-                this.modes.map(mode => {
-        
-                    return () => {
-        
-                        console.log('JUSTIFY:', mode);
-        
-                        this.column.justify = mode;
-                        this.row.justify = mode;
-        
-                    };
-                })
-            );
-        
+
+        this.newCycleLoop = this.createClickCycle(
+            this.modes.map(mode => {
+                return () => {
+                    console.log("JUSTIFY:", mode);
+
+                    this.column.justify = mode;
+                    this.row.justify = mode;
+                };
+            })
+        );
+
         this.createLoopTest_isSetup = true;
     }
 }

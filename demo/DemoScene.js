@@ -8,6 +8,8 @@ import {
 import ComponentRegistry from "../src/builder/ComponentRegistry.js";
 import createComponentRegistry from "../src/builder/createComponentRegistry.js";
 import LayoutBuilder from "../src/builder/LayoutBuilder.js";
+import runComponentRegistryTests
+    from "../src/builder/tests/ComponentRegistryTests.js";
 
 export default class DemoScene extends Phaser.Scene {
     constructor() {
@@ -27,6 +29,18 @@ export default class DemoScene extends Phaser.Scene {
             this.cameras.main.setScroll(0, 0);
         };
         //setZoom();
+
+// ==================================
+// REGISTRY VALIDATION TESTS
+// ==================================
+
+if (DEBUG) {
+    const registry = createComponentRegistry();
+
+    //runComponentRegistryTests(registry);
+}
+
+
 
         // ==================================
 

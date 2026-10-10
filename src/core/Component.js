@@ -6,8 +6,10 @@ export default class Component {
         this.scene = scene;
 
         this.requestedWidth = config.width ?? "auto";
-
         this.requestedHeight = config.height ?? "auto";
+
+        this.validateDimension("width", this.requestedWidth);
+        this.validateDimension("height", this.requestedHeight);
 
         // Parent allocations; null means unallocated.
         this.layoutWidth = null;
@@ -46,13 +48,35 @@ export default class Component {
 
         this.name = config.name ?? null;
 
-        this.minWidth = config.minWidth ?? 0;
+        // ==================================
+        // SIZE CONSTRAINTS
+        // ==================================
 
-        this.maxWidth = config.maxWidth ?? null;
+        const minWidth = config.minWidth ?? 0;
+        const maxWidth = config.maxWidth ?? null;
 
-        this.minHeight = config.minHeight ?? 0;
+        const minHeight = config.minHeight ?? 0;
+        const maxHeight = config.maxHeight ?? null;
 
-        this.maxHeight = config.maxHeight ?? null;
+        this.validateConstraint("minWidth", minWidth);
+        this.validateConstraint("maxWidth", maxWidth, true);
+
+        this.validateConstraint("minHeight", minHeight);
+        this.validateConstraint("maxHeight", maxHeight, true);
+
+        if (maxWidth !== null && minWidth > maxWidth) {
+            throw new RangeError("minWidth cannot exceed maxWidth.");
+        }
+
+        if (maxHeight !== null && minHeight > maxHeight) {
+            throw new RangeError("minHeight cannot exceed maxHeight.");
+        }
+
+        this._minWidth = minWidth;
+        this._maxWidth = maxWidth;
+
+        this._minHeight = minHeight;
+        this._maxHeight = maxHeight;
 
         // LAYOUT
         this.layoutParent = null;
@@ -124,14 +148,7 @@ export default class Component {
     }
 
     setWidth(width) {
-        if (
-            width !== "auto" &&
-            (typeof width !== "number" || !Number.isFinite(width) || width < 0)
-        ) {
-            throw new TypeError(
-                'Width must be a non-negative number or "auto".'
-            );
-        }
+        this.validateDimension("width", width);
 
         if (this.requestedWidth === width) {
             return this;
@@ -145,17 +162,8 @@ export default class Component {
         return this;
     }
 
-    setHeight(height) {
-        if (
-            height !== "auto" &&
-            (typeof height !== "number" ||
-                !Number.isFinite(height) ||
-                height < 0)
-        ) {
-            throw new TypeError(
-                'Height must be a non-negative number or "auto".'
-            );
-        }
+    setHeight(height) {;
+        this.validateDimension("height", height);
 
         if (this.requestedHeight === height) {
             return this;
@@ -167,6 +175,150 @@ export default class Component {
         this.markLayoutDirty();
 
         return this;
+    }
+
+    // ==================================
+    // SIZE CONSTRAINTS
+    // ==================================
+
+    get minWidth() {
+        return this._minWidth;
+    }
+
+    set minWidth(value) {
+        this.setMinWidth(value);
+    }
+
+    get maxWidth() {
+        return this._maxWidth;
+    }
+
+    set maxWidth(value) {
+        this.setMaxWidth(value);
+    }
+
+    get minHeight() {
+        return this._minHeight;
+    }
+
+    set minHeight(value) {
+        this.setMinHeight(value);
+    }
+
+    get maxHeight() {
+        return this._maxHeight;
+    }
+
+    set maxHeight(value) {
+        this.setMaxHeight(value);
+    }
+
+    // ==================================
+    // CONSTRAINT SETTERS
+    // ==================================
+
+    setMinWidth(value) {
+        this.validateConstraint("minWidth", value);
+
+        if (this.maxWidth !== null && value > this.maxWidth) {
+            throw new RangeError("minWidth cannot exceed maxWidth.");
+        }
+
+        if (this.minWidth === value) {
+            return this;
+        }
+
+        this._minWidth = value;
+
+        this.updateResolvedSize();
+        this.markLayoutDirty();
+
+        return this;
+    }
+
+    setMaxWidth(value) {
+        this.validateConstraint("maxWidth", value, true);
+
+        if (value !== null && value < this.minWidth) {
+            throw new RangeError("maxWidth cannot be less than minWidth.");
+        }
+
+        if (this.maxWidth === value) {
+            return this;
+        }
+
+        this._maxWidth = value;
+
+        this.updateResolvedSize();
+        this.markLayoutDirty();
+
+        return this;
+    }
+
+    setMinHeight(value) {
+        this.validateConstraint("minHeight", value);
+
+        if (this.maxHeight !== null && value > this.maxHeight) {
+            throw new RangeError("minHeight cannot exceed maxHeight.");
+        }
+
+        if (this.minHeight === value) {
+            return this;
+        }
+
+        this._minHeight = value;
+
+        this.updateResolvedSize();
+        this.markLayoutDirty();
+
+        return this;
+    }
+
+    setMaxHeight(value) {
+        this.validateConstraint("maxHeight", value, true);
+
+        if (value !== null && value < this.minHeight) {
+            throw new RangeError("maxHeight cannot be less than minHeight.");
+        }
+
+        if (this.maxHeight === value) {
+            return this;
+        }
+
+        this._maxHeight = value;
+
+        this.updateResolvedSize();
+        this.markLayoutDirty();
+
+        return this;
+    }
+
+    // ==================================
+    // CONSTRAINT VALIDATION
+    // ==================================
+
+    validateConstraint(name, value, nullable = false) {
+        if (nullable && value === null) {
+            return;
+        }
+
+        if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
+            throw new TypeError(
+                `${name} must be a non-negative finite number` +
+                    (nullable ? " or null." : ".")
+            );
+        }
+    }
+
+    validateDimension(name, value) {
+        if (
+            value !== "auto" &&
+            (typeof value !== "number" || !Number.isFinite(value) || value < 0)
+        ) {
+            throw new TypeError(
+                `${name} must be a non-negative finite number or "auto".`
+            );
+        }
     }
 
     get x() {

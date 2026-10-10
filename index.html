@@ -15,6 +15,7 @@
 
     <title>mobile-phaser-ui</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="./src/debug/mobile-dev-console/console.css" />
 
 </head>
 
@@ -24,8 +25,21 @@
     <div id="consoleLog"></div>
     <div id="main"></div>
 
+        <!-- Must load before the console -->
+        <script src="./src/debug/mobile-dev-console/errorBootstrap.js"></script>
+
+        <!-- Import the console in a catchable way -->
+        <script type="module">
+            try {
+                const { default: Console } = await import("./src/debug/mobile-dev-console/Console.js");
+
+                new Console();
+            } catch (error) {
+                window.showFatalError("Console Startup Failed", error);
+            }
+        </script>
+
     <script src="./phaser4.js"></script>
-    <script src="./src/debug/console.js" type="module"></script>
     <script src="./main.js" type="module"></script>
 
 </body>
