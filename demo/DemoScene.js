@@ -155,8 +155,7 @@ console.log(
         // ==================================
         if (DEBUG) {
             this.debug = new DebugButtons(this, { 
-                x: 20, y: 500,
-                //builderRoot: this.layoutBuilder.root
+                x: 20, y: 500
             });
         }
 

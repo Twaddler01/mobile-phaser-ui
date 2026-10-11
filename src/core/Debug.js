@@ -1,5 +1,6 @@
 // core/Debug.js
 import createComponentRegistry from "../builder/createComponentRegistry.js";
+import installBuildDebug from "../builder/DebugBuilds.js";
 
 class Debug {
     constructor(options = {}) {
@@ -984,4 +985,4 @@ class Debug {
     }
 }
 
-export default new Debug();
+export default installBuildDebug(new Debug());

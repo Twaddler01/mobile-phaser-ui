@@ -43,7 +43,7 @@ const BOX_SIDES = ["top", "right", "bottom", "left"];
 // HELPERS
 // ==================================
 
-function isPlainObject(value) {
+export function isPlainObject(value) {
     return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
@@ -53,7 +53,7 @@ function isFiniteNumber(value) {
 
 // Event props are named onPress, onDragEnd, ... and hold either a
 // function or an "@handlerName" string (resolved by LayoutBuilder).
-function isEventProp(key) {
+export function isEventProp(key) {
     return /^on[A-Z]/.test(key);
 }
 
@@ -61,6 +61,34 @@ function isAction(value) {
     return (
         typeof value === "function" ||
         (typeof value === "string" && value.length > 1 && value[0] === "@")
+    );
+}
+
+// Structural equality for definition data: plain objects, arrays and
+// primitives. Functions compare by reference.
+export function deepEqual(a, b) {
+    if (Object.is(a, b)) {
+        return true;
+    }
+
+    if (
+        typeof a !== "object" ||
+        typeof b !== "object" ||
+        a === null ||
+        b === null ||
+        Array.isArray(a) !== Array.isArray(b)
+    ) {
+        return false;
+    }
+
+    const keysA = Object.keys(a);
+
+    if (keysA.length !== Object.keys(b).length) {
+        return false;
+    }
+
+    return keysA.every(
+        key => Object.hasOwn(b, key) && deepEqual(a[key], b[key])
     );
 }
 
@@ -259,7 +287,7 @@ function validateNode(definition, path, ctx) {
 // Registry keys can be dotted ("style.radius") while definitions
 // may nest them ({ style: { radius: 8 } }). Flatten nested objects
 // until a key matches the schema.
-function flattenProps(props, schema, prefix = "") {
+export function flattenProps(props, schema, prefix = "") {
     const flat = [];
 
     for (const [name, value] of Object.entries(props)) {

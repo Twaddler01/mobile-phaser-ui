@@ -32,8 +32,6 @@ export default class DebugButtons {
         this.buttonHeight = 60;
         this.spacing = 10;
 
-        this.builderRoot = options.builderRoot ?? null;
-
         this.create();
         this.setupButtons();
     }
@@ -151,11 +149,16 @@ export default class DebugButtons {
         });
         //******************************
         this.addButton("debug builder", () => {
-            Debug.inspect(this.builderRoot, {
+            Debug.inspect(this.state.layoutBuilder.id, {
                 tree: true,
                 recursive: true
             });
         });
+        //******************************
+        this.addButton("builder UPDATE", () => {
+            this.state.nextUpdate?.()
+        });
+    
     }
 
     create() {
@@ -191,6 +194,8 @@ export default class DebugButtons {
 
         this.resetTest = () => {
             this.destroyTest();
+
+            this.state.layoutBuilder?.dispose();
 
             // Deleting keys ensures no leftovers
             for (const key of Object.keys(this.state)) {

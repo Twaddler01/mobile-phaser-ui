@@ -22,8 +22,6 @@ import {
 } from "../../builder/ui.js";
 import LayoutBuilder from "../../builder/LayoutBuilder.js";
 
-
-
 export default function createBuilderTests(debug) {
     const { scene, width, height, state, resetTest, addTest } = debug;
 
@@ -55,41 +53,147 @@ export default function createBuilderTests(debug) {
 
     return [
 
+// ==================================
+// LAYOUT BUILDER — SINGLE RUN
+// ==================================
 
 () => {
-const layoutBuilder = new LayoutBuilder(
-    scene,
-    createComponentRegistry(),
-    {
-        handlers: {
-            startGame: () => console.log("start")
-        }
-    }
-);
+    console.log("BUILDER — SINGLE RUN");
 
-layoutBuilder.build(
-    Column(
+    resetTest();
+
+    const layoutBuilder = new LayoutBuilder(
+        scene,
+        createComponentRegistry(),
         {
-            id: "root",
-            padding: 20,
-            gap: 12
-        },
-        [
-            Card(
-                { padding: 16 },
+            handlers: {
+                startGame: () => console.log("start")
+            },
+            id: 'myNewRoot'
+        }
+    );
+
+    state.layoutBuilder = layoutBuilder;
+
+    const root = layoutBuilder.build(
+        Column(
+            {
+                id: "root",
+                padding: 20,
+                gap: 12
+            },
+            [
+                Card(
+                    { padding: 16 },
+                    [
+                        Text(
+                            "Hello world",
+                            { fontSize: "24px" },
+                            { horizontalAlign: "center" }
+                        )
+                    ]
+                ),
+                Spacer({ height: 60 })
+            ]
+        )
+    );
+
+    state.root = root;
+
+    addTest(root);
+},
+
+// ==================================
+// UPDATE SEQUENCE
+// ==================================
+
+() => {
+
+    console.log("BUILDER — SEQUENCE SETUP");
+
+    resetTest();
+
+    const definitions = [
+        // Step 1: Original layout
+        () =>
+            Column(
+                { id: "root", padding: 20, gap: 12 },
                 [
-                    Text(
-                        "Hello world",
-                        { fontSize: "24px" },
-                        { horizontalAlign: "center" }
-                    )
+                    Card({}, [
+                        Text("Hello new world", { fontSize: "24px" })
+                    ]),
+                    Spacer({ height: 60 })
                 ]
             ),
-            Spacer({ height: 60 })
-        ]
-    )
-)
+    
+        // Step 2: Change text and spacer height
+        () =>
+            Column(
+                { id: "root", padding: 20, gap: 12 },
+                [
+                    Card({}, [
+                        Text("Hello updated world", { fontSize: "24px" })
+                    ]),
+                    Spacer({ height: 100 })
+                ]
+            ),
+    
+        // Step 3: Add another child
+        () =>
+            Column(
+                { id: "root", padding: 20, gap: 12 },
+                [
+                    Card({}, [
+                        Text("Hello updated world", { fontSize: "24px" })
+                    ]),
+                    Spacer({ height: 100 }),
+                    Text("New child")
+                ]
+            )
+    ];
+
+    const layoutBuilder = new LayoutBuilder(
+        scene,
+        createComponentRegistry(),
+        { id: "myNewRoot" }
+    );
+    
+    state.layoutBuilder = layoutBuilder;
+    state.updateStep = 0;
+    
+    const root = layoutBuilder.build(definitions[0]());
+    
+    state.root = root;
+    addTest(root);
+    
+    // ==================================
+    // SAVE STATE FOR UPDATE FUNCTION SEQUENCE
+    // DebugButtons live click: state.nextUpdate?.()
+    // ==================================
+    
+    state.nextUpdate = () => {
+        if (state.updateStep >= definitions.length - 1) {
+            console.log("All update steps completed.");
+            return;
+        }
+    
+        state.updateStep++;
+    
+        layoutBuilder.update(definitions[state.updateStep]());
+    
+        console.log(`UPDATE STEP ${state.updateStep}`);
+        console.log("Statistics:", layoutBuilder.lastUpdate);
+    
+        Debug.inspect(layoutBuilder.id, {
+            tree: true,
+            recursive: true
+        });
+    };
+    
+
 },
+
+
 
 
 
