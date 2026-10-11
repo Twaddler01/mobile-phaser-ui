@@ -1,10 +1,10 @@
 // debug/tests/builderTests.js
 import Stack from "../../layout/Stack.js";
-import Spacer from "../../layout/Spacer.js";
 import Row from "../../layout/Row.js";
-import Column from "../../layout/Column.js";
-import Card from "../../components/Card.js";
-import Text from "../../components/Text.js";
+//import Column from "../../layout/Column.js";
+//import Card from "../../components/Card.js";
+//import Text from "../../components/Text.js";
+//import Spacer from "../../layout/Spacer.js";
 import Button from "../../components/Button.js";
 import ScrollView from "../../layout/ScrollView.js";
 import Grid from "../../layout/Grid.js";
@@ -13,6 +13,16 @@ import Debug from "../../core/Debug.js";
 
 import createComponentRegistry from "../../builder/createComponentRegistry.js";
 import ComponentPropertyApplier from "../../builder/ComponentPropertyApplier.js";
+
+import {
+    Column,
+    Card,
+    Text,
+    Spacer
+} from "../../builder/ui.js";
+import LayoutBuilder from "../../builder/LayoutBuilder.js";
+
+
 
 export default function createBuilderTests(debug) {
     const { scene, width, height, state, resetTest, addTest } = debug;
@@ -44,6 +54,48 @@ export default function createBuilderTests(debug) {
     };
 
     return [
+
+
+() => {
+const layoutBuilder = new LayoutBuilder(
+    scene,
+    createComponentRegistry(),
+    {
+        handlers: {
+            startGame: () => console.log("start")
+        }
+    }
+);
+
+layoutBuilder.build(
+    Column(
+        {
+            id: "root",
+            padding: 20,
+            gap: 12
+        },
+        [
+            Card(
+                { padding: 16 },
+                [
+                    Text(
+                        "Hello world",
+                        { fontSize: "24px" },
+                        { horizontalAlign: "center" }
+                    )
+                ]
+            ),
+            Spacer({ height: 60 })
+        ]
+    )
+)
+},
+
+
+
+
+
+
 
 // ==================================
 // COMPONENT PROPERTY APPLIER
