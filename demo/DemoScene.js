@@ -70,7 +70,7 @@ export default class DemoScene extends Phaser.Scene {
                     name: "backgroundColor",
                     type: "color",
                     label: "Background Color",
-                    default: 0x222222
+                    //default: "#222222"
                 }
             ],
 
@@ -81,7 +81,7 @@ export default class DemoScene extends Phaser.Scene {
         });
 
         // Read all current values.
-        console.log(form.getValues());
+        //console.log(form.getValues());
 
         // Update a field programmatically.
         form.setValue("padding", 24);

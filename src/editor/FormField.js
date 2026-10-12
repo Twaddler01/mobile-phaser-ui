@@ -1,4 +1,5 @@
 // HTML/DOM METHOD
+import ColorPicker from "./ColorPicker.js";
 
 export default class FormField {
     constructor(scene, config, options = {}) {
@@ -124,7 +125,7 @@ export default class FormField {
             if (type === "number") {
                 if (input.value.trim() === "") {
                     this.value = "";
-                    this.onChange?.("",);
+                    this.onChange?.("");
                     return;
                 }
 
@@ -210,48 +211,15 @@ export default class FormField {
     }
 
     createColor() {
-        const wrapper = document.createElement("div");
-
-        Object.assign(wrapper.style, {
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            width: `${this.width}px`,
-            height: `${this.controlHeight}px`,
-            marginTop: `${this.gap}px`
+        this.colorPicker = new ColorPicker({
+            scene: this.scene,
+            value: this.value ?? "#FFFFFF",
+            onChange: hex => {
+                this.setValue(hex, true);
+            }
         });
 
-        this.colorSwatch = document.createElement("input");
-        this.colorSwatch.type = "color";
-
-        Object.assign(this.colorSwatch.style, {
-            width: "42px",
-            height: "34px",
-            padding: "2px",
-            border: "1px solid #596273",
-            borderRadius: "6px",
-            background: "#20242b"
-        });
-
-        this.colorText = document.createElement("input");
-        this.colorText.type = "text";
-        this.styleControl(this.colorText);
-        this.colorText.style.flex = "1";
-        this.colorText.style.width = "auto";
-        this.colorText.style.minWidth = "0";
-        this.colorText.style.marginTop = "0";
-
-        this.colorSwatch.addEventListener("input", () => {
-            this.setValue(this.colorSwatch.value, true);
-        });
-
-        this.colorText.addEventListener("change", () => {
-            this.setValue(this.colorText.value, true);
-        });
-
-        wrapper.append(this.colorSwatch, this.colorText);
-
-        return wrapper;
+        return this.colorPicker.element;
     }
 
     setValue(value, notify = false) {
@@ -272,15 +240,10 @@ export default class FormField {
         }
 
         if (this.config.type === "color") {
-            const hex = String(value ?? "#ffffff");
-            const normalized = hex.startsWith("#") ? hex : `#${hex}`;
-
-            if (!/^#[0-9a-f]{6}$/i.test(normalized)) return;
-
-            value = typeof this.value === "number"
-                ? Number.parseInt(normalized.slice(1), 16)
-                : normalized;
-        }
+    value = this.colorPicker.setValue(
+        value ?? "#FFFFFF"
+    ).getValue();
+}
 
         this.value = value;
 
@@ -288,18 +251,10 @@ export default class FormField {
             this.toggleInput.checked = Boolean(value);
         } else if (this.config.type === "select") {
             this.control.value = value == null ? "" : String(value);
-        } else if (this.config.type === "color") {
-            const hex = typeof value === "number"
-                ? `#${value.toString(16).padStart(6, "0")}`
-                : String(value);
-
-            this.colorSwatch.value = hex.startsWith("#")
-                ? hex
-                : `#${hex}`;
-
-            this.colorText.value = this.colorSwatch.value;
-        } else if (this.config.type === "string" ||
-                   this.config.type === "number") {
+        } else if (
+            this.config.type === "string" ||
+            this.config.type === "number"
+        ) {
             this.control.value = value ?? "";
         }
 

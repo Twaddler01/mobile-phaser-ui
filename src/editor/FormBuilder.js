@@ -70,7 +70,7 @@ export default class FormBuilder {
                 return null;
 
             case "color":
-                return 0xffffff;
+                return "#FFFFFF";
 
             default:
                 return null;
@@ -118,14 +118,24 @@ export default class FormBuilder {
         const scaleX = rect.width / logicalWidth;
         const scaleY = rect.height / logicalHeight;
 
-        this.container.style.left =
-            `${rect.left + this.x * scaleX}px`;
+        this.container.style.left = `${rect.left + this.x * scaleX}px`;
 
-        this.container.style.top =
-            `${rect.top + this.y * scaleY}px`;
+        this.container.style.top = `${rect.top + this.y * scaleY}px`;
 
-        this.container.style.transform =
-            `scale(${scaleX}, ${scaleY})`;
+        // Scale the container's layout dimensions instead of using
+        // CSS transform, which can interfere with iro.js pointer input.
+        this.container.style.width = `${this.width * scaleX}px`;
+
+        this.container.style.height = `${this.height * scaleY}px`;
+
+        this.container.style.transform = "none";
+
+        // Scale each field's layout dimensions to match the canvas.
+        for (const field of this.fieldInstances.values()) {
+            field.element.style.width = `${this.width * scaleX}px`;
+
+            field.element.style.transform = "none";
+        }
     }
 
     getValue(name) {
