@@ -8,8 +8,9 @@ import {
 import ComponentRegistry from "../src/builder/ComponentRegistry.js";
 import createComponentRegistry from "../src/builder/createComponentRegistry.js";
 import LayoutBuilder from "../src/builder/LayoutBuilder.js";
-import runComponentRegistryTests
-    from "../src/builder/tests/ComponentRegistryTests.js";
+import runComponentRegistryTests from "../src/builder/tests/ComponentRegistryTests.js";
+
+import FormBuilder from "../src/editor/FormBuilder.js";
 
 export default class DemoScene extends Phaser.Scene {
     constructor() {
@@ -30,23 +31,78 @@ export default class DemoScene extends Phaser.Scene {
         };
         //setZoom();
 
-// ==================================
-// REGISTRY VALIDATION TESTS
-// ==================================
+        const form = new FormBuilder(this, {
+            x: 20,
+            y: 20,
+            width: 300,
+            gap: 16,
 
-if (DEBUG) {
-    const registry = createComponentRegistry();
+            fields: [
+                {
+                    name: "id",
+                    type: "string",
+                    label: "Component ID",
+                    default: "root"
+                },
+                {
+                    name: "padding",
+                    type: "number",
+                    label: "Padding",
+                    default: 20,
+                    min: 0,
+                    max: 100,
+                    step: 1
+                },
+                {
+                    name: "align",
+                    type: "select",
+                    label: "Alignment",
+                    options: ["start", "center", "end"],
+                    default: "center"
+                },
+                {
+                    name: "enabled",
+                    type: "boolean",
+                    label: "Enabled",
+                    default: true
+                },
+                {
+                    name: "backgroundColor",
+                    type: "color",
+                    label: "Background Color",
+                    default: 0x222222
+                }
+            ],
 
-    //runComponentRegistryTests(registry);
-}
+            onChange(values, name, value) {
+                console.log("Changed:", name, value);
+                console.log("Form values:", values);
+            }
+        });
 
+        // Read all current values.
+        console.log(form.getValues());
 
+        // Update a field programmatically.
+        form.setValue("padding", 24);
+
+        // Clean up when the scene shuts down.
+        this.events.once("shutdown", () => {
+            form.destroy();
+        });
+
+        // ==================================
+        // REGISTRY VALIDATION TESTS
+        // ==================================
+
+        if (DEBUG) {
+            //const registry = createComponentRegistry();
+            //runComponentRegistryTests(registry);
+        }
 
         // ==================================
 
-
-
-/*
+        /*
 // ==================================
 // TEST LIVE LAYOUT BUILDER
 // ==================================
@@ -151,11 +207,11 @@ console.log(
 
 */
 
-
         // ==================================
         if (DEBUG) {
-            this.debug = new DebugButtons(this, { 
-                x: 20, y: 500
+            this.debug = new DebugButtons(this, {
+                x: 20,
+                y: 500
             });
         }
 

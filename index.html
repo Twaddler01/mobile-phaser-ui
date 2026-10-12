@@ -26,9 +26,11 @@
     <div id="main"></div>
 
         <!-- Must load before the console -->
+<!--
         <script src="./src/debug/mobile-dev-console/errorBootstrap.js"></script>
-
+-->
         <!-- Import the console in a catchable way -->
+<!--
         <script type="module">
             try {
                 const { default: Console } = await import("./src/debug/mobile-dev-console/Console.js");
@@ -38,7 +40,9 @@
                 window.showFatalError("Console Startup Failed", error);
             }
         </script>
-
+-->
+<script src="./src/debug/_console.js"></script>
+    
     <script src="./phaser4.js"></script>
     <script src="./main.js" type="module"></script>
 
