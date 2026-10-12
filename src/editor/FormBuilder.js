@@ -1,3 +1,5 @@
+// HTML/DOM METHOD
+
 import FormField from "./FormField.js";
 
 export default class FormBuilder {
@@ -14,7 +16,23 @@ export default class FormBuilder {
         this.values = {};
         this.fieldInstances = new Map();
 
-        this.container = scene.add.container(this.x, this.y);
+        // DOM overlay positioned relative to the Phaser canvas.
+        this.container = document.createElement("div");
+
+        Object.assign(this.container.style, {
+            position: "fixed",
+            left: "0",
+            top: "0",
+            width: `${this.width}px`,
+            margin: "0",
+            padding: "0",
+            boxSizing: "border-box",
+            transformOrigin: "top left",
+            zIndex: "1000",
+            pointerEvents: "auto"
+        });
+
+        document.body.appendChild(this.container);
 
         for (const field of this.fields) {
             this.values[field.name] = Object.hasOwn(field, "default")
@@ -23,6 +41,18 @@ export default class FormBuilder {
         }
 
         this.render();
+
+        this.updatePosition = () => this.syncPosition();
+
+        window.addEventListener("resize", this.updatePosition);
+        window.addEventListener("scroll", this.updatePosition, true);
+
+        this.scene.scale.on("resize", this.updatePosition);
+
+        this.syncPosition();
+
+        this.scene.events.once("shutdown", this.destroy, this);
+        this.scene.events.once("destroy", this.destroy, this);
     }
 
     defaultValue(type) {
@@ -59,8 +89,13 @@ export default class FormBuilder {
                 }
             });
 
-            instance.setPosition(0, y);
-            this.container.add(instance);
+            Object.assign(instance.element.style, {
+                position: "absolute",
+                left: "0",
+                top: `${y}px`
+            });
+
+            this.container.appendChild(instance.element);
 
             this.fieldInstances.set(field.name, instance);
 
@@ -68,6 +103,29 @@ export default class FormBuilder {
         }
 
         this.height = Math.max(0, y - this.gap);
+        this.container.style.height = `${this.height}px`;
+    }
+
+    syncPosition() {
+        if (!this.container.isConnected) return;
+
+        const canvas = this.scene.game.canvas;
+        const rect = canvas.getBoundingClientRect();
+
+        const logicalWidth = this.scene.scale.width;
+        const logicalHeight = this.scene.scale.height;
+
+        const scaleX = rect.width / logicalWidth;
+        const scaleY = rect.height / logicalHeight;
+
+        this.container.style.left =
+            `${rect.left + this.x * scaleX}px`;
+
+        this.container.style.top =
+            `${rect.top + this.y * scaleY}px`;
+
+        this.container.style.transform =
+            `scale(${scaleX}, ${scaleY})`;
     }
 
     getValue(name) {
@@ -88,6 +146,8 @@ export default class FormBuilder {
         this.fieldInstances.get(name).setValue(value);
 
         this.onChange?.(this.getValues(), name, value);
+
+        return this;
     }
 
     setValues(values) {
@@ -107,14 +167,30 @@ export default class FormBuilder {
     setPosition(x, y) {
         this.x = x;
         this.y = y;
-        this.container.setPosition(x, y);
+
+        this.syncPosition();
 
         return this;
     }
 
     destroy() {
-        this.container.destroy(true);
+        if (this.destroyed) return;
+        this.destroyed = true;
+
+        window.removeEventListener("resize", this.updatePosition);
+        window.removeEventListener("scroll", this.updatePosition, true);
+
+        this.scene.scale.off("resize", this.updatePosition);
+
+        this.scene.events.off("shutdown", this.destroy, this);
+        this.scene.events.off("destroy", this.destroy, this);
+
+        for (const field of this.fieldInstances.values()) {
+            field.destroy();
+        }
+
         this.fieldInstances.clear();
+        this.container.remove();
         this.values = {};
     }
 }
