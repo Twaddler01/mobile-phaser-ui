@@ -1,246 +1,128 @@
 import Debug from "../core/Debug.js";
 import Container from "../core/Container.js";
 
+/*
+ * Stack: every child shares the same content box and is aligned inside it.
+ * No sequential allocation; each child resolves independently.
+ */
 export default class Stack extends Container {
     constructor(scene, config = {}) {
         super(scene, config);
     }
 
-    updateSize() {
-        let measuredWidth = this.measuredWidth;
+    getItems() {
+        const items = [];
 
-        let measuredHeight = this.measuredHeight;
+        for (const child of this.children) {
+            const options = this.childLayoutOptions.get(child);
 
-        ////////////////////////////////////////
-        // WIDTH
-        ////////////////////////////////////////
-
-        if (this.widthAuto && this.layoutWidth === null) {
-            const contentWidth = this.children.reduce((max, child) => {
-                const options = this.childLayoutOptions.get(child);
-
-                if (!options) {
-                    return max;
-                }
-
-                const childWidth = options.width ?? child.getLayoutWidth();
-
-                const { margin } = options;
-
-                return Math.max(max, margin.left + childWidth + margin.right);
-            }, 0);
-
-            measuredWidth =
-                this.padding.left + contentWidth + this.padding.right;
+            if (options) {
+                items.push({ child, options });
+            }
         }
 
-        ////////////////////////////////////////
-        // HEIGHT
-        ////////////////////////////////////////
+        return items;
+    }
 
-        if (this.heightAuto && this.layoutHeight === null) {
-            const contentHeight = this.children.reduce((max, child) => {
-                const options = this.childLayoutOptions.get(child);
+    // Natural size = the largest outer box among children.
+    measureContent() {
+        let width = 0;
+        let height = 0;
 
-                if (!options) {
-                    return max;
-                }
+        for (const { child, options } of this.getItems()) {
+            const { margin } = options;
 
-                const childHeight = options.height ?? child.getLayoutHeight();
+            width = Math.max(
+                width,
+                margin.left + child.resolvedWidth + margin.right
+            );
 
-                const { margin } = options;
-
-                return Math.max(max, margin.top + childHeight + margin.bottom);
-            }, 0);
-
-            measuredHeight =
-                this.padding.top + contentHeight + this.padding.bottom;
+            height = Math.max(
+                height,
+                margin.top + child.resolvedHeight + margin.bottom
+            );
         }
 
-        ////////////////////////////////////////
-        // COMMIT INTRINSIC MEASUREMENTS
-        ////////////////////////////////////////
-
-        this.setMeasuredSize(measuredWidth, measuredHeight);
-
-        return this;
+        return { width, height };
     }
 
     layout() {
         this.beginLayout();
 
-        ////////////////////////////////////////
-        // 1. GET CONSTRAINTS
-        //
-        // Determine the dimensions this Stack
-        // already knows from itself / its parent.
-        ////////////////////////////////////////
+        try {
+            // 1. CONSTRAINTS + 2. ALLOCATE
+            const box = this.getContentBox();
+            const items = this.getItems();
 
-        const constraints = this.getLayoutConstraints();
-
-        const {
-            width: layoutWidth,
-            height: layoutHeight,
-            contentWidth,
-            contentHeight
-        } = constraints;
-
-        ////////////////////////////////////////
-        // 2. ALLOCATE CHILD CONSTRAINTS
-        //
-        // Stack gives each child access to the
-        // same content area.
-        //
-        // No sequential allocation occurs.
-        // Each child resolves independently.
-        ////////////////////////////////////////
-
-        const availableWidth = contentWidth;
-
-        const availableHeight = contentHeight;
-
-        ////////////////////////////////////////
-        // 3. RESOLVE CHILDREN
-        //
-        // Apply newly assigned constraints.
-        //
-        // If a child's constraint changes, resolve
-        // that child immediately so its final measured
-        // size is available to this Stack.
-        ////////////////////////////////////////
-
-        this.resolveChildren(availableWidth, availableHeight);
-
-        ////////////////////////////////////////
-        // 4. MEASURE FINAL SIZE
-        //
-        // All children have now responded to their
-        // constraints, so Stack can measure itself
-        // using their final dimensions.
-        ////////////////////////////////////////
-
-        this.updateSize();
-
-        ////////////////////////////////////////
-        // RE-CAPTURE FINAL DIMENSIONS
-        //
-        // updateSize() may have changed this Stack's
-        // intrinsic width/height.
-        ////////////////////////////////////////
-
-        const finalConstraints = this.getLayoutConstraints();
-
-        const {
-            width: finalLayoutWidth,
-            height: finalLayoutHeight,
-            contentWidth: finalContentWidth,
-            contentHeight: finalContentHeight
-        } = finalConstraints;
-
-        ////////////////////////////////////////
-        // 5. POSITION CHILDREN
-        //
-        // Each child occupies the Stack's content
-        // area and is positioned according to its
-        // own alignment and margins.
-        ////////////////////////////////////////
-
-        for (const child of this.children) {
-            const options = this.childLayoutOptions.get(child);
-
-            if (!options) {
-                continue;
+            for (const { child, options } of items) {
+                this.layoutChildInBox(child, options, box);
             }
 
-            const { margin } = options;
+            // 3. MEASURE
+            this.updateSize();
 
-            const childWidth = this.resolveChildWidth(
-                child,
-                options,
-                finalContentWidth
+            // 4. ARRANGE
+            const p = this.padding;
+
+            const contentWidth = Math.max(
+                0,
+                this.resolvedWidth - p.left - p.right
             );
 
-            const childHeight = this.resolveChildHeight(
-                child,
-                options,
-                finalContentHeight
+            const contentHeight = Math.max(
+                0,
+                this.resolvedHeight - p.top - p.bottom
             );
 
-            const resolvedWidth = childWidth ?? 0;
+            for (const { child, options } of items) {
+                const { margin } = options;
 
-            const resolvedHeight = childHeight ?? 0;
+                const outerWidth =
+                    margin.left + child.resolvedWidth + margin.right;
 
-            ////////////////////////////////////////
-            // HORIZONTAL ALIGNMENT
-            ////////////////////////////////////////
+                const outerHeight =
+                    margin.top + child.resolvedHeight + margin.bottom;
 
-            const outerWidth = margin.left + resolvedWidth + margin.right;
+                let outerX;
 
-            let outerX;
+                switch (options.horizontalAlign) {
+                    case "center":
+                        outerX = p.left + (contentWidth - outerWidth) / 2;
+                        break;
 
-            switch (options.horizontalAlign) {
-                case "center":
-                    outerX =
-                        this.padding.left +
-                        (finalContentWidth - outerWidth) / 2;
+                    case "end":
+                        outerX = p.left + contentWidth - outerWidth;
+                        break;
 
-                    break;
+                    default:
+                        outerX = p.left;
+                        break;
+                }
 
-                case "end":
-                    outerX = finalLayoutWidth - this.padding.right - outerWidth;
+                let outerY;
 
-                    break;
+                switch (options.verticalAlign) {
+                    case "center":
+                        outerY = p.top + (contentHeight - outerHeight) / 2;
+                        break;
 
-                case "start":
-                default:
-                    outerX = this.padding.left;
+                    case "end":
+                        outerY = p.top + contentHeight - outerHeight;
+                        break;
 
-                    break;
+                    default:
+                        outerY = p.top;
+                        break;
+                }
+
+                child.setPosition(outerX + margin.left, outerY + margin.top);
             }
-
-            ////////////////////////////////////////
-            // VERTICAL ALIGNMENT
-            ////////////////////////////////////////
-
-            const outerHeight = margin.top + resolvedHeight + margin.bottom;
-
-            let outerY;
-
-            switch (options.verticalAlign) {
-                case "center":
-                    outerY =
-                        this.padding.top +
-                        (finalContentHeight - outerHeight) / 2;
-
-                    break;
-
-                case "end":
-                    outerY =
-                        finalLayoutHeight - this.padding.bottom - outerHeight;
-
-                    break;
-
-                case "start":
-                default:
-                    outerY = this.padding.top;
-
-                    break;
-            }
-
-            ////////////////////////////////////////
-            // REPOSITION
-            ////////////////////////////////////////
-
-            child.setPosition(outerX + margin.left, outerY + margin.top);
+        } finally {
+            this.finishLayout();
         }
-
-        ////////////////////////////////////////
-        // 6. FINALIZE
-        ////////////////////////////////////////
-
-        this.finishLayout();
     }
 }
+
 /*
 const stack = new Stack(this, {
 
@@ -252,4 +134,7 @@ const stack = new Stack(this, {
 
     padding: 30
 });
+
+stack.add(background, { fill: true });
+stack.add(label, { horizontalAlign: 'center', verticalAlign: 'center' });
 */

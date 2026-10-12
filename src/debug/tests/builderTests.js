@@ -1,6 +1,6 @@
 // debug/tests/builderTests.js
 import Stack from "../../layout/Stack.js";
-import Row from "../../layout/Row.js";
+//import Row from "../../layout/Row.js";
 //import Column from "../../layout/Column.js";
 //import Card from "../../components/Card.js";
 //import Text from "../../components/Text.js";
@@ -16,6 +16,7 @@ import ComponentPropertyApplier from "../../builder/ComponentPropertyApplier.js"
 
 import {
     Column,
+    Row,
     Card,
     Text,
     Spacer
@@ -147,7 +148,25 @@ export default function createBuilderTests(debug) {
                         Text("Hello updated world", { fontSize: "24px" })
                     ]),
                     Spacer({ height: 100 }),
-                    Text("New child")
+                    Text("New child"),
+                    Row({
+                        height: 'auto', width: 'auto'
+                    }, [
+                        Card({
+                            height: 'auto',
+                            width: 'auto',
+                            padding: 20
+                        }, [
+                            Text("CardA")
+                        ]),
+                        Card({
+                            height: 'auto',
+                            width: 'auto',
+                            padding: 20
+                        }, [
+                            Text("CardB")
+                        ])
+                    ])
                 ]
             )
     ];
@@ -183,14 +202,7 @@ export default function createBuilderTests(debug) {
     
         console.log(`UPDATE STEP ${state.updateStep}`);
         console.log("Statistics:", layoutBuilder.lastUpdate);
-    
-        Debug.inspect(layoutBuilder.id, {
-            tree: true,
-            recursive: true
-        });
     };
-    
-
 },
 
 

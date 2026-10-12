@@ -1,5 +1,6 @@
 import Debug from "./Debug.js";
 import Component from "./Component.js";
+import LayoutConstraints from "../layout/LayoutConstraints.js";
 
 export default class Container extends Component {
     constructor(scene, config = {}) {
@@ -18,35 +19,47 @@ export default class Container extends Component {
     }
 
     beginLayout() {
+        super.beginLayout();
         Debug.clearLayoutBounds(this);
         return this;
     }
 
     finishLayout() {
-        this.layoutDirty = false;
+        super.finishLayout();
         Debug.updateBounds(this);
         return this;
     }
 
     //////////////////////////////////////////
-    // CHILD LOOKUP
-    //////////////////////////////////////////
-
-    getChild(childOrId) {
-        if (typeof childOrId !== "string") {
-            return childOrId;
-        }
-
-        return this.children?.find(child => child.id === childOrId) ?? null;
-    }
-
-    getChildren() {
-        return [...(this.children ?? [])];
-    }
-
-    //////////////////////////////////////////
     // CHILD OPTIONS
+    //
+    // Per-child, per-parent layout instructions.
+    //
+    //   width / height   explicit ALLOCATION for this child (number | null)
+    //   fill             true | "horizontal" | "vertical" | null
+    //   margin           space around the child
+    //   horizontalAlign  null = inherit the container's align
+    //   verticalAlign    null = inherit the container's align
+    //
+    // These are never sizes of the child itself; they feed the child's
+    // `allocated` value.
     //////////////////////////////////////////
+
+    _createChildOptions(options = {}) {
+        return {
+            width: options.width ?? null,
+
+            height: options.height ?? null,
+
+            fill: options.fill ?? null,
+
+            margin: this.getMargin(options.margin),
+
+            horizontalAlign: options.horizontalAlign ?? null,
+
+            verticalAlign: options.verticalAlign ?? null
+        };
+    }
 
     setChildOptions(childOrId, options = {}) {
         const child = this.getChild(childOrId);
@@ -55,7 +68,8 @@ export default class Container extends Component {
             return this;
         }
 
-        const current = this.childLayoutOptions.get(child) ?? {};
+        const current =
+            this.childLayoutOptions.get(child) ?? this._createChildOptions();
 
         if (options.width !== undefined) {
             current.width = options.width;
@@ -99,421 +113,285 @@ export default class Container extends Component {
     }
 
     //////////////////////////////////////////
-    // LAYOUT HELPERS
+    // CONTENT BOX
+    //
+    // The area inside padding, described by what is KNOWN about it:
+    //
+    //   definiteWidth/Height   exact content size (allocated or fixed),
+    //                          or null when it depends on the children
+    //   maxWidth/Height        upper bound for children (the definite
+    //                          size, else the constraint maximum),
+    //                          or null when unbounded
     //////////////////////////////////////////
 
-    isFillWidth(options) {
-        return (
-            options.width === null &&
-            (options.fill === true || options.fill === "horizontal")
-        );
-    }
+    getContentBox() {
+        const p = this.padding;
+        const c = this.constraints;
 
-    isFillHeight(options) {
-        return (
-            options.height === null &&
-            (options.fill === true || options.fill === "vertical")
-        );
-    }
+        const width = this.getDefiniteWidth();
+        const height = this.getDefiniteHeight();
 
-    getChildWidth(child, options) {
-        return options.width ?? child.getLayoutWidth();
-    }
+        const boundWidth = width ?? (c.hasBoundedWidth ? c.maxWidth : null);
+        const boundHeight = height ?? (c.hasBoundedHeight ? c.maxHeight : null);
 
-    getChildHeight(child, options) {
-        return options.height ?? child.getLayoutHeight();
-    }
-
-    resolveChildWidth(child, options, availableWidth = null, fillWidth = null) {
-        // Explicit width takes priority.
-        if (options.width !== null) {
-            return options.width;
-        }
-
-        // Fill children receive their share.
-        if (this.isFillWidth(options)) {
-            if (fillWidth !== null) {
-                return fillWidth;
-            }
-
-            if (availableWidth !== null) {
-                return Math.max(
-                    0,
-                    availableWidth - options.margin.left - options.margin.right
-                );
-            }
-
-            return null;
-        }
-
-        // Automatic wrapping:
-        // Columns can offer the full available width.
-        // Rows must preserve intrinsic child widths.
-        if (
-            this.constructor.name === "Column" &&
-            child.usesAvailableWidth?.() &&
-            availableWidth !== null
-        ) {
-            return Math.max(
-                0,
-                availableWidth - options.margin.left - options.margin.right
-            );
-        }
-
-        // All other children retain intrinsic sizing.
-        return this.getChildWidth(child, options);
-    }
-
-    resolveChildHeight(
-        child,
-        options,
-        availableHeight = null,
-        fillHeight = null
-    ) {
-        // Fill children receive their individual allocation.
-        if (this.isFillHeight(options)) {
-            if (fillHeight instanceof Map) {
-                return fillHeight.get(child) ?? 0;
-            }
-
-            if (fillHeight !== null) {
-                return fillHeight;
-            }
-
-            if (availableHeight !== null) {
-                return Math.max(
-                    0,
-                    availableHeight - options.margin.top - options.margin.bottom
-                );
-            }
-
-            // No vertical allocation exists yet.
-            return null;
-        }
-
-        return this.getChildHeight(child, options);
-    }
-
-    getHorizontalFillAllocation(availableWidth) {
-        let fixedWidth = 0;
-        let fillCount = 0;
-        let fillMargins = 0;
-
-        for (const child of this.children) {
-            const options = this.childLayoutOptions.get(child);
-
-            if (!options) {
-                continue;
-            }
-
-            const { margin } = options;
-
-            const childWidth = this.getChildWidth(child, options);
-
-            if (this.isFillWidth(options)) {
-                fillCount++;
-
-                fillMargins += margin.left + margin.right;
-            } else {
-                fixedWidth += margin.left + childWidth + margin.right;
-            }
-        }
-
-        const totalGaps = Math.max(0, this.children.length - 1) * this.gap;
-
-        const fillSpace = Math.max(
-            0,
-            availableWidth - fixedWidth - fillMargins - totalGaps
-        );
-
-        const fillWidth = fillCount > 0 ? fillSpace / fillCount : 0;
+        const inset = (value, before, after) =>
+            value === null ? null : Math.max(0, value - before - after);
 
         return {
-            fixedWidth,
-            fillCount,
-            fillMargins,
-            totalGaps,
-            fillSpace,
-            fillWidth
+            definiteWidth: inset(width, p.left, p.right),
+            definiteHeight: inset(height, p.top, p.bottom),
+            maxWidth: inset(boundWidth, p.left, p.right),
+            maxHeight: inset(boundHeight, p.top, p.bottom)
         };
     }
 
-    getVerticalFillAllocation(availableHeight) {
-        let fixedHeight = 0;
-        let fillMargins = 0;
+    //////////////////////////////////////////
+    // MEASURE
+    //
+    // Subclasses implement measureContent(): the natural size of the
+    // children's area (no padding), read from children's RESOLVED sizes.
+    // Call it only after the children were laid out in this pass.
+    //////////////////////////////////////////
 
-        const fillChildren = [];
-
-        for (const child of this.children) {
-            const options = this.childLayoutOptions.get(child);
-
-            if (!options) {
-                continue;
-            }
-
-            const { margin } = options;
-
-            const childHeight = this.getChildHeight(child, options);
-
-            if (this.isFillHeight(options)) {
-                const constraints = child.getLayoutConstraints();
-
-                fillChildren.push({
-                    child,
-                    options,
-                    minHeight: constraints.minHeight ?? 0,
-                    maxHeight: constraints.maxHeight ?? Infinity,
-                    height: 0,
-                    margin: margin.top + margin.bottom
-                });
-
-                fillMargins += margin.top + margin.bottom;
-            } else {
-                fixedHeight += margin.top + childHeight + margin.bottom;
-            }
-        }
-
-        const totalGaps = Math.max(0, this.children.length - 1) * this.gap;
-
-        const fillSpace = Math.max(
-            0,
-            availableHeight - fixedHeight - fillMargins - totalGaps
-        );
-
-        // Begin with an equal share for every fill child.
-        let remainingSpace = fillSpace;
-        let remainingChildren = [...fillChildren];
-
-        while (remainingChildren.length > 0) {
-            const share = remainingSpace / remainingChildren.length;
-
-            const constrainedChildren = remainingChildren.filter(
-                item => share < item.minHeight || share > item.maxHeight
-            );
-
-            // All remaining children can accept an equal share.
-            if (constrainedChildren.length === 0) {
-                for (const item of remainingChildren) {
-                    item.height = share;
-                }
-
-                break;
-            }
-
-            // Fix children whose equal share violates a constraint.
-            for (const item of constrainedChildren) {
-                item.height = Math.max(
-                    item.minHeight,
-                    Math.min(share, item.maxHeight)
-                );
-
-                remainingSpace -= item.height;
-            }
-
-            const constrainedSet = new Set(constrainedChildren);
-
-            remainingChildren = remainingChildren.filter(
-                item => !constrainedSet.has(item)
-            );
-
-            // If constraints cause overflow, keep allocating
-            // the remaining children at their minimums.
-            if (remainingSpace < 0) {
-                for (const item of remainingChildren) {
-                    item.height = item.minHeight;
-                }
-
-                break;
-            }
-        }
-
-        const fillHeight = fillChildren.length > 0 ? fillChildren[0].height : 0;
-
-        return {
-            fixedHeight,
-            fillCount: fillChildren.length,
-            fillMargins,
-            totalGaps,
-            fillSpace,
-            fillHeight,
-
-            // Individual allocations are needed because
-            // constrained children may have different heights.
-            fillHeights: new Map(
-                fillChildren.map(item => [item.child, item.height])
-            )
-        };
+    measureContent() {
+        return { width: 0, height: 0 };
     }
 
-    getChildLayoutWidth(child, options, resolvedWidth) {
-        if (
-            options.width !== null ||
-            this.isFillWidth(options) ||
-            (this.constructor.name === "Column" &&
-                child.usesAvailableWidth?.() &&
-                (!this.widthAuto || this.layoutWidth !== null))
-        ) {
-            return resolvedWidth;
-        }
+    updateSize() {
+        const content = this.measureContent();
+        const p = this.padding;
 
-        return null;
-    }
+        const width = this.widthAuto
+            ? p.left + content.width + p.right
+            : this.requestedWidth;
 
-    getChildLayoutHeight(child, options, resolvedHeight) {
-        if (options.height !== null || this.isFillHeight(options)) {
-            return resolvedHeight;
-        }
+        const height = this.heightAuto
+            ? p.top + content.height + p.bottom
+            : this.requestedHeight;
 
-        return null;
-    }
-
-    getChildAvailableWidth(child, options, availableWidth = null) {
-        // An explicit child width or fill allocation
-        // is handled by actual layout allocation.
-        if (options.width !== null || this.isFillWidth(options)) {
-            return null;
-        }
-
-        if (availableWidth === null) {
-            return null;
-        }
-
-        const available = Math.max(
-            0,
-            availableWidth - options.margin.left - options.margin.right
-        );
-
-        // Respect the child's own configured maximum.
-        return child.maxWidth === null
-            ? available
-            : Math.min(available, child.maxWidth);
-    }
-
-    getChildAvailableHeight(child, options, availableHeight = null) {
-        if (
-            options.height !== null ||
-            this.isFillHeight(options) ||
-            availableHeight === null
-        ) {
-            return null;
-        }
-
-        const available = Math.max(
-            0,
-            availableHeight - options.margin.top - options.margin.bottom
-        );
-
-        return child.maxHeight === null
-            ? available
-            : Math.min(available, child.maxHeight);
-    }
-
-    applyChildLayout(child, options, width, height) {
-        const layoutWidth = this.getChildLayoutWidth(child, options, width);
-
-        const layoutHeight = this.getChildLayoutHeight(child, options, height);
-
-        const constraints = child.getLayoutConstraints();
-
-        const size = constraints.constrainSize(layoutWidth, layoutHeight);
-
-        return child.setLayoutSize(size.width, size.height);
-    }
-
-    resolveChildren(
-        availableWidth = null,
-        availableHeight = null,
-        fillWidth = null,
-        fillHeight = null
-    ) {
-        for (const child of this.children) {
-            const options = this.childLayoutOptions.get(child);
-
-            if (!options) {
-                continue;
-            }
-
-            const childWidth = this.resolveChildWidth(
-                child,
-                options,
-                availableWidth,
-                fillWidth
-            );
-
-            const childHeight = this.resolveChildHeight(
-                child,
-                options,
-                availableHeight,
-                fillHeight
-            );
-
-            const availableMaxWidth = this.getChildAvailableWidth(
-                child,
-                options,
-                availableWidth
-            );
-
-            const availableMaxHeight = this.getChildAvailableHeight(
-                child,
-                options,
-                availableHeight
-            );
-
-            const availableSizeChanged = child.setAvailableSize(
-                availableMaxWidth,
-                availableMaxHeight
-            );
-
-            const layoutSizeChanged = this.applyChildLayout(
-                child,
-                options,
-                childWidth,
-                childHeight
-            );
-
-            if (
-                layoutSizeChanged ||
-                availableSizeChanged ||
-                child.layoutDirty
-            ) {
-                child.layout();
-            }
-        }
+        this.setMeasuredSize(width, height);
+        this.updateResolvedSize();
 
         return this;
     }
 
     //////////////////////////////////////////
-    // CHILD OPTIONS DEFAULTS
+    // PARENT → CHILD HANDSHAKE
+    //
+    // The only place a container writes layout input onto a child:
+    //
+    //   size   -> child.allocated   (null = no allocation on that axis)
+    //   max    -> child.parentConstraints (null = unbounded)
+    //
+    // The child then lays itself out and its RESOLVED size is final for
+    // this pass.
     //////////////////////////////////////////
 
-    // *** OPTIONS
-    // width: Override the child's allocated width inside this parent
-    // height: Override the child's allocated height inside this parent
-    // margin: Space around the child
-    // horizontalAlign: Position child horizontally within available space
-    // verticalAlign: Position child vertically within available space
-    // ***
+    layoutChild(
+        child,
+        { width = null, height = null, maxWidth = null, maxHeight = null }
+    ) {
+        child.setParentConstraints(
+            LayoutConstraints.loose(maxWidth ?? Infinity, maxHeight ?? Infinity)
+        );
 
-    _createChildOptions(options = {}) {
+        child.setAllocatedSize(width, height);
+
+        if (child.layoutDirty) {
+            child.layout();
+        }
+
+        return child;
+    }
+
+    isFill(options, axis) {
+        const explicit = axis === "width" ? options.width : options.height;
+
+        if (explicit !== null && explicit !== undefined) {
+            return false;
+        }
+
+        return (
+            options.fill === true ||
+            options.fill === (axis === "width" ? "horizontal" : "vertical")
+        );
+    }
+
+    // Children of this container that should be offered the full content
+    // width (wrapping text in a Column). Override in subclasses.
+    shouldFitChildWidth(child, options) {
+        return false;
+    }
+
+    // Decides what one axis of a child receives.
+    //
+    //   explicit option   -> allocated = that number, unbounded
+    //   fill share given  -> allocated = share,       unbounded
+    //   fill / fit        -> allocated = content size, unbounded
+    //                        (only when the content size is definite)
+    //   otherwise         -> not allocated, bounded by the content size
+    //
+    // `extent` is { definite, max } for this axis from getContentBox().
+    planChildAxis(options, axis, extent, { share = null, fit = false } = {}) {
+        const horizontal = axis === "width";
+
+        const explicit = horizontal ? options.width : options.height;
+
+        const margins = horizontal
+            ? options.margin.left + options.margin.right
+            : options.margin.top + options.margin.bottom;
+
+        if (explicit !== null && explicit !== undefined) {
+            return { size: explicit, max: null };
+        }
+
+        if (share !== null) {
+            return { size: share, max: null };
+        }
+
+        if ((this.isFill(options, axis) || fit) && extent.definite !== null) {
+            return {
+                size: Math.max(0, extent.definite - margins),
+                max: null
+            };
+        }
+
+        const bound = extent.definite ?? extent.max;
+
         return {
-            width: options.width ?? null,
-
-            height: options.height ?? null,
-
-            fill: options.fill ?? null,
-
-            margin: this.getMargin(options.margin),
-
-            horizontalAlign: options.horizontalAlign ?? "start",
-
-            verticalAlign: options.verticalAlign ?? "start"
+            size: null,
+            max: bound === null ? null : Math.max(0, bound - margins)
         };
+    }
+
+    // Lay one child out with both axes planned from the content box.
+    // `shares` optionally gives a fill share for width and/or height.
+    layoutChildInBox(child, options, box, shares = {}) {
+        const w = this.planChildAxis(
+            options,
+            "width",
+            { definite: box.definiteWidth, max: box.maxWidth },
+            {
+                share: shares.width ?? null,
+                fit: this.shouldFitChildWidth(child, options)
+            }
+        );
+
+        const h = this.planChildAxis(
+            options,
+            "height",
+            { definite: box.definiteHeight, max: box.maxHeight },
+            { share: shares.height ?? null }
+        );
+
+        return this.layoutChild(child, {
+            width: w.size,
+            height: h.size,
+            maxWidth: w.max,
+            maxHeight: h.max
+        });
+    }
+
+    //////////////////////////////////////////
+    // FILL DISTRIBUTION
+    //
+    // Splits `space` between fill children while honoring each child's
+    // own min/max (flexbox "freeze" algorithm):
+    //
+    //   1. offer every active child an equal share
+    //   2. clamp each share to the child's [min, max]
+    //   3. if clamping added space overall, freeze the children that hit
+    //      their MIN; if it removed space, freeze those that hit their MAX;
+    //      if net zero, everything is final
+    //   4. repeat with the space that is left
+    //
+    // items: [{ child, min, max }]    returns: Map<child, size>
+    //////////////////////////////////////////
+
+    distributeFill(space, items) {
+        const sizes = new Map();
+
+        let remaining = Math.max(0, space);
+        let active = items.slice();
+
+        while (active.length > 0) {
+            const share = remaining / active.length;
+
+            let violation = 0;
+
+            const clamped = active.map(item => {
+                const size = Math.min(item.max, Math.max(item.min, share));
+
+                violation += size - share;
+
+                return { item, size };
+            });
+
+            const frozen =
+                violation === 0
+                    ? clamped
+                    : clamped.filter(({ size }) =>
+                          violation > 0 ? size > share : size < share
+                      );
+
+            if (frozen.length === 0) {
+                for (const { item, size } of clamped) {
+                    sizes.set(item.child, size);
+                }
+
+                break;
+            }
+
+            const frozenItems = new Set();
+
+            for (const { item, size } of frozen) {
+                sizes.set(item.child, size);
+                frozenItems.add(item);
+                remaining -= size;
+            }
+
+            active = active.filter(item => !frozenItems.has(item));
+        }
+
+        return sizes;
     }
 
     //////////////////////////////////////////
     // ADD
     //////////////////////////////////////////
+
+    _canAttach(child, action) {
+        if (child.layoutParent && child.layoutParent !== this) {
+            if (Debug.enabled) {
+                console.warn(
+                    `Cannot ${action} child: component already belongs to another layout.`
+                );
+            }
+
+            return false;
+        }
+
+        return true;
+    }
+
+    _attach(child, index, options = {}) {
+        this.children.splice(index, 0, child);
+
+        this.childLayoutOptions.set(child, this._createChildOptions(options));
+
+        super.add(child);
+
+        child.layoutParent = this;
+
+        if (index < this.children.length - 1) {
+            // Keep Phaser's display order synchronized.
+            this.syncDisplayOrder();
+        }
+
+        this.markLayoutDirty();
+
+        return this;
+    }
 
     add(child, options = {}) {
         if (Array.isArray(child)) {
@@ -534,34 +412,18 @@ export default class Container extends Component {
             return this;
         }
 
-        if (child.layoutParent && child.layoutParent !== this) {
-            if (Debug.enabled) {
-                console.warn(
-                    "Cannot add child: component already belongs to another layout."
-                );
-            }
-
+        if (!this._canAttach(child, "add")) {
             return this;
         }
 
-        this.children.push(child);
-
-        this.childLayoutOptions.set(child, this._createChildOptions(options));
-
-        super.add(child);
-
-        child.layoutParent = this;
-
-        this.markLayoutDirty();
-
-        return this;
+        return this._attach(child, this.children.length, options);
     }
 
     //////////////////////////////////////////
-    // INSERT BEFORE
+    // INSERT
     //////////////////////////////////////////
 
-    insertBefore(child, beforeChild) {
+    _insertRelative(child, reference, offset, options) {
         if (!child) {
             return this;
         }
@@ -576,19 +438,13 @@ export default class Container extends Component {
             return this;
         }
 
-        if (child.layoutParent && child.layoutParent !== this) {
-            if (Debug.enabled) {
-                console.warn(
-                    "Cannot insert child: component already belongs to another layout."
-                );
-            }
-
+        if (!this._canAttach(child, "insert")) {
             return this;
         }
 
-        const reference = this.getChild(beforeChild);
+        const anchor = this.getChild(reference);
 
-        if (!reference) {
+        if (!anchor || !this.children.includes(anchor)) {
             if (Debug.enabled) {
                 console.warn(
                     "Cannot insert child: reference component was not found."
@@ -598,89 +454,23 @@ export default class Container extends Component {
             return this;
         }
 
-        const index = this.children.indexOf(reference);
+        return this._attach(
+            child,
+            this.children.indexOf(anchor) + offset,
+            options
+        );
+    }
 
-        this.children.splice(index, 0, child);
+    insertBefore(child, beforeChild, options = {}) {
+        return this._insertRelative(child, beforeChild, 0, options);
+    }
 
-        // Inserted children need default
-        // layout options just like add().
-        this.childLayoutOptions.set(child, this._createChildOptions());
-
-        child.layoutParent = this;
-
-        super.add(child);
-
-        // Keep Phaser's display order synchronized.
-        this.syncDisplayOrder();
-
-        this.markLayoutDirty();
-
-        return this;
+    insertAfter(child, afterChild, options = {}) {
+        return this._insertRelative(child, afterChild, 1, options);
     }
 
     //////////////////////////////////////////
-    // INSERT AFTER
-    //////////////////////////////////////////
-
-    insertAfter(child, afterChild) {
-        if (!child) {
-            return this;
-        }
-
-        if (this.children.includes(child)) {
-            if (Debug.enabled) {
-                console.warn(
-                    "Cannot insert child: component is already in this layout."
-                );
-            }
-
-            return this;
-        }
-
-        if (child.layoutParent && child.layoutParent !== this) {
-            if (Debug.enabled) {
-                console.warn(
-                    "Cannot insert child: component already belongs to another layout."
-                );
-            }
-
-            return this;
-        }
-
-        const reference = this.getChild(afterChild);
-
-        if (!reference) {
-            if (Debug.enabled) {
-                console.warn(
-                    "Cannot insert child: reference component was not found."
-                );
-            }
-
-            return this;
-        }
-
-        const index = this.children.indexOf(reference) + 1;
-
-        this.children.splice(index, 0, child);
-
-        // Inserted children need default
-        // layout options just like add().
-        this.childLayoutOptions.set(child, this._createChildOptions());
-
-        child.layoutParent = this;
-
-        super.add(child);
-
-        // Keep Phaser's display order synchronized.
-        this.syncDisplayOrder();
-
-        this.markLayoutDirty();
-
-        return this;
-    }
-
-    //////////////////////////////////////////
-    // REMOVE
+    // REMOVE / CLEAR
     //////////////////////////////////////////
 
     remove(childOrId) {
@@ -702,18 +492,13 @@ export default class Container extends Component {
 
         child.layoutParent = null;
 
-        // Return the child to its
-        // intrinsic dimensions.
-        child.setLayoutSize(null, null);
+        // Back to intrinsic sizing: no allocation, no parent bounds.
+        child.resetLayoutInput();
 
         this.markLayoutDirty();
 
         return this;
     }
-
-    //////////////////////////////////////////
-    // CLEAR
-    //////////////////////////////////////////
 
     clear() {
         for (const child of this.children) {
@@ -721,7 +506,7 @@ export default class Container extends Component {
 
             child.layoutParent = null;
 
-            child.setLayoutSize(null, null);
+            child.resetLayoutInput();
         }
 
         this.children.length = 0;
@@ -781,10 +566,6 @@ export default class Container extends Component {
         return this;
     }
 
-    //////////////////////////////////////////
-    // DISPLAY ORDER
-    //////////////////////////////////////////
-
     syncDisplayOrder() {
         for (const child of this.children) {
             if (!child?.container) {
@@ -802,7 +583,7 @@ export default class Container extends Component {
     }
 
     //////////////////////////////////////////
-    // PADDING
+    // PADDING / MARGIN
     //////////////////////////////////////////
 
     getPadding(padding = 0) {
@@ -823,10 +604,6 @@ export default class Container extends Component {
         };
     }
 
-    //////////////////////////////////////////
-    // MARGIN
-    //////////////////////////////////////////
-
     getMargin(margin = 0) {
         if (typeof margin === "number") {
             return {
@@ -843,5 +620,228 @@ export default class Container extends Component {
             bottom: margin.bottom ?? 0,
             left: margin.left ?? 0
         };
+    }
+
+    //////////////////////////////////////////
+    // LEGACY CHILD RESOLUTION
+    //
+    // Used by Grid, ScrollView and Card. New layouts (Linear, Stack)
+    // use layoutChildInBox() instead. Same behavior as before, except
+    // that sizes are now written through setAllocatedSize() and
+    // setParentConstraints().
+    //////////////////////////////////////////
+
+    isFillWidth(options) {
+        return this.isFill(options, "width");
+    }
+
+    isFillHeight(options) {
+        return this.isFill(options, "height");
+    }
+
+    getChildWidth(child, options) {
+        return options.width ?? child.getLayoutWidth();
+    }
+
+    getChildHeight(child, options) {
+        return options.height ?? child.getLayoutHeight();
+    }
+
+    resolveChildWidth(child, options, availableWidth = null, fillWidth = null) {
+        if (options.width !== null) {
+            return options.width;
+        }
+
+        if (this.isFillWidth(options)) {
+            if (fillWidth !== null) {
+                return fillWidth;
+            }
+
+            if (availableWidth !== null) {
+                return Math.max(
+                    0,
+                    availableWidth - options.margin.left - options.margin.right
+                );
+            }
+
+            return null;
+        }
+
+        if (
+            this.constructor.name === "Column" &&
+            child.usesAvailableWidth?.() &&
+            availableWidth !== null
+        ) {
+            return Math.max(
+                0,
+                availableWidth - options.margin.left - options.margin.right
+            );
+        }
+
+        return this.getChildWidth(child, options);
+    }
+
+    resolveChildHeight(
+        child,
+        options,
+        availableHeight = null,
+        fillHeight = null
+    ) {
+        if (this.isFillHeight(options)) {
+            if (fillHeight instanceof Map) {
+                return fillHeight.get(child) ?? 0;
+            }
+
+            if (fillHeight !== null) {
+                return fillHeight;
+            }
+
+            if (availableHeight !== null) {
+                return Math.max(
+                    0,
+                    availableHeight - options.margin.top - options.margin.bottom
+                );
+            }
+
+            return null;
+        }
+
+        return this.getChildHeight(child, options);
+    }
+
+    getChildLayoutWidth(child, options, resolvedWidth) {
+        if (
+            options.width !== null ||
+            this.isFillWidth(options) ||
+            (this.constructor.name === "Column" &&
+                child.usesAvailableWidth?.() &&
+                (!this.widthAuto || this.allocatedWidth !== null))
+        ) {
+            return resolvedWidth;
+        }
+
+        return null;
+    }
+
+    getChildLayoutHeight(child, options, resolvedHeight) {
+        if (options.height !== null || this.isFillHeight(options)) {
+            return resolvedHeight;
+        }
+
+        return null;
+    }
+
+    getChildAvailableWidth(child, options, availableWidth = null) {
+        if (options.width !== null || this.isFillWidth(options)) {
+            return null;
+        }
+
+        if (availableWidth === null) {
+            return null;
+        }
+
+        const available = Math.max(
+            0,
+            availableWidth - options.margin.left - options.margin.right
+        );
+
+        return child.maxWidth === null
+            ? available
+            : Math.min(available, child.maxWidth);
+    }
+
+    getChildAvailableHeight(child, options, availableHeight = null) {
+        if (
+            options.height !== null ||
+            this.isFillHeight(options) ||
+            availableHeight === null
+        ) {
+            return null;
+        }
+
+        const available = Math.max(
+            0,
+            availableHeight - options.margin.top - options.margin.bottom
+        );
+
+        return child.maxHeight === null
+            ? available
+            : Math.min(available, child.maxHeight);
+    }
+
+    applyChildLayout(child, options, width, height) {
+        const allocatedWidth = this.getChildLayoutWidth(child, options, width);
+
+        const allocatedHeight = this.getChildLayoutHeight(
+            child,
+            options,
+            height
+        );
+
+        const size = child.constraints.constrainSize(
+            allocatedWidth,
+            allocatedHeight
+        );
+
+        return child.setAllocatedSize(size.width, size.height);
+    }
+
+    resolveChildren(
+        availableWidth = null,
+        availableHeight = null,
+        fillWidth = null,
+        fillHeight = null
+    ) {
+        for (const child of this.children) {
+            const options = this.childLayoutOptions.get(child);
+
+            if (!options) {
+                continue;
+            }
+
+            const childWidth = this.resolveChildWidth(
+                child,
+                options,
+                availableWidth,
+                fillWidth
+            );
+
+            const childHeight = this.resolveChildHeight(
+                child,
+                options,
+                availableHeight,
+                fillHeight
+            );
+
+            const availableMaxWidth = this.getChildAvailableWidth(
+                child,
+                options,
+                availableWidth
+            );
+
+            const availableMaxHeight = this.getChildAvailableHeight(
+                child,
+                options,
+                availableHeight
+            );
+
+            const boundsChanged = child.setAvailableSize(
+                availableMaxWidth,
+                availableMaxHeight
+            );
+
+            const allocationChanged = this.applyChildLayout(
+                child,
+                options,
+                childWidth,
+                childHeight
+            );
+
+            if (boundsChanged || allocationChanged || child.layoutDirty) {
+                child.layout();
+            }
+        }
+
+        return this;
     }
 }

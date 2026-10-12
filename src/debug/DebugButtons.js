@@ -7,6 +7,7 @@ import createStackTests from "./tests/stackTests.js";
 import createColumnTests from "./tests/columnTests.js";
 import createGridTests from "./tests/gridTests.js";
 import createBuilderTests from "./tests/builderTests.js";
+import createButtonTests from "./tests/buttonTests.js";
 
 export default class DebugButtons {
     constructor(scene, options = {}) {
@@ -44,6 +45,10 @@ export default class DebugButtons {
         //******************************
         this.addButton("BUILDER Tests", () => this.builderCycle(), {
             color: 0x002200
+        });
+        //******************************
+        this.addButton("BUTTON Tests", () => this.buttonCycle(), {
+            color: 0x008800
         });
         //******************************
         this.addButton("GRID Tests", () => this.gridCycle(), {
@@ -223,6 +228,8 @@ export default class DebugButtons {
         // TEST GROUPS
         // ==========================================
 
+        this.buttonTests = createButtonTests(this);
+
         this.miscTests = createMiscTests(this);
 
         this.constraintTests = createConstraintTests(this);
@@ -242,6 +249,8 @@ export default class DebugButtons {
         // ==========================================
         // CYCLE
         // ==========================================
+
+        this.buttonCycle = this.createClickCycle(this.buttonTests);
 
         this.miscCycle = this.createClickCycle(this.miscTests);
 

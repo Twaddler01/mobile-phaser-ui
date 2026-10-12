@@ -15,6 +15,7 @@ import Spacer from "../layout/Spacer.js";
 
 import Card from "../components/Card.js";
 import Text from "../components/Text.js";
+import Button from "../components/Button.js";
 
 export default function createComponentRegistry() {
     const registry = new ComponentRegistry();
@@ -374,6 +375,109 @@ export default function createComponentRegistry() {
         category: "Layout",
 
         properties: commonProperties
+    });
+
+    // ==================================
+    // 8. BUTTON
+    // ==================================
+
+    registry.register("Button", Button, {
+        label: "Button",
+        category: "Content",
+
+        properties: mergeProperties(commonProperties, {
+            "text.value": {
+                type: "string",
+                label: "Text",
+                default: "Button",
+                apply: {
+                    type: "method",
+                    name: "setText"
+                }
+            },
+
+            "text.fontSize": {
+                type: "fontSize",
+                label: "Font Size",
+                default: "18px",
+                apply: {
+                    type: "method",
+                    name: "setFontSize"
+                }
+            },
+
+            "text.color": {
+                type: "color",
+                label: "Text Color",
+                default: "#ffffff",
+                apply: {
+                    type: "method",
+                    name: "setTextColor"
+                }
+            },
+
+            "style.backgroundColor": {
+                type: "color",
+                label: "Background Color",
+                default: 0x222222,
+                apply: {
+                    type: "group",
+                    name: "setStyle",
+                    group: "style",
+                    property: "backgroundColor"
+                }
+            },
+
+            "style.radius": {
+                type: "number",
+                label: "Corner Radius",
+                default: 30,
+                min: 0,
+                apply: {
+                    type: "group",
+                    name: "setStyle",
+                    group: "style",
+                    property: "radius"
+                }
+            },
+
+            "style.stroke": {
+                type: "number",
+                label: "Border Width",
+                default: null,
+                min: 0,
+                nullable: true,
+                apply: {
+                    type: "group",
+                    name: "setStyle",
+                    group: "style",
+                    property: "stroke"
+                }
+            },
+
+            "style.strokeColor": {
+                type: "color",
+                label: "Border Color",
+                default: null,
+                nullable: true,
+                apply: {
+                    type: "group",
+                    name: "setStyle",
+                    group: "style",
+                    property: "strokeColor"
+                }
+            },
+
+            disabled: {
+                type: "boolean",
+                label: "Disabled",
+                default: false,
+                apply: {
+                    type: "method",
+                    name: "setDisabled"
+                }
+            }
+        })
     });
 
     return registry;

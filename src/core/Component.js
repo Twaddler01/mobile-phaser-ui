@@ -1,9 +1,36 @@
 import Debug from "./Debug.js";
-import LayoutConstraints from "../layout/LayoutConstraints.js";
+import LayoutConstraints, { LayoutBox } from "../layout/LayoutConstraints.js";
+
+/*
+ * LAYOUT STATE (see LayoutConstraints.js for the full vocabulary)
+ *
+ *   requestedWidth/Height     number | "auto"        author intent
+ *   parentConstraints         LayoutConstraints      bounds set by the parent
+ *   ownLimits                 LayoutConstraints      this component's min/max
+ *   constraints               LayoutConstraints      parentConstraints ∩ ownLimits
+ *   allocatedWidth/Height     number | null          slot assigned by the parent
+ *   measuredWidth/Height      number                 natural content size
+ *   resolvedWidth/Height      number                 final size
+ *
+ * Data flow in one pass:
+ *
+ *   parent  ── setParentConstraints() ──▶ child.constraints
+ *   parent  ── setAllocatedSize()     ──▶ child.allocated
+ *   child   ── layout() / updateSize()──▶ child.measured
+ *   child   ── updateResolvedSize()   ──▶ child.resolved
+ *   parent  ◀── reads child.resolved, positions the child
+ *
+ * A parent never writes measured or resolved on a child, and a child never
+ * writes allocated or parentConstraints on itself.
+ */
 
 export default class Component {
     constructor(scene, config = {}) {
         this.scene = scene;
+
+        ////////////////////////////////////////
+        // REQUESTED
+        ////////////////////////////////////////
 
         this.requestedWidth = config.width ?? "auto";
         this.requestedHeight = config.height ?? "auto";
@@ -11,46 +38,9 @@ export default class Component {
         this.validateDimension("width", this.requestedWidth);
         this.validateDimension("height", this.requestedHeight);
 
-        // Parent allocations; null means unallocated.
-        this.layoutWidth = null;
-        this.layoutHeight = null;
-
-        // Incoming constraints from the parent.
-        // null means the parent has not bounded this dimension.
-        this.availableMaxWidth = null;
-        this.availableMaxHeight = null;
-
-        // Intrinsic measurements.
-        this.measuredWidth =
-            typeof this.requestedWidth === "number" ? this.requestedWidth : 0;
-
-        this.measuredHeight =
-            typeof this.requestedHeight === "number" ? this.requestedHeight : 0;
-
-        // Final numeric dimensions used internally.
-        this.resolvedWidth = this.measuredWidth;
-        this.resolvedHeight = this.measuredHeight;
-
-        Object.defineProperties(this, {
-            widthAuto: {
-                configurable: true,
-                enumerable: true,
-                get: () => this.requestedWidth === "auto"
-            },
-            heightAuto: {
-                configurable: true,
-                enumerable: true,
-                get: () => this.requestedHeight === "auto"
-            }
-        });
-
-        this.id = config.id ?? null;
-
-        this.name = config.name ?? null;
-
-        // ==================================
-        // SIZE CONSTRAINTS
-        // ==================================
+        ////////////////////////////////////////
+        // CONSTRAINTS
+        ////////////////////////////////////////
 
         const minWidth = config.minWidth ?? 0;
         const maxWidth = config.maxWidth ?? null;
@@ -72,22 +62,74 @@ export default class Component {
             throw new RangeError("minHeight cannot exceed maxHeight.");
         }
 
+        // Own limits (configured by the author).
         this._minWidth = minWidth;
         this._maxWidth = maxWidth;
 
         this._minHeight = minHeight;
         this._maxHeight = maxHeight;
 
-        // LAYOUT
+        // Bounds from the parent. Unbounded until a parent sets them.
+        this.parentConstraints = LayoutConstraints.UNBOUNDED;
+
+        // Caches, rebuilt when either input changes.
+        this._ownLimits = null;
+        this._constraints = null;
+
+        ////////////////////////////////////////
+        // ALLOCATED (null = parent assigned nothing)
+        ////////////////////////////////////////
+
+        this.allocatedWidth = null;
+        this.allocatedHeight = null;
+
+        ////////////////////////////////////////
+        // MEASURED
+        ////////////////////////////////////////
+
+        this.measuredWidth =
+            typeof this.requestedWidth === "number" ? this.requestedWidth : 0;
+
+        this.measuredHeight =
+            typeof this.requestedHeight === "number" ? this.requestedHeight : 0;
+
+        ////////////////////////////////////////
+        // RESOLVED
+        ////////////////////////////////////////
+
+        this.resolvedWidth = 0;
+        this.resolvedHeight = 0;
+
+        this.updateResolvedSize();
+
+        ////////////////////////////////////////
+        // IDENTITY
+        ////////////////////////////////////////
+
+        this.id = config.id ?? null;
+        this.name = config.name ?? null;
+
+        ////////////////////////////////////////
+        // TREE
+        ////////////////////////////////////////
+
         this.layoutParent = null;
 
         this.children = [];
 
         this.container = scene.add.container(config.x ?? 0, config.y ?? 0);
 
-        // For eventual dirty updates
+        ////////////////////////////////////////
+        // DIRTY TRACKING
+        ////////////////////////////////////////
+
         this.layoutDirty = true;
         this.layoutScheduled = false;
+
+        // True between beginLayout() and finishLayout(). Size changes made
+        // by this component's own layout pass settle in that pass, so they
+        // must not re-queue it.
+        this._inLayout = false;
 
         // DEBUG ONLY
         if (Debug.enabled) {
@@ -131,6 +173,20 @@ export default class Component {
         return this;
     }
 
+    ////////////////////////////////////////
+    // REQUESTED
+    ////////////////////////////////////////
+
+    get widthAuto() {
+        return this.requestedWidth === "auto";
+    }
+
+    get heightAuto() {
+        return this.requestedHeight === "auto";
+    }
+
+    // Reads the FINAL size, writes the REQUESTED size.
+    // Use requestedWidth to read what was asked for.
     get width() {
         return this.resolvedWidth;
     }
@@ -162,7 +218,7 @@ export default class Component {
         return this;
     }
 
-    setHeight(height) {;
+    setHeight(height) {
         this.validateDimension("height", height);
 
         if (this.requestedHeight === height) {
@@ -177,9 +233,9 @@ export default class Component {
         return this;
     }
 
-    // ==================================
-    // SIZE CONSTRAINTS
-    // ==================================
+    ////////////////////////////////////////
+    // OWN LIMITS (min / max)
+    ////////////////////////////////////////
 
     get minWidth() {
         return this._minWidth;
@@ -213,10 +269,6 @@ export default class Component {
         this.setMaxHeight(value);
     }
 
-    // ==================================
-    // CONSTRAINT SETTERS
-    // ==================================
-
     setMinWidth(value) {
         this.validateConstraint("minWidth", value);
 
@@ -224,16 +276,7 @@ export default class Component {
             throw new RangeError("minWidth cannot exceed maxWidth.");
         }
 
-        if (this.minWidth === value) {
-            return this;
-        }
-
-        this._minWidth = value;
-
-        this.updateResolvedSize();
-        this.markLayoutDirty();
-
-        return this;
+        return this.applyOwnLimit("_minWidth", value);
     }
 
     setMaxWidth(value) {
@@ -243,16 +286,7 @@ export default class Component {
             throw new RangeError("maxWidth cannot be less than minWidth.");
         }
 
-        if (this.maxWidth === value) {
-            return this;
-        }
-
-        this._maxWidth = value;
-
-        this.updateResolvedSize();
-        this.markLayoutDirty();
-
-        return this;
+        return this.applyOwnLimit("_maxWidth", value);
     }
 
     setMinHeight(value) {
@@ -262,16 +296,7 @@ export default class Component {
             throw new RangeError("minHeight cannot exceed maxHeight.");
         }
 
-        if (this.minHeight === value) {
-            return this;
-        }
-
-        this._minHeight = value;
-
-        this.updateResolvedSize();
-        this.markLayoutDirty();
-
-        return this;
+        return this.applyOwnLimit("_minHeight", value);
     }
 
     setMaxHeight(value) {
@@ -281,21 +306,22 @@ export default class Component {
             throw new RangeError("maxHeight cannot be less than minHeight.");
         }
 
-        if (this.maxHeight === value) {
+        return this.applyOwnLimit("_maxHeight", value);
+    }
+
+    applyOwnLimit(field, value) {
+        if (this[field] === value) {
             return this;
         }
 
-        this._maxHeight = value;
+        this[field] = value;
 
+        this.invalidateConstraints();
         this.updateResolvedSize();
         this.markLayoutDirty();
 
         return this;
     }
-
-    // ==================================
-    // CONSTRAINT VALIDATION
-    // ==================================
 
     validateConstraint(name, value, nullable = false) {
         if (nullable && value === null) {
@@ -320,6 +346,258 @@ export default class Component {
             );
         }
     }
+
+    ////////////////////////////////////////
+    // CONSTRAINTS
+    ////////////////////////////////////////
+
+    // This component's own min/max, as constraints.
+    get ownLimits() {
+        if (!this._ownLimits) {
+            this._ownLimits = new LayoutConstraints({
+                minWidth: this._minWidth,
+                maxWidth: this._maxWidth,
+                minHeight: this._minHeight,
+                maxHeight: this._maxHeight
+            });
+        }
+
+        return this._ownLimits;
+    }
+
+    // Effective constraints: what the parent allows AND what this
+    // component allows. Every size this component can have lies inside.
+    get constraints() {
+        if (!this._constraints) {
+            this._constraints = this.parentConstraints.intersect(this.ownLimits);
+        }
+
+        return this._constraints;
+    }
+
+    invalidateConstraints() {
+        this._ownLimits = null;
+        this._constraints = null;
+    }
+
+    // PARENT API. Returns true when the constraints changed.
+    setParentConstraints(constraints = LayoutConstraints.UNBOUNDED) {
+        if (this.parentConstraints.equals(constraints)) {
+            return false;
+        }
+
+        this.parentConstraints = constraints;
+        this._constraints = null;
+
+        this.updateResolvedSize();
+        this.markLayoutDirty();
+
+        return true;
+    }
+
+    ////////////////////////////////////////
+    // ALLOCATED
+    ////////////////////////////////////////
+
+    // PARENT API. Pass null on an axis the parent does not allocate.
+    // Returns true when the allocation changed.
+    setAllocatedSize(width = null, height = null) {
+        if (this.allocatedWidth === width && this.allocatedHeight === height) {
+            return false;
+        }
+
+        this.allocatedWidth = width;
+        this.allocatedHeight = height;
+
+        this.updateResolvedSize();
+        this.markLayoutDirty();
+
+        return true;
+    }
+
+    // Used when a component leaves its parent: back to intrinsic sizing.
+    resetLayoutInput() {
+        const constraintsChanged = this.setParentConstraints(
+            LayoutConstraints.UNBOUNDED
+        );
+
+        const allocationChanged = this.setAllocatedSize(null, null);
+
+        return constraintsChanged || allocationChanged;
+    }
+
+    // The exact outer size this component is guaranteed on an axis, or null
+    // when it depends on content. A container can only fill or center
+    // against a definite size.
+    getDefiniteWidth() {
+        const base =
+            this.allocatedWidth ?? (this.widthAuto ? null : this.requestedWidth);
+
+        return base === null ? null : this.constraints.constrainWidth(base);
+    }
+
+    getDefiniteHeight() {
+        const base =
+            this.allocatedHeight ??
+            (this.heightAuto ? null : this.requestedHeight);
+
+        return base === null ? null : this.constraints.constrainHeight(base);
+    }
+
+    ////////////////////////////////////////
+    // MEASURED
+    ////////////////////////////////////////
+
+    // Called by the component itself (updateSize / layout).
+    setMeasuredSize(width, height) {
+        if (this.measuredWidth === width && this.measuredHeight === height) {
+            return false;
+        }
+
+        this.measuredWidth = width;
+        this.measuredHeight = height;
+
+        this.updateResolvedSize();
+        this.markLayoutDirty();
+
+        return true;
+    }
+
+    getMeasuredWidth() {
+        return this.measuredWidth;
+    }
+
+    getMeasuredHeight() {
+        return this.measuredHeight;
+    }
+
+    ////////////////////////////////////////
+    // RESOLVED
+    ////////////////////////////////////////
+
+    // The one rule that produces a final size:
+    //
+    //     resolved = constraints.constrain( allocated ?? requested ?? measured )
+    updateResolvedSize() {
+        const width =
+            this.allocatedWidth ??
+            (this.widthAuto ? this.measuredWidth : this.requestedWidth);
+
+        const height =
+            this.allocatedHeight ??
+            (this.heightAuto ? this.measuredHeight : this.requestedHeight);
+
+        const size = this.constraints.constrainSize(width, height);
+
+        this.setResolvedSize(size.width, size.height);
+
+        return this;
+    }
+
+    // Not dirty-marking on purpose: resolved size is derived from the
+    // inputs above, and every input setter already marks layout dirty.
+    setResolvedSize(width, height) {
+        if (this.resolvedWidth === width && this.resolvedHeight === height) {
+            return false;
+        }
+
+        this.resolvedWidth = width;
+        this.resolvedHeight = height;
+
+        return true;
+    }
+
+    getLayoutWidth() {
+        return this.resolvedWidth;
+    }
+
+    getLayoutHeight() {
+        return this.resolvedHeight;
+    }
+
+    ////////////////////////////////////////
+    // SNAPSHOT
+    //
+    // All five values in one plain object. Feed this to Debug.inspect(),
+    // the builder, or an editor panel: it is the full layout "why".
+    ////////////////////////////////////////
+
+    getLayoutState() {
+        return {
+            requested: {
+                width: this.requestedWidth,
+                height: this.requestedHeight
+            },
+            constraints: this.constraints.toJSON(),
+            allocated: {
+                width: this.allocatedWidth,
+                height: this.allocatedHeight
+            },
+            measured: {
+                width: this.measuredWidth,
+                height: this.measuredHeight
+            },
+            resolved: {
+                width: this.resolvedWidth,
+                height: this.resolvedHeight
+            }
+        };
+    }
+
+    // Size + padding + effective constraints as one object.
+    getLayoutBox() {
+        return new LayoutBox({
+            width: this.resolvedWidth,
+            height: this.resolvedHeight,
+            padding: this.padding,
+            constraints: this.constraints
+        });
+    }
+
+    ////////////////////////////////////////
+    // LEGACY NAMES
+    //
+    // Kept so Grid, ScrollView, Text, Card and any builder code written
+    // against the old API keep working. Prefer the new names.
+    ////////////////////////////////////////
+
+    get layoutWidth() {
+        return this.allocatedWidth;
+    }
+
+    get layoutHeight() {
+        return this.allocatedHeight;
+    }
+
+    get availableMaxWidth() {
+        const max = this.parentConstraints.maxWidth;
+
+        return Number.isFinite(max) ? max : null;
+    }
+
+    get availableMaxHeight() {
+        const max = this.parentConstraints.maxHeight;
+
+        return Number.isFinite(max) ? max : null;
+    }
+
+    setLayoutSize(width = null, height = null) {
+        return this.setAllocatedSize(width, height);
+    }
+
+    setAvailableSize(maxWidth = null, maxHeight = null) {
+        return this.setParentConstraints(
+            LayoutConstraints.loose(maxWidth ?? Infinity, maxHeight ?? Infinity)
+        );
+    }
+
+    getLayoutConstraints() {
+        return this.getLayoutBox();
+    }
+
+    ////////////////////////////////////////
+    // POSITION
+    ////////////////////////////////////////
 
     get x() {
         return this.container.x;
@@ -346,6 +624,15 @@ export default class Component {
         };
     }
 
+    setPosition(x, y) {
+        this.container.setPosition(x, y);
+        return this;
+    }
+
+    ////////////////////////////////////////
+    // LOOKUP
+    ////////////////////////////////////////
+
     // Ref name or id
     getChild(childOrId) {
         if (typeof childOrId !== "string") {
@@ -359,11 +646,6 @@ export default class Component {
     getChildren() {
         return [...(this.children ?? [])];
     }
-    /*
-    for (const child of row.getChildren()) {
-        console.log(child.id);
-    }
-    */
 
     getById(id, options = {}) {
         if (!id) {
@@ -467,9 +749,17 @@ export default class Component {
         return current;
     }
 
+    ////////////////////////////////////////
+    // LAYOUT LIFECYCLE
+    ////////////////////////////////////////
+
     markLayoutDirty() {
-        if (!this.layoutDirty) {
-            this.layoutDirty = true;
+        this.layoutDirty = true;
+
+        // This component's own layout pass is running; its size changes
+        // are part of that pass, not a reason to start another.
+        if (this._inLayout) {
+            return this;
         }
 
         if (this.layoutParent) {
@@ -484,150 +774,35 @@ export default class Component {
         return this;
     }
 
-    layout() {
-        this.layoutDirty = false;
-        return this;
-    }
-
-    setPosition(x, y) {
-        this.container.setPosition(x, y);
-        return this;
-    }
-
-    setLayoutSize(width = null, height = null) {
-        const changed =
-            this.layoutWidth !== width || this.layoutHeight !== height;
-
-        if (!changed) {
-            return false;
-        }
-
-        this.layoutWidth = width;
-        this.layoutHeight = height;
-
-        this.updateResolvedSize();
-        this.markLayoutDirty();
-
-        return true;
-    }
-
-    setAvailableSize(maxWidth = null, maxHeight = null) {
-        const changed =
-            this.availableMaxWidth !== maxWidth ||
-            this.availableMaxHeight !== maxHeight;
-
-        if (!changed) {
-            return false;
-        }
-
-        this.availableMaxWidth = maxWidth;
-        this.availableMaxHeight = maxHeight;
-
-        this.markLayoutDirty();
-
-        return true;
-    }
-
-    setMeasuredSize(width, height) {
-        const changed =
-            this.measuredWidth !== width || this.measuredHeight !== height;
-
-        if (!changed) {
-            return false;
-        }
-
-        this.measuredWidth = width;
-        this.measuredHeight = height;
-
-        this.updateResolvedSize();
-        this.markLayoutDirty();
-
-        return true;
-    }
-
-    setResolvedSize(width, height) {
-        const changed =
-            this.resolvedWidth !== width || this.resolvedHeight !== height;
-
-        if (!changed) {
-            return false;
-        }
-
-        this.resolvedWidth = width;
-        this.resolvedHeight = height;
-
-        return true;
-    }
-
-    updateResolvedSize() {
-        const width =
-            this.layoutWidth ??
-            (this.widthAuto ? this.measuredWidth : this.requestedWidth);
-
-        const height =
-            this.layoutHeight ??
-            (this.heightAuto ? this.measuredHeight : this.requestedHeight);
-
-        // Apply this component's size constraints
-        // to the resolved dimensions.
-        const constraints = this.getLayoutConstraints();
-
-        const size = constraints.constrainSize(width, height);
-
-        this.setResolvedSize(size.width, size.height);
-
-        return this;
-    }
-
-    getMeasuredWidth() {
-        return this.measuredWidth;
-    }
-
-    getMeasuredHeight() {
-        return this.measuredHeight;
-    }
-
-    getLayoutConstraints() {
-        const maxWidth =
-            this.availableMaxWidth === null
-                ? this.maxWidth
-                : Math.min(this.maxWidth ?? Infinity, this.availableMaxWidth);
-
-        const maxHeight =
-            this.availableMaxHeight === null
-                ? this.maxHeight
-                : Math.min(this.maxHeight ?? Infinity, this.availableMaxHeight);
-
-        return new LayoutConstraints({
-            width: this.getLayoutWidth(),
-
-            height: this.getLayoutHeight(),
-
-            minWidth: this.minWidth,
-
-            maxWidth,
-
-            minHeight: this.minHeight,
-
-            maxHeight,
-
-            padding: this.padding
-        });
-    }
-
-    getLayoutWidth() {
-        return this.layoutWidth ?? this.resolvedWidth;
-    }
-
-    getLayoutHeight() {
-        return this.layoutHeight ?? this.resolvedHeight;
-    }
-
     requestLayout() {
         this.markLayoutDirty();
 
         return this;
     }
+
+    beginLayout() {
+        this._inLayout = true;
+
+        return this;
+    }
+
+    finishLayout() {
+        this._inLayout = false;
+        this.layoutDirty = false;
+
+        return this;
+    }
+
+    // Leaf default. Containers and text-like components override.
+    layout() {
+        this.layoutDirty = false;
+
+        return this;
+    }
+
+    ////////////////////////////////////////
+    // DISPLAY
+    ////////////////////////////////////////
 
     setVisible(visible) {
         this.container.setVisible(visible);
@@ -735,7 +910,7 @@ export default class Component {
  *     Local position relative to parent component.
  *
  * width/height:
- *     Local dimensions.
+ *     Local dimensions (resolved).
  *
  * getContentBounds():
  *     Local content bounds.

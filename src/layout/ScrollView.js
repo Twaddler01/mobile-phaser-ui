@@ -1005,229 +1005,112 @@ console.log('========== SCROLL CONTENT ==========');
 
     ////////////////////////////////////////
     // LAYOUT
+    //
+    // The viewport is this ScrollView's own size. The content is laid out
+    // against it:
+    //
+    //   cross axis   fits the viewport (and is bounded by it)
+    //   scroll axis  intrinsic and UNBOUNDED, so content may exceed it
+    //
+    // An explicit width/height in the content's child options still wins.
     ////////////////////////////////////////
 
     layout() {
-        const layoutWidth =
-            this.getLayoutWidth();
-    
-        const layoutHeight =
-            this.getLayoutHeight();
-    
-        const availableWidth =
-            Math.max(
-                0,
-                layoutWidth -
-                this.padding.left -
-                this.padding.right
-            );
-    
-        const availableHeight =
-            Math.max(
-                0,
-                layoutHeight -
-                this.padding.top -
-                this.padding.bottom
-            );
-    
-        if (this.content) {
+        this.beginLayout();
 
-            const options =
-                this.childLayoutOptions.get(
-                    this.content
-                ) ?? {};
+        try {
+            if (this.content) {
+                const options =
+                    this.childLayoutOptions.get(this.content) ??
+                    this._createChildOptions();
 
-            ////////////////////////////////////////
-            // DETERMINE CONTENT SIZE
-            ////////////////////////////////////////
-    
-            let contentWidth;
-            let contentHeight;
-    
-            ////////////////////////////////////////
-            // VERTICAL
-            ////////////////////////////////////////
+                const box = this.getContentBox();
 
-            if (this.direction === 'vertical') {
-            
-                contentWidth =
-                    options.width === null
-                        ? availableWidth
-                        : this.resolveChildWidth(
-                            this.content,
-                            options,
-                            availableWidth
-                        );
-            
-                contentHeight =
-                    options.height === null
-                        ? null
-                        : this.resolveChildHeight(
-                            this.content,
-                            options,
-                            availableHeight
-                        );
-            }
+                const scrollsX =
+                    this.direction === 'horizontal' ||
+                    this.direction === 'both';
 
-            ////////////////////////////////////////
-            // HORIZONTAL
-            ////////////////////////////////////////
-    
-            else if (
-                this.direction === 'horizontal'
-            ) {
-    
-                // Scrolling axis remains intrinsic.
-                contentWidth =
-                    options.width === null
-                        ? null
-                        : this.resolveChildWidth(
-                            this.content,
-                            options,
-                            availableWidth
-                        );
-    
-                // Cross axis fills viewport.
-                contentHeight =
-                    this.resolveChildHeight(
-                        this.content,
-                        {
-                            ...options,
-                            height:
-                                options.height ?? null
-                        },
-                        availableHeight
-                    );
-            }
-    
-            ////////////////////////////////////////
-            // BOTH
-            ////////////////////////////////////////
-    
-            else {
-                // Both scrolling axes remain intrinsic.
-                contentWidth =
-                    options.width === null
-                        ? null
-                        : this.resolveChildWidth(
-                            this.content,
-                            options,
-                            availableWidth
-                        );
-    
-                contentHeight =
-                    options.height === null
-                        ? null
-                        : this.resolveChildHeight(
-                            this.content,
-                            options,
-                            availableHeight
-                        );
-            }
+                const scrollsY =
+                    this.direction === 'vertical' ||
+                    this.direction === 'both';
 
-            ////////////////////////////////////////
-            // INTRINSIC LAYOUT
-            ////////////////////////////////////////
-    
-            /*
-             * A null dimension means:
-             *
-             * "Let the content determine its
-             * own size."
-             *
-             * This is especially important for
-             * Grid, Column, and Row.
-             */
-    
-            if (
-                contentWidth === null ||
-                contentHeight === null
-            ) {
-    
-                this.content.setLayoutSize(
-                    contentWidth,
-                    contentHeight
+                const unbounded = { definite: null, max: null };
+
+                const width = this.planChildAxis(
+                    options,
+                    'width',
+                    scrollsX
+                        ? unbounded
+                        : { definite: box.definiteWidth, max: box.maxWidth },
+                    { fit: !scrollsX }
                 );
-    
-                this.content.layout();
+
+                const height = this.planChildAxis(
+                    options,
+                    'height',
+                    scrollsY
+                        ? unbounded
+                        : { definite: box.definiteHeight, max: box.maxHeight },
+                    { fit: !scrollsY }
+                );
+
+                this.layoutChild(this.content, {
+                    width: width.size,
+                    height: height.size,
+                    maxWidth: width.max,
+                    maxHeight: height.max
+                });
             }
-    
-            ////////////////////////////////////////
-            // APPLY FINAL SIZE
-            ////////////////////////////////////////
-            
-            this.content.setLayoutSize(
-                contentWidth,
-                contentHeight
-            );
-    
-            ////////////////////////////////////////
-            // FINAL LAYOUT
-            ////////////////////////////////////////
-    
-            if (
-                this.content.layoutDirty
-            ) {
-    
-                this.content.layout();
-            }
-    
-            ////////////////////////////////////////
-            // CONTENT POSITION
-            ////////////////////////////////////////
-    
-            const margin =
-                options.margin;
-    
-            const contentX =
-                this.padding.left +
-                margin.left;
-    
-            const contentY =
-                this.padding.top +
-                margin.top;
-    
-            this.content.setPosition(
-                contentX,
-                contentY
-            );
+
+            // Measure, resolve, then derive scroll limits, content position,
+            // mask and scroll zone from the FINAL viewport size.
+            this.updateSize();
+        } finally {
+            this.finishLayout();
         }
 
-        ////////////////////////////////////////
-        // FINAL SCROLLVIEW UPDATE
-        ////////////////////////////////////////
-        
-        this.updateScrollLimits();
-        this.updateMask();
-        this.updateScrollZone();
-        
-        ////////////////////////////////////////
-        // CLEAN
-        ////////////////////////////////////////
-        
-        this.layoutDirty = false;
-        
         return this;
     }
-    
+
     setPosition(x, y) {
         super.setPosition(x, y);
-    
+
         this.updateMask();
         this.updateScrollZone();
-    
+
         return this;
     }
 
     ////////////////////////////////////////
-    // SIZE / POSITION
+    // MEASURE
+    //
+    // Natural size = the content's outer box. With no maximum the view
+    // grows to fit; with a maximum, resolved size is clamped and the
+    // rest scrolls.
     ////////////////////////////////////////
 
+    measureContent() {
+        if (!this.content) {
+            return { width: 0, height: 0 };
+        }
+
+        const margin =
+            this.childLayoutOptions.get(this.content)?.margin ??
+            this.getMargin(0);
+
+        return {
+            width: margin.left + this.content.resolvedWidth + margin.right,
+            height: margin.top + this.content.resolvedHeight + margin.bottom
+        };
+    }
+
     updateSize() {
+        super.updateSize();
+
         this.updateScrollLimits();
         this.updateMask();
         this.updateScrollZone();
-    
+
         return this;
     }
 
