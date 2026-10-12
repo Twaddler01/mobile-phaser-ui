@@ -63,6 +63,7 @@ export const Card = defineContainer("Card");
 // ==================================
 
 export const Spacer = defineLeaf("Spacer");
+export const Button = defineLeaf("Button");
 
 // Text("Hello", props, layout)  or  Text({ text: "Hello", ... }, layout)
 export function Text(textOrProps, props, layout) {

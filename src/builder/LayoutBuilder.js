@@ -4,6 +4,7 @@ import {
     normalizeLayoutDefinition,
     validateLayoutDefinition
 } from "./LayoutDefinition.js";
+import createComponentRegistry from "./createComponentRegistry.js";
 
 // What a child's layout options fall back to when a key is removed
 // (mirrors Container._createChildOptions).
@@ -51,13 +52,27 @@ export default class LayoutBuilder {
     // options.id         build ID used by Debug.inspect(buildId) (auto if omitted)
     // options.handlers   { name: fn } used to resolve "@name" event props
     // options.onRoot     called with the root each time a new root is created
-    constructor(scene, registry, options = {}) {
+    constructor(scene, registryOrOptions = {}, options = {}) {
         this.scene = scene;
-        this.registry = registry;
 
-        this.id = options.id ?? BuildRegistry.nextId();
-        this.handlers = options.handlers ?? {};
-        this.onRoot = options.onRoot ?? null;
+        if (
+            registryOrOptions &&
+            typeof registryOrOptions.getComponent === "function"
+        ) {
+            // Existing API:
+            // new LayoutBuilder(scene, registry, options)
+            this.registry = registryOrOptions;
+            this.options = options;
+        } else {
+            // Simplified API:
+            // new LayoutBuilder(scene, options)
+            this.registry = createComponentRegistry();
+            this.options = registryOrOptions;
+        }
+
+        this.id = this.options.id ?? BuildRegistry.nextId();
+        this.handlers = this.options.handlers ?? {};
+        this.onRoot = this.options.onRoot ?? null;
 
         // Live component instances by definition ID.
         this.components = new Map();
@@ -279,7 +294,9 @@ export default class LayoutBuilder {
             return;
         }
 
-        const oldById = new Map(oldDef.children.map(child => [child.id, child]));
+        const oldById = new Map(
+            oldDef.children.map(child => [child.id, child])
+        );
         const newIds = new Set(newDef.children.map(child => child.id));
 
         // Removed.
@@ -301,7 +318,10 @@ export default class LayoutBuilder {
             let component = null;
             let isNew = false;
 
-            if (existing && this.reconcileNode(existing, oldChild, newChild, ctx)) {
+            if (
+                existing &&
+                this.reconcileNode(existing, oldChild, newChild, ctx)
+            ) {
                 component = existing;
             } else {
                 if (existing) {
@@ -323,7 +343,9 @@ export default class LayoutBuilder {
         for (const { component, oldChild, newChild, isNew } of slots) {
             if (isNew) {
                 parent.add(component, newChild.layout ?? {});
-            } else if (!isEqual(oldChild.layout ?? null, newChild.layout ?? null)) {
+            } else if (
+                !isEqual(oldChild.layout ?? null, newChild.layout ?? null)
+            ) {
                 parent.setChildOptions(component, fullLayout(newChild.layout));
             }
         }
