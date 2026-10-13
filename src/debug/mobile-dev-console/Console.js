@@ -1,5 +1,4 @@
 import ConsoleOutput from "./ConsoleOutput.js";
-import TestEnvironment from "./TestEnvironment.js";
 
 export default class Console {
     constructor() {
@@ -21,6 +20,7 @@ export default class Console {
             document.getElementById("js-console"),
             this.options
         );
+        9;
 
         this.bindEvents();
 
@@ -31,8 +31,6 @@ export default class Console {
         if (this.options.captureConsole) {
             this.captureNativeConsole();
         }
-
-        //this.testEnvironment = new TestEnvironment();
     }
 
     // ==========================================
@@ -313,5 +311,19 @@ export default class Console {
 
     clear() {
         this.output.clear();
+    }
+
+    checkConsoleCapture() {
+        const methods = ["log", "info", "debug", "warn", "error"];
+
+        for (const method of methods) {
+            const current = console[method];
+            const original = this.nativeConsole?.[method];
+
+            this.nativeConsole?.log(
+                `[Capture Check] ${method}:`,
+                current === original ? "ORIGINAL (NOT CAPTURED)" : "REPLACED"
+            );
+        }
     }
 }

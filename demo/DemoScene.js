@@ -21,9 +21,8 @@ export default class DemoScene extends Phaser.Scene {
     }
 
     create() {
-        
-        this.layoutManager = new LayoutManager(this);
 
+        this.layoutManager = new LayoutManager(this);
 
 this.editor = new LayoutEditor(this, {
     initial: Column({ id: "root", padding: 20, gap: 12 }, [Text("Hello")]),
@@ -32,8 +31,6 @@ this.editor = new LayoutEditor(this, {
 
 this.editor.toggle();   // show / hide the sidebar
 
-
-        
         this.width = this.scale.width;
         this.height = this.scale.height;
 

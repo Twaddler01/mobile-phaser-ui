@@ -1,51 +1,61 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+    <head>
+        <meta charset="UTF-8" />
 
-<head>
+        <meta
+            name="viewport"
+            content="width=device-width,
+                     height=device-height,
+                     initial-scale=1.0,
+                     maximum-scale=1,
+                     minimum-scale=1,
+                     user-scalable=no"
+        />
 
-    <meta charset="UTF-8">
+        <title>mobile-phaser-ui</title>
 
-    <meta name="viewport"
-          content="width=device-width,
-                   height=device-height,
-                   initial-scale=1.0,
-                   maximum-scale=1,
-                   minimum-scale=1,
-                   user-scalable=no">
+        <link rel="stylesheet" href="style.css" />
+        <link
+            rel="stylesheet"
+            href="./src/debug/mobile-dev-console/console.css"
+        />
+    </head>
 
-    <title>mobile-phaser-ui</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="./src/debug/mobile-dev-console/console.css" />
+    <body>
+        <div id="productionErrorLog"></div>
+        <div id="consoleLog"></div>
+        <div id="main"></div>
 
-</head>
-
-<body>
-
-    <div id="productionErrorLog"></div>
-    <div id="consoleLog"></div>
-    <div id="main"></div>
-
-        <!-- Must load before the console -->
-<!--
+        <!-- Install error listeners first. -->
         <script src="./src/debug/mobile-dev-console/errorBootstrap.js"></script>
--->
-        <!-- Import the console in a catchable way -->
-<!--
+
+        <!-- Initialize the console before the application. -->
         <script type="module">
             try {
-                const { default: Console } = await import("./src/debug/mobile-dev-console/Console.js");
+                const { default: Console } =
+                    await import(
+                        "./src/debug/mobile-dev-console/Console.js"
+                    );
 
                 new Console();
+
+                // Only load the application after capture is installed.
+                await import("./main.js");
             } catch (error) {
-                window.showFatalError("Console Startup Failed", error);
+                if (window.devConsole) {
+                    window.devConsole.error(error);
+                } else {
+                    window.showFatalError(
+                        "Application Startup Failed",
+                        error
+                    );
+                }
             }
         </script>
--->
-<script src="./src/debug/_console.js"></script>
-    
-    <script src="./phaser4.js"></script>
-    <script src="./public/vendor/iro.min.js"></script>
-    <script src="./main.js" type="module"></script>
 
-</body>
+        <!-- Load dependencies before main.js imports the application. -->
+        <script src="./phaser4.js"></script>
+        <script src="./public/vendor/iro.min.js"></script>
+    </body>
 </html>
