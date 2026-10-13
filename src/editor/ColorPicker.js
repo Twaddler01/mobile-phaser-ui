@@ -11,6 +11,12 @@ export default class ColorPicker {
         this.syncing = false;
         this.destroyed = false;
 
+        this.pickerWidth = config.pickerWidth ?? 145;
+        this.popupWidth = config.popupWidth ?? 190;
+        this.popupPadding = config.popupPadding ?? 6;
+        this.popupGap = config.popupGap ?? 6;
+        this.popupControlHeight = config.popupControlHeight ?? 32;
+
         this.draftValue = this.value;
         this.accepting = false;
 
@@ -22,12 +28,12 @@ export default class ColorPicker {
         Object.assign(this.element.style, {
             display: "flex",
             alignItems: "center",
-            gap: "10px",
+            gap: "8px",
             width: "100%",
-            height: "48px",
-            padding: "3px 10px",
+            height: "38px",
+            padding: "2px 8px",
             border: "1px solid #596273",
-            borderRadius: "8px",
+            borderRadius: "6px",
             background: "#20242b",
             color: "#ffffff",
             boxSizing: "border-box",
@@ -38,10 +44,10 @@ export default class ColorPicker {
         this.preview = document.createElement("div");
 
         Object.assign(this.preview.style, {
-            width: "32px",
-            height: "32px",
+            width: "22px",
+            height: "22px",
             flexShrink: "0",
-            borderRadius: "6px",
+            borderRadius: "5px",
             border: "1px solid #596273",
             boxSizing: "border-box"
         });
@@ -53,7 +59,7 @@ export default class ColorPicker {
             flex: "1",
             textAlign: "left",
             fontFamily: "monospace",
-            fontSize: "16px"
+            fontSize: "14px"
         });
 
         this.element.append(this.preview, this.label);
@@ -64,12 +70,12 @@ export default class ColorPicker {
         Object.assign(this.panel.style, {
             display: "flex",
             flexDirection: "column",
-            gap: "12px",
-            width: "260px",
+            gap: `${this.popupGap}px`,
+            width: `${this.popupWidth}px`,
             maxWidth: "calc(100vw - 16px)",
-            padding: "12px",
+            padding: `${this.popupPadding}px`,
             border: "1px solid #596273",
-            borderRadius: "12px",
+            borderRadius: "10px",
             background: "#171a20",
             color: "#ffffff",
             boxSizing: "border-box",
@@ -97,7 +103,7 @@ export default class ColorPicker {
         Object.assign(this.text.style, {
             width: "100%",
             minWidth: "0",
-            height: "42px",
+            height: `${this.popupControlHeight}px`,
             padding: "0 12px",
             border: "1px solid #596273",
             borderRadius: "8px",
@@ -137,11 +143,12 @@ export default class ColorPicker {
         for (const button of [this.cancelButton, this.acceptButton]) {
             Object.assign(button.style, {
                 flex: "1",
-                minHeight: "42px",
-                padding: "8px 12px",
+                minHeight: `${this.popupControlHeight}px`,
+                height: `${this.popupControlHeight}px`,
+                padding: "2px 6px",
                 border: "1px solid #596273",
-                borderRadius: "8px",
-                fontSize: "14px",
+                borderRadius: "6px",
+                fontSize: "11px",
                 fontWeight: "bold",
                 cursor: "pointer"
             });
@@ -206,7 +213,7 @@ export default class ColorPicker {
             }
         });
         this.picker = new globalThis.iro.ColorPicker(this.pickerElement, {
-            width: config.width ?? 220,
+            width: this.pickerWidth,
             color: this.value,
             layout: [
                 {
@@ -366,6 +373,7 @@ export default class ColorPicker {
         const hex = this.normalize(value);
 
         this.value = hex;
+        this.draftValue = hex;
         this.text.value = hex;
         this.preview.style.backgroundColor = hex;
         this.label.textContent = hex;

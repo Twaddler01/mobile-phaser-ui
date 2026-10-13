@@ -8,10 +8,12 @@ export default class FormBuilder {
         this.fields = config.fields ?? [];
         this.onChange = config.onChange ?? null;
 
+        this.uiScale = config.uiScale ?? 1.5;
+
         this.x = config.x ?? 20;
         this.y = config.y ?? 20;
         this.width = config.width ?? 280;
-        this.gap = config.gap ?? 14;
+        this.gap = config.gap ?? 10;
 
         this.values = {};
         this.fieldInstances = new Map();
@@ -112,29 +114,25 @@ export default class FormBuilder {
         const canvas = this.scene.game.canvas;
         const rect = canvas.getBoundingClientRect();
 
-        const logicalWidth = this.scene.scale.width;
-        const logicalHeight = this.scene.scale.height;
+        const scaleX = rect.width / this.scene.scale.width;
+        const scaleY = rect.height / this.scene.scale.height;
 
-        const scaleX = rect.width / logicalWidth;
-        const scaleY = rect.height / logicalHeight;
-
+        // Position the form relative to the visible Phaser canvas.
         this.container.style.left = `${rect.left + this.x * scaleX}px`;
 
         this.container.style.top = `${rect.top + this.y * scaleY}px`;
 
-        // Scale the container's layout dimensions instead of using
-        // CSS transform, which can interfere with iro.js pointer input.
-        this.container.style.width = `${this.width * scaleX}px`;
+        // Keep layout dimensions in logical units.
+        // The transform scales the entire form consistently.
+        this.container.style.width = `${this.width}px`;
+        this.container.style.height = `${this.height}px`;
 
-        this.container.style.height = `${this.height * scaleY}px`;
+        this.container.style.transformOrigin = "top left";
+        this.container.style.transform = `scale(${scaleX * this.uiScale}, ${scaleY * this.uiScale})`;
 
-        this.container.style.transform = "none";
-
-        // Scale each field's layout dimensions to match the canvas.
+        // Restore each field's logical dimensions.
         for (const field of this.fieldInstances.values()) {
-            field.element.style.width = `${this.width * scaleX}px`;
-
-            field.element.style.transform = "none";
+            field.element.style.width = `${this.width}px`;
         }
     }
 

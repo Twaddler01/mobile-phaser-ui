@@ -9,9 +9,9 @@ export default class FormField {
         this.onChange = options.onChange ?? null;
         this.width = options.controlWidth ?? 280;
 
-        this.labelHeight = 24;
-        this.controlHeight = 42;
-        this.gap = 6;
+        this.labelHeight = 20;
+        this.controlHeight = 38;
+        this.gap = 4;
         this.height = this.labelHeight + this.gap + this.controlHeight;
 
         this.element = document.createElement("div");
@@ -34,7 +34,7 @@ export default class FormField {
             display: "block",
             height: `${this.labelHeight}px`,
             lineHeight: `${this.labelHeight}px`,
-            fontSize: "16px",
+            fontSize: "14px",
             margin: "0",
             padding: "0"
         });
@@ -42,6 +42,11 @@ export default class FormField {
         this.element.appendChild(this.label);
 
         this.control = this.createControl();
+
+        if (this.config.type === "color") {
+            this.control.style.width = "100%";
+            this.control.style.height = `${this.controlHeight}px`;
+        }
 
         this.element.appendChild(this.control);
 
@@ -214,6 +219,14 @@ export default class FormField {
         this.colorPicker = new ColorPicker({
             scene: this.scene,
             value: this.value ?? "#FFFFFF",
+
+            pickerWidth: this.config.pickerWidth ?? 145,
+            popupWidth: this.config.popupWidth ?? 190,
+
+            popupPadding: 6,
+            popupGap: 6,
+            popupControlHeight: 32,
+
             onChange: hex => {
                 this.setValue(hex, true);
             }
@@ -240,10 +253,8 @@ export default class FormField {
         }
 
         if (this.config.type === "color") {
-    value = this.colorPicker.setValue(
-        value ?? "#FFFFFF"
-    ).getValue();
-}
+            value = this.colorPicker.setValue(value ?? "#FFFFFF").getValue();
+        }
 
         this.value = value;
 
@@ -262,6 +273,7 @@ export default class FormField {
     }
 
     destroy() {
+        this.colorPicker?.destroy();
         this.element.remove();
     }
 }
