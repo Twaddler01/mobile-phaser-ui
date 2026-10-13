@@ -12,14 +12,28 @@ import runComponentRegistryTests from "../src/builder/tests/ComponentRegistryTes
 
 import FormBuilder from "../src/editor/FormBuilder.js";
 
+import LayoutEditor from "../src/builder/_new/LayoutEditor.js";
+import { Column, Text } from "../src/builder/ui.js";
+
 export default class DemoScene extends Phaser.Scene {
     constructor() {
         super("DemoScene");
     }
 
     create() {
+        
         this.layoutManager = new LayoutManager(this);
 
+
+this.editor = new LayoutEditor(this, {
+    initial: Column({ id: "root", padding: 20, gap: 12 }, [Text("Hello")]),
+    handlers: { startGame: () => console.log("start") }   // for "@startGame"
+});
+
+this.editor.toggle();   // show / hide the sidebar
+
+
+        
         this.width = this.scale.width;
         this.height = this.scale.height;
 
@@ -30,7 +44,7 @@ export default class DemoScene extends Phaser.Scene {
             this.cameras.main.setScroll(0, 0);
         };
         //setZoom();
-
+/*
         const form = new FormBuilder(this, {
             x: 20,
             y: 20,
@@ -90,6 +104,12 @@ export default class DemoScene extends Phaser.Scene {
         this.events.once("shutdown", () => {
             form.destroy();
         });
+
+
+
+*/
+
+
 
         // ==================================
         // REGISTRY VALIDATION TESTS

@@ -1,19 +1,27 @@
-import DemoScene from './demo/DemoScene.js';
+import DemoScene from "./demo/DemoScene.js";
 
 const DEMO_WIDTH = 800;
 
-const aspectRatio = window.innerHeight / window.innerWidth;
-const DEMO_HEIGHT = Math.round(DEMO_WIDTH * aspectRatio);
+function getInitialGameSize() {
+    const aspectRatio = window.innerHeight / window.innerWidth;
+
+    return {
+        width: DEMO_WIDTH,
+        height: Math.round(DEMO_WIDTH * aspectRatio)
+    };
+}
+
+const gameSize = getInitialGameSize();
 
 const config = {
-    parent: 'main',
+    parent: "main",
     type: Phaser.AUTO,
     scene: DemoScene,
     scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
-        width: DEMO_WIDTH,
-        height: DEMO_HEIGHT
+        width: gameSize.width,
+        height: gameSize.height
     }
 };
 
